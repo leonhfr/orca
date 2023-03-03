@@ -1,0 +1,19 @@
+linters:
+  enable:
+    - errcheck
+    - gci
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - revive
+    - staticcheck
+    - typecheck
+    - unused
+
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/leonhfr/orca)
