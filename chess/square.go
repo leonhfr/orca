@@ -26,6 +26,11 @@ func (sq Square) Rank() Rank {
 	return Rank(sq / 8)
 }
 
+// bitboard returns the square's bitboard.
+func (sq Square) bitboard() bitboard {
+	return 1 << sq
+}
+
 // String implements the Stringer interface.
 //
 // Returns an UCI-compatible representation.
