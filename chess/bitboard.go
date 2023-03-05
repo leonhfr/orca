@@ -1,10 +1,16 @@
 package chess
 
-import "fmt"
+import (
+	"fmt"
+	"math/bits"
+)
 
 // bitboard is a board representation encoded in an unsigned 64-bit integer.
 // The 64 squares board has A1 as the least significant bit and H8 as the most.
 type bitboard uint64
+
+// emptyBitboard is an empty bitboard.
+const emptyBitboard bitboard = 0
 
 // deBruijnMagicTable contains a lookup table of squares indexed by the result
 // of the de Bruijn multiplication.
@@ -36,6 +42,16 @@ func (b bitboard) scanForward() Square {
 // resetLSB resets the lowest significant bit.
 func (b bitboard) resetLSB() bitboard {
 	return b & (b - 1)
+}
+
+// ones returns the number of one bits in the bitboard.
+func (b bitboard) ones() int {
+	return bits.OnesCount64(uint64(b))
+}
+
+// reverse reverses the bitboard.
+func (b bitboard) reverse() bitboard {
+	return bitboard(bits.Reverse64(uint64(b)))
 }
 
 // String returns a 64 character string of 1s and 0s

@@ -1,0 +1,12 @@
+package chess
+
+{{ range .MagicLiterals }}
+// {{ .Name }}Magics contains the magics for {{ .Name }}s indexed by square.
+//
+// This literal has been automatically generated, do not edit.
+var {{ .Name }}Magics = [64]Magic{
+	{{ range .Magics -}}
+	{Mask: {{ .Mask | printf "0x%X" }}, Magic: {{ .Magic | printf "0x%X" }}, Shift: {{ .Shift }}, Offset: {{ .Offset }}},
+	{{ end }}
+}
+{{ end }}
