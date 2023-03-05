@@ -48,6 +48,11 @@ func (pt PieceType) String() string {
 	return pieceTypeName[pt/2 : pt/2+1]
 }
 
+// color returns a piece of the passed piece type and color.
+func (pt PieceType) color(c Color) Piece {
+	return Piece(pt) ^ Piece(c)
+}
+
 // Piece is a piece type with a color.
 type Piece uint8
 
@@ -99,8 +104,12 @@ func (p Piece) Type() PieceType {
 	return PieceType(p & ^Piece(1))
 }
 
-// pieceTable is a lookup type of pieces indexed by their byte representation minus 'A'.
-var pieceTable = [58]Piece{}
+var (
+	// pieceTable is a lookup type of pieces indexed by their byte representation minus 'A'.
+	pieceTable = [58]Piece{}
+	// promoPieceTypeTable is a lookup type of piece types indexed by their byte representation minus 'A'.
+	promoPieceTypeTable = [58]PieceType{}
+)
 
 // initializes pieceTable
 func initPieceTable() {
@@ -118,6 +127,24 @@ func initPieceTable() {
 			pieceTable[r-'A'] = p
 		} else {
 			pieceTable[r-'A'] = NoPiece
+		}
+	}
+}
+
+// initializes promoPieceTypeTable
+func initPromoPieceTypeTable() {
+	m := map[rune]PieceType{
+		'q': Queen,
+		'r': Rook,
+		'b': Bishop,
+		'n': Knight,
+	}
+
+	for r := 'A'; r <= 'z'; r++ {
+		if pt, ok := m[r]; ok {
+			promoPieceTypeTable[r-'A'] = pt
+		} else {
+			promoPieceTypeTable[r-'A'] = NoPieceType
 		}
 	}
 }
