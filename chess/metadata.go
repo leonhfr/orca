@@ -14,8 +14,6 @@ const (
 type castlingRights uint8
 
 const (
-	// noCastle represents the absence of a castle.
-	noCastle castlingRights = 0
 	// castleWhiteKing represents white's king castle.
 	castleWhiteKing castlingRights = 1 << iota
 	// castleWhiteQueen represents white's queen castle.
@@ -24,6 +22,8 @@ const (
 	castleBlackKing
 	// castleBlackQueen represents black's queen castle.
 	castleBlackQueen
+	// noCastle represents the absence of a castle.
+	noCastle castlingRights = 0
 )
 
 // canCastle returns whether a castle with this combinations of

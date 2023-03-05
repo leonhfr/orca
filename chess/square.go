@@ -1,5 +1,7 @@
 package chess
 
+import "errors"
+
 // Square is one of the 64 squares on a chess board.
 type Square uint8
 
@@ -14,11 +16,23 @@ const (
 	A6, B6, C6, D6, E6, F6, G6, H6
 	A7, B7, C7, D7, E7, F7, G7, H7
 	A8, B8, C8, D8, E8, F8, G8, H8
+	NoSquare Square = 64
 )
 
 // newSquare create a new square from a file and rank.
 func newSquare(f File, r Rank) Square {
 	return Square(f) + Square(8*r)
+}
+
+// uciSquare parses a square from UCI notation.
+func uciSquare(uci string) (Square, error) {
+	b := []rune(uci)
+	f := File(b[0] - 'a')
+	r := Rank(b[1] - '1')
+	if f > FileH || r > Rank8 {
+		return NoSquare, errors.New("invalid uci square")
+	}
+	return newSquare(f, r), nil
 }
 
 // File returns the square's file.

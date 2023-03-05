@@ -98,3 +98,26 @@ func (p Piece) Color() Color {
 func (p Piece) Type() PieceType {
 	return PieceType(p & ^Piece(1))
 }
+
+// pieceTable is a lookup type of pieces indexed by their byte representation minus 'A'.
+var pieceTable = [58]Piece{}
+
+// initializes pieceTable
+func initPieceTable() {
+	m := map[rune]Piece{
+		'K': WhiteKing, 'k': BlackKing,
+		'Q': WhiteQueen, 'q': BlackQueen,
+		'R': WhiteRook, 'r': BlackRook,
+		'B': WhiteBishop, 'b': BlackBishop,
+		'N': WhiteKnight, 'n': BlackKnight,
+		'P': WhitePawn, 'p': BlackPawn,
+	}
+
+	for r := 'A'; r <= 'z'; r++ {
+		if p, ok := m[r]; ok {
+			pieceTable[r-'A'] = p
+		} else {
+			pieceTable[r-'A'] = NoPiece
+		}
+	}
+}
