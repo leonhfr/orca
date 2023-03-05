@@ -4,6 +4,11 @@ package chess
 func init() {
 	initPieceTable()
 
+	initBBFiles()
+	initBBRanks()
+	initBBDiagonals()
+	initBBAntiDiagonals()
+
 	// Attacks
 	initBBWhitePawnCaptures()
 	initBBBlackPawnCaptures()

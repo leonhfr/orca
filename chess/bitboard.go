@@ -67,3 +67,54 @@ const (
 	bbFileG
 	bbFileH
 )
+
+var (
+	bbFiles         [64]bitboard // bbFiles contains the file bitboards indexed by Square.
+	bbRanks         [64]bitboard // bbRanks contains the rank bitboards indexed by Square.
+	bbDiagonals     [64]bitboard // bbDiagonals contains the diagonal bitboards indexed by Square.
+	bbAntiDiagonals [64]bitboard // bbAntiDiagonals contains the anti diagonal bitboards indexed by Square.
+)
+
+// initializes bbFiles
+func initBBFiles() {
+	files := [8]bitboard{bbFileA, bbFileB, bbFileC, bbFileD, bbFileE, bbFileF, bbFileG, bbFileH}
+	for sq := A1; sq <= H8; sq++ {
+		bbFiles[sq] = files[sq.File()]
+	}
+}
+
+// initBBRanks bbRanks
+func initBBRanks() {
+	ranks := [8]bitboard{bbRank1, bbRank2, bbRank3, bbRank4, bbRank5, bbRank6, bbRank7, bbRank8}
+	for sq := A1; sq <= H8; sq++ {
+		bbRanks[sq] = ranks[sq.Rank()]
+	}
+}
+
+// initializes bbDiagonals
+func initBBDiagonals() {
+	for sq := A1; sq <= H8; sq++ {
+		var bb bitboard
+		for upLeft := sq; upLeft.Rank() != Rank8 && upLeft.File() != FileA; upLeft += 7 {
+			bb |= upLeft.bitboard()
+		}
+		for downRight := sq; downRight.Rank() != Rank1 && downRight.File() != FileH; downRight -= 7 {
+			bb |= downRight.bitboard()
+		}
+		bbDiagonals[sq] = bb
+	}
+}
+
+// initializes bbAntiDiagonals
+func initBBAntiDiagonals() {
+	for sq := A1; sq <= H8; sq++ {
+		var bb bitboard
+		for upRight := sq; upRight.Rank() != Rank8 && upRight.File() != FileH; upRight += 9 {
+			bb |= upRight.bitboard()
+		}
+		for downLeft := sq; downLeft.Rank() != Rank1 && downLeft.File() != FileA; downLeft -= 9 {
+			bb |= downLeft.bitboard()
+		}
+		bbAntiDiagonals[sq] = bb
+	}
+}
