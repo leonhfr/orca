@@ -33,3 +33,8 @@ var (
 func TestNewBoard(t *testing.T) {
 	assert.Equal(t, startingBoard, newBoard(startingSquareMap))
 }
+
+func TestBoard_String(t *testing.T) {
+	expected := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+	assert.Equal(t, expected, startingBoard.String())
+}

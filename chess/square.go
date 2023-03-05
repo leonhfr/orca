@@ -16,6 +16,11 @@ const (
 	A8, B8, C8, D8, E8, F8, G8, H8
 )
 
+// newSquare create a new square from a file and rank.
+func newSquare(f File, r Rank) Square {
+	return Square(f) + Square(8*r)
+}
+
 // File returns the square's file.
 func (sq Square) File() File {
 	return File(sq % 8)
