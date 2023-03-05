@@ -15,6 +15,8 @@ const (
 	Quiet MoveTag = 1 << (iota + 24)
 	// Capture indicates that the move captures a piece.
 	Capture
+	// EnPassant indicates that the move captures a piece via en passant.
+	EnPassant
 	// Promotion indicates that the move is a promotion.
 	Promotion
 	// KingSideCastle indicates that the move is a king side castle.
@@ -50,6 +52,7 @@ func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 			tags ^= QueenSideCastle
 		}
 	} else if pt == Pawn && s2 == enPassant {
+		tags |= EnPassant
 		tags |= Capture
 	} else if promo != NoPiece {
 		tags ^= Promotion

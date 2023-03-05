@@ -39,6 +39,52 @@ func (b board) pieceAt(sq Square) Piece {
 	return NoPiece
 }
 
+// makeMove makes and unmakes a move on the board.
+func (b *board) makeMove(m Move) {
+	p1, p2 := m.P1(), m.P2()
+	s1, s2 := m.S1(), m.S2()
+	c := p1.Color()
+
+	s1bb, s2bb := s1.bitboard(), s2.bitboard()
+	mbb := s1bb ^ s2bb
+
+	if promo := m.Promo(); promo == NoPiece {
+		b.xorBitboard(p1.Type(), mbb)
+	} else {
+		// promotion
+		b.xorBitboard(p1.Type(), s1bb)
+		b.xorBitboard(promo.Type(), s2bb)
+	}
+
+	b.xorColor(c, mbb)
+
+	switch enPassant := m.HasTag(EnPassant); {
+	case m.HasTag(Capture) && !enPassant: // capture
+		b.xorBitboard(p2.Type(), s2bb)
+		b.xorColor(p2.Color(), s2bb)
+	case c == White && enPassant: // white en passant
+		bb := s2.bitboard() >> 8
+		b.bbPawn ^= bb
+		b.bbBlack ^= bb
+	case c == Black && enPassant: // black en passant
+		bb := s2.bitboard() << 8
+		b.bbPawn ^= bb
+		b.bbWhite ^= bb
+	case c == White && m.HasTag(KingSideCastle): // white king side castle
+		b.bbRook ^= bbWhiteKingCastle
+		b.bbWhite ^= bbWhiteKingCastle
+	case c == White && m.HasTag(QueenSideCastle): // white queen side castle
+		b.bbRook ^= bbWhiteQueenCastle
+		b.bbWhite ^= bbWhiteQueenCastle
+	case c == Black && m.HasTag(KingSideCastle): // black king side castle
+		b.bbRook ^= bbBlackKingCastle
+		b.bbBlack ^= bbBlackKingCastle
+	case c == Black && m.HasTag(QueenSideCastle): // black queen side castle
+		b.bbRook ^= bbBlackQueenCastle
+		b.bbBlack ^= bbBlackQueenCastle
+	}
+}
+
 // getBitboard returns the bitboard of the given piece.
 func (b board) getBitboard(p Piece) bitboard {
 	switch p {

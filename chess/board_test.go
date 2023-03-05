@@ -1,6 +1,7 @@
 package chess
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -104,6 +105,18 @@ var (
 
 func TestNewBoard(t *testing.T) {
 	assert.Equal(t, startingBoard, newBoard(startingSquareMap))
+}
+
+func TestBoard_MakeMoveBoard(t *testing.T) {
+	for _, tt := range testPositions {
+		t.Run(tt.move.String(), func(t *testing.T) {
+			pos, post := unsafeFEN(tt.preFEN), unsafeFEN(tt.postFEN)
+			pos.board.makeMove(tt.move)
+			want := strings.Fields(tt.postFEN)[0]
+			assert.Equal(t, want, pos.board.String())
+			assert.Equal(t, post.board, pos.board)
+		})
+	}
 }
 
 func TestBoard_String(t *testing.T) {
