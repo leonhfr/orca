@@ -5,6 +5,10 @@ var (
 	bbWhitePawnCaptures = [64]bitboard{}
 	// bbBlackPawnCaptures contains a lookup table of black pawn captures bitboard indexed by squares.
 	bbBlackPawnCaptures = [64]bitboard{}
+	// bbMagicRookMoves contains a lookup table of rook moves indexed by magics.
+	bbMagicRookMoves []bitboard
+	// bbMagicBishopMoves contains a lookup table of bishop moves indexed by magics.
+	bbMagicBishopMoves []bitboard
 )
 
 // initializes bbWhitePawnCaptures
@@ -22,6 +26,26 @@ func initBBBlackPawnCaptures() {
 		captureR := (sq.bitboard() & ^bbFileH & ^bbRank1) >> 7
 		captureL := (sq.bitboard() & ^bbFileA & ^bbRank1) >> 9
 		bbBlackPawnCaptures[sq] = captureR | captureL
+	}
+}
+
+// initializes rookMoves
+//
+// requires bbFiles, bbRanks, bbDiagonals, bbAntiDiagonals
+func initBBMagicRookMoves() {
+	for sq := A1; sq <= H8; sq++ {
+		moves, _ := slowMoveTable(Rook, sq, rookMagics[sq])
+		bbMagicRookMoves = append(bbMagicRookMoves, moves...)
+	}
+}
+
+// initializes bishopMoves
+//
+// requires bbFiles, bbRanks, bbDiagonals, bbAntiDiagonals
+func initBBMagicBishopMoves() {
+	for sq := A1; sq <= H8; sq++ {
+		moves, _ := slowMoveTable(Bishop, sq, bishopMagics[sq])
+		bbMagicBishopMoves = append(bbMagicBishopMoves, moves...)
 	}
 }
 

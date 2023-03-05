@@ -12,4 +12,6 @@ func init() {
 	// Attacks
 	initBBWhitePawnCaptures()
 	initBBBlackPawnCaptures()
+	initBBMagicRookMoves()
+	initBBMagicBishopMoves()
 }
