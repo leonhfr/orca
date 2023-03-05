@@ -38,3 +38,12 @@ func TestBoard_String(t *testing.T) {
 	expected := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 	assert.Equal(t, expected, startingBoard.String())
 }
+
+// unsafeFEN returns a position without error checking, only meant for tests
+func unsafeFEN(fen string) *Position {
+	p, err := NewPosition(fen)
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
