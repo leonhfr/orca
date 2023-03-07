@@ -103,3 +103,17 @@ const (
 func (r Rank) String() string {
 	return rankChars[r : r+1]
 }
+
+// direction represent a step in a direction on the chess board.
+type direction int
+
+const (
+	north     direction = 8
+	northEast direction = 9
+	east      direction = 1
+	southEast direction = -7
+	south     direction = -8
+	southWest direction = -9
+	west      direction = -1
+	northWest direction = 7
+)

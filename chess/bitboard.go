@@ -44,14 +44,22 @@ func (b bitboard) resetLSB() bitboard {
 	return b & (b - 1)
 }
 
+// mapping returns the list of squares set to 1.
+func (b bitboard) mapping() []Square {
+	if b == 0 {
+		return nil
+	}
+	squares := make([]Square, 0, 8)
+	for b > 0 {
+		squares = append(squares, b.scanForward())
+		b = b.resetLSB()
+	}
+	return squares
+}
+
 // ones returns the number of one bits in the bitboard.
 func (b bitboard) ones() int {
 	return bits.OnesCount64(uint64(b))
-}
-
-// reverse reverses the bitboard.
-func (b bitboard) reverse() bitboard {
-	return bitboard(bits.Reverse64(uint64(b)))
 }
 
 // String returns a 64 character string of 1s and 0s

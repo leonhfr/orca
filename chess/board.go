@@ -117,6 +117,14 @@ func (b board) getBitboard(p Piece) bitboard {
 	}
 }
 
+// getColor returns the bitboard of the given color.
+func (b board) getColor(c Color) bitboard {
+	if c == White {
+		return b.bbWhite
+	}
+	return b.bbBlack
+}
+
 // xorBitboard performs a xor operation on one of the piece bitboard.
 func (b *board) xorBitboard(pt PieceType, bb bitboard) {
 	switch pt {
