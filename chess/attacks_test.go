@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMoveBitboard(t *testing.T) {
+func TestPieceBitboard(t *testing.T) {
 	type args struct {
 		fen string
 		sq  Square
@@ -37,7 +37,6 @@ func TestMoveBitboard(t *testing.T) {
 			G4, H5,
 		}},
 		{args{"k7/8/8/8/8/8/5P2/KQRBN3 w - - 0 1", E1, Knight}, []Square{C2, D3, F3, G2}},
-		// {args{"k7/8/8/8/8/8/5P2/KQRBN3 w - - 0 1", F2, Pawn}, []Square{F3, F4}},
 		{args{"k7/8/8/8/8/8/5P2/KQRBN3 w - - 0 1", F2, NoPieceType}, []Square{}},
 		{args{"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", A1, Rook}, []Square{B1, C1, D1, E1, A2}},
 		{args{"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", H1, Rook}, []Square{E1, F1, G1, H2}},
@@ -49,13 +48,64 @@ func TestMoveBitboard(t *testing.T) {
 		t.Run(tt.args.pt.String()+" "+tt.args.sq.String(), func(t *testing.T) {
 			pos := unsafeFEN(tt.args.fen)
 			occupancy := pos.board.getColor(White) ^ pos.board.getColor(Black)
-			got := moveBitboard(tt.args.sq, tt.args.pt, occupancy)
+			got := pieceBitboard(tt.args.sq, tt.args.pt, occupancy)
 			assert.ElementsMatch(t, tt.want, got.mapping())
 		})
 	}
 }
 
-func TestMoves(t *testing.T) {
+func TestPawnMoveBitboard(t *testing.T) {
+	type args struct {
+		fen string
+		sq  Square
+	}
+	tests := []struct {
+		args args
+		want []Square
+	}{
+		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", F2}, []Square{F3, F4}},
+		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", D4}, []Square{D5}},
+		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", C4}, []Square{C3}},
+		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", D7}, []Square{D6, D5}},
+		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", E6}, []Square{E5}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.args.sq.String(), func(t *testing.T) {
+			pos := unsafeFEN(tt.args.fen)
+			occupancy := pos.board.getColor(White) ^ pos.board.getColor(Black)
+			got := pawnMoveBitboard(tt.args.sq, occupancy, pos.turn)
+			assert.ElementsMatch(t, tt.want, got.mapping())
+		})
+	}
+}
+
+func TestPawnCaptureBitboard(t *testing.T) {
+	type args struct {
+		fen string
+		sq  Square
+	}
+	tests := []struct {
+		args args
+		want []Square
+	}{
+		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", F2}, []Square{E3, G3}},
+		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", D4}, []Square{C5, E5}},
+		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", C4}, []Square{B3, D3}},
+		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", D7}, []Square{C6, E6}},
+		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", E6}, []Square{D5, F5}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.args.sq.String(), func(t *testing.T) {
+			pos := unsafeFEN(tt.args.fen)
+			got := pawnCaptureBitboard(tt.args.sq, pos.turn)
+			assert.ElementsMatch(t, tt.want, got.mapping())
+		})
+	}
+}
+
+func TestRookBishopMoves(t *testing.T) {
 	magics := [][64]Magic{rookMagics, bishopMagics}
 	moves := [][]bitboard{bbMagicRookMoves, bbMagicBishopMoves}
 
@@ -73,7 +123,7 @@ func TestMoves(t *testing.T) {
 	}
 }
 
-func BenchmarkMoves(b *testing.B) {
+func BenchmarkRookBishopMoves(b *testing.B) {
 	magics := [][64]Magic{rookMagics, bishopMagics}
 	moves := [][]bitboard{bbMagicRookMoves, bbMagicBishopMoves}
 	bb, sq := randomPosition()
