@@ -19,6 +19,14 @@ func (c Color) String() string {
 	return colorName[c : c+1]
 }
 
+// other returns the other color.
+func (c Color) other() Color {
+	if c == White {
+		return Black
+	}
+	return White
+}
+
 // PieceType is the type of a piece.
 type PieceType uint8
 

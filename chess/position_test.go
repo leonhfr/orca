@@ -30,3 +30,36 @@ func TestNewPosition(t *testing.T) {
 func TestStartingPosition(t *testing.T) {
 	assert.Equal(t, startFEN, StartingPosition().String())
 }
+
+func TestPosition_MakeMove(t *testing.T) {
+	for _, tt := range testPositions {
+		t.Run(tt.moveUCI, func(t *testing.T) {
+			pos := unsafeFEN(tt.preFEN)
+			pos.MakeMove(tt.move)
+			assert.Equal(t, tt.postFEN, pos.String())
+		})
+	}
+}
+
+func BenchmarkPosition_MakeMove(b *testing.B) {
+	for _, bb := range testPositions {
+		pos := unsafeFEN(bb.preFEN)
+		b.Run(bb.moveUCI, func(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				meta := pos.MakeMove(bb.move)
+				pos.UnmakeMove(bb.move, meta)
+			}
+		})
+	}
+}
+
+func TestPosition_UnmakeMove(t *testing.T) {
+	for _, tt := range testPositions {
+		t.Run(tt.moveUCI, func(t *testing.T) {
+			pos := unsafeFEN(tt.preFEN)
+			meta := pos.MakeMove(tt.move)
+			pos.UnmakeMove(tt.move, meta)
+			assert.Equal(t, tt.preFEN, pos.String())
+		})
+	}
+}
