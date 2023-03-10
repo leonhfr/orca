@@ -91,6 +91,16 @@ func initBBMagicBishopMoves() {
 	}
 }
 
+// attackBitboard returns the attack bitboard.
+func attackBitboard(sq Square, p Piece, occupancy bitboard) bitboard {
+	switch pt := p.Type(); pt {
+	case Pawn:
+		return pawnCaptureBitboard(sq, p.Color())
+	default:
+		return pieceBitboard(sq, pt, occupancy)
+	}
+}
+
 // pieceBitboard returns the move bitboard.
 //
 // The returned bitboard has to be NOT AND with the bitboard of the color whose turn it is.

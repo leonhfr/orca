@@ -8,6 +8,7 @@ import (
 // Position represents the state of the game.
 type Position struct {
 	board          board
+	attackMap      attackMap
 	turn           Color
 	castlingRights castlingRights
 	enPassant      Square
@@ -57,6 +58,8 @@ func NewPosition(fen string) (*Position, error) {
 		return nil, err
 	}
 
+	pos.attackMap = newAttackMap(pos)
+
 	return pos, nil
 }
 
@@ -76,6 +79,18 @@ func (pos *Position) MakeMove(m Move) Metadata {
 		pos.halfMoveClock, pos.fullMoves, pos.enPassant)
 
 	pos.board.makeMove(m)
+
+	if m.HasTag(EnPassant) || m.HasTag(KingSideCastle) || m.HasTag(QueenSideCastle) {
+		pos.attackMap = newAttackMap(pos)
+	} else {
+		p := m.P1()
+		if promo := m.Promo(); promo != NoPiece {
+			p = promo
+		}
+		pos.attackMap.updateAttackMap(m.S1(), m.S2(), NoPiece, p, pos.board.bbWhite|pos.board.bbBlack,
+			pos.board.bbRook|pos.board.bbQueen, pos.board.bbBishop|pos.board.bbQueen)
+	}
+
 	pos.turn = pos.turn.other()
 	pos.castlingRights = moveCastlingRights(pos.castlingRights, m)
 	pos.enPassant = moveEnPassant(m)
@@ -96,6 +111,12 @@ func (pos *Position) MakeMove(m Move) Metadata {
 // UnmakeMove unmakes a move and restores the previous position.
 func (pos *Position) UnmakeMove(m Move, meta Metadata) {
 	pos.board.makeMove(m)
+	if m.HasTag(EnPassant) || m.HasTag(KingSideCastle) || m.HasTag(QueenSideCastle) {
+		pos.attackMap = newAttackMap(pos)
+	} else {
+		pos.attackMap.updateAttackMap(m.S1(), m.S2(), m.P1(), m.P2(), pos.board.bbWhite|pos.board.bbBlack,
+			pos.board.bbRook|pos.board.bbQueen, pos.board.bbBishop|pos.board.bbQueen)
+	}
 	pos.turn = meta.turn()
 	pos.castlingRights = meta.castleRights()
 	pos.enPassant = meta.enPassant()
