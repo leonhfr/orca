@@ -11,8 +11,6 @@ func init() {
 	initBBAntiDiagonals()
 
 	// Attacks
-	initBBWhitePawnCaptures()
-	initBBBlackPawnCaptures()
 	initBBKingMoves()
 	initBBKnightMoves()
 	initBBMagicRookMoves()

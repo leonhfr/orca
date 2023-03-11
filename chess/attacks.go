@@ -1,31 +1,11 @@
 package chess
 
 var (
-	bbWhitePawnCaptures = [64]bitboard{} // bbWhitePawnCaptures contains a lookup table of white pawn captures bitboard indexed by squares.
-	bbBlackPawnCaptures = [64]bitboard{} // bbBlackPawnCaptures contains a lookup table of black pawn captures bitboard indexed by squares.
-	bbKingMoves         = [64]bitboard{} // bbMagicRookMoves contains a lookup table of king moves indexed by squares.
-	bbKnightMoves       = [64]bitboard{} // bbMagicRookMoves contains a lookup table of king moves indexed by squares.
-	bbMagicRookMoves    []bitboard       // bbMagicRookMoves contains a lookup table of rook moves indexed by magics.
-	bbMagicBishopMoves  []bitboard       // bbMagicBishopMoves contains a lookup table of bishop moves indexed by magics.
+	bbKingMoves        = [64]bitboard{} // bbMagicRookMoves contains a lookup table of king moves indexed by squares.
+	bbKnightMoves      = [64]bitboard{} // bbMagicRookMoves contains a lookup table of king moves indexed by squares.
+	bbMagicRookMoves   []bitboard       // bbMagicRookMoves contains a lookup table of rook moves indexed by magics.
+	bbMagicBishopMoves []bitboard       // bbMagicBishopMoves contains a lookup table of bishop moves indexed by magics.
 )
-
-// initializes bbWhitePawnCaptures
-func initBBWhitePawnCaptures() {
-	for sq := A1; sq <= H8; sq++ {
-		captureR := (sq.bitboard() & ^bbFileH & ^bbRank8) << 9
-		captureL := (sq.bitboard() & ^bbFileA & ^bbRank8) << 7
-		bbWhitePawnCaptures[sq] = captureR | captureL
-	}
-}
-
-// initializes bbBlackPawnCaptures
-func initBBBlackPawnCaptures() {
-	for sq := A1; sq <= H8; sq++ {
-		captureR := (sq.bitboard() & ^bbFileH & ^bbRank1) >> 7
-		captureL := (sq.bitboard() & ^bbFileA & ^bbRank1) >> 9
-		bbBlackPawnCaptures[sq] = captureR | captureL
-	}
-}
 
 // initializes bbKingMoves
 func initBBKingMoves() {

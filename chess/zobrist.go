@@ -7,6 +7,14 @@ const (
 	polyRandomTurnOffset      = 780
 )
 
+const (
+	polyCastleWhiteKing  Hash = 0x31D71DCE64B2C310
+	polyCastleWhiteQueen Hash = 0xF165B587DF898190
+	polyCastleBlackKing  Hash = 0xA57E6339DD2CF3A0
+	polyCastleBlackQueen Hash = 0x1EF6E6DBB1961EC9
+	polyTurn             Hash = 0xF8D626AAAF278509
+)
+
 type Hash uint64
 
 // Hash returns a zobrist hash (uint64).
@@ -19,9 +27,9 @@ type Hash uint64
 // Hash follows the Polyglot opening file specification.
 func (pos *Position) Hash() (hash Hash) {
 	hash ^= pieceHash(pos)
-	hash ^= enPassantHash(pos)
-	hash ^= turnHash(pos)
-	hash ^= castleHash(pos)
+	hash ^= castleHash(pos.castlingRights)
+	hash ^= enPassantHash(pos.enPassant, pos.turn, pos.board.getBitboard(WhitePawn), pos.board.getBitboard(BlackPawn))
+	hash ^= turnHash(pos.turn)
 	return
 }
 
@@ -36,10 +44,10 @@ func pieceHash(pos *Position) (hash Hash) {
 		for bb := pos.board.getBitboard(p); bb > 0; bb = bb.resetLSB() {
 			switch sq := bb.scanForward(); p.Color() {
 			case White:
-				offset := 64*uint16(p) + uint16(sq)
+				offset := 64*int(p) + int(sq)
 				hash ^= polyRandom[offset]
 			case Black:
-				offset := 64*uint16(p) + uint16(sq)
+				offset := 64*int(p) + int(sq)
 				hash ^= polyRandom[offset]
 			}
 		}
@@ -57,18 +65,18 @@ func pieceHash(pos *Position) (hash Hash) {
 //	white queen side castle  1
 //	black king side castle   2
 //	black queen side castle  3
-func castleHash(pos *Position) (hash Hash) {
-	if pos.castlingRights.canCastle(White, kingSide) {
-		hash ^= polyRandom[polyRandomCastleOffset]
+func castleHash(cr castlingRights) (hash Hash) {
+	if cr&castleWhiteKing > 0 {
+		hash ^= polyCastleWhiteKing
 	}
-	if pos.castlingRights.canCastle(White, queenSide) {
-		hash ^= polyRandom[polyRandomCastleOffset+1]
+	if cr&castleWhiteQueen > 0 {
+		hash ^= polyCastleWhiteQueen
 	}
-	if pos.castlingRights.canCastle(Black, kingSide) {
-		hash ^= polyRandom[polyRandomCastleOffset+2]
+	if cr&castleBlackKing > 0 {
+		hash ^= polyCastleBlackKing
 	}
-	if pos.castlingRights.canCastle(Black, queenSide) {
-		hash ^= polyRandom[polyRandomCastleOffset+3]
+	if cr&castleBlackQueen > 0 {
+		hash ^= polyCastleBlackQueen
 	}
 	return
 }
@@ -79,14 +87,14 @@ func castleHash(pos *Position) (hash Hash) {
 // to it belonging to the player to move, then it returns the entry from
 // randomEnPassant whose offset is the file of the pushed pawn. Otherwise,
 // 0 is returned.
-func enPassantHash(pos *Position) (hash Hash) {
-	switch epSquare := pos.enPassant; {
-	case epSquare == NoSquare:
+func enPassantHash(ep Square, turn Color, whitePawn, blackPawn bitboard) (hash Hash) {
+	switch bb := ep.bitboard(); {
+	case ep == NoSquare:
 		return 0
-	case pos.turn == White && pos.board.bbWhite&pos.board.bbPawn&bbBlackPawnCaptures[epSquare] > 0:
-		return polyRandom[polyRandomEnPassantOffset+int(epSquare.File())]
-	case pos.turn == Black && pos.board.bbBlack&pos.board.bbPawn&bbWhitePawnCaptures[epSquare] > 0:
-		return polyRandom[polyRandomEnPassantOffset+int(epSquare.File())]
+	case turn == White && (bb>>7|bb>>9)&bbRank5&whitePawn > 0:
+		return polyRandom[polyRandomEnPassantOffset+int(ep.File())]
+	case turn == Black && (bb<<7|bb<<9)&bbRank4&blackPawn > 0:
+		return polyRandom[polyRandomEnPassantOffset+int(ep.File())]
 	default:
 		return 0
 	}
@@ -94,9 +102,9 @@ func enPassantHash(pos *Position) (hash Hash) {
 
 // turnHash returns a hash (uint64), which is the sole entry of randomTurn if
 // white is to move and 0 otherwise.
-func turnHash(pos *Position) (hash Hash) {
-	if pos.turn == White {
-		return polyRandom[polyRandomTurnOffset]
+func turnHash(turn Color) (hash Hash) {
+	if turn == White {
+		return polyTurn
 	}
 	return 0
 }
@@ -300,8 +308,11 @@ var polyRandom = [781]Hash{
 	0x0C335248857FA9E7, 0x0A9C32D5EAE45305, 0xE6C42178C4BBB92E, 0x71F1CE2490D20B07,
 	0xF1BCC3D275AFE51A, 0xE728E8C83C334074, 0x96FBF83A12884624, 0x81A1549FD6573DA5,
 	0x5FA7867CAF35E149, 0x56986E2EF3ED091B, 0x917F1DD5F8886C61, 0xD20D8C88C8FFE65F,
+	// castle rights
 	0x31D71DCE64B2C310, 0xF165B587DF898190, 0xA57E6339DD2CF3A0, 0x1EF6E6DBB1961EC9,
+	// en passant
 	0x70CC73D90BC26E24, 0xE21A6B35DF0C3AD7, 0x003A93D8B2806962, 0x1C99DED33CB890A1,
 	0xCF3145DE0ADD4289, 0xD0E4427A5514FB72, 0x77C621CC9FB3A483, 0x67A34DAC4356550B,
+	// turn
 	0xF8D626AAAF278509,
 }

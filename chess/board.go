@@ -59,7 +59,7 @@ func (b *board) makeMove(m Move) {
 	b.xorColor(c, mbb)
 
 	switch enPassant := m.HasTag(EnPassant); {
-	case m.HasTag(Capture) && !enPassant: // capture
+	case p2 != NoPiece && !enPassant: // capture
 		b.xorBitboard(p2.Type(), s2bb)
 		b.xorColor(p2.Color(), s2bb)
 	case c == White && enPassant: // white en passant
