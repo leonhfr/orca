@@ -63,7 +63,7 @@ func TestZobristHash(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			pos := unsafeFEN(tt.args)
-			key := pos.Hash()
+			key := newZobristHash(pos)
 			assert.Equal(t, tt.want, fmt.Sprintf("0x%016x", key))
 		})
 	}
@@ -72,6 +72,6 @@ func TestZobristHash(t *testing.T) {
 func BenchmarkZobristHash(b *testing.B) {
 	pos := unsafeFEN("rnbqkbnr/p1pppppp/8/8/PpP4P/8/1P1PPPP1/RNBQKBNR b KQkq c3 0 3")
 	for n := 0; n < b.N; n++ {
-		pos.Hash()
+		newZobristHash(pos)
 	}
 }

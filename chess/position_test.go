@@ -35,8 +35,10 @@ func TestPosition_MakeMove(t *testing.T) {
 	for _, tt := range testPositions {
 		t.Run(tt.moveUCI, func(t *testing.T) {
 			pos := unsafeFEN(tt.preFEN)
+			exp := unsafeFEN(tt.postFEN)
 			pos.MakeMove(tt.move)
 			assert.Equal(t, tt.postFEN, pos.String())
+			assert.Equal(t, exp.hash, pos.hash)
 		})
 	}
 }
@@ -57,9 +59,11 @@ func TestPosition_UnmakeMove(t *testing.T) {
 	for _, tt := range testPositions {
 		t.Run(tt.moveUCI, func(t *testing.T) {
 			pos := unsafeFEN(tt.preFEN)
+			pre := unsafeFEN(tt.preFEN)
 			meta := pos.MakeMove(tt.move)
 			pos.UnmakeMove(tt.move, meta)
 			assert.Equal(t, tt.preFEN, pos.String())
+			assert.Equal(t, pre.hash, pos.hash)
 		})
 	}
 }

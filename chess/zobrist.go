@@ -17,7 +17,7 @@ const (
 
 type Hash uint64
 
-// Hash returns a zobrist hash (uint64).
+// newZobristHash returns a zobrist hash (uint64).
 //
 // The hash is the result of a Zobrist hash function. It is the exclusive or
 // of the result hashes of several functions:
@@ -25,12 +25,59 @@ type Hash uint64
 //	hash = piece ^ castle ^ enPassant ^ turn
 //
 // Hash follows the Polyglot opening file specification.
-func (pos *Position) Hash() (hash Hash) {
+func newZobristHash(pos *Position) (hash Hash) {
 	hash ^= pieceHash(pos)
 	hash ^= castleHash(pos.castlingRights)
 	hash ^= enPassantHash(pos.enPassant, pos.turn, pos.board.getBitboard(WhitePawn), pos.board.getBitboard(BlackPawn))
 	hash ^= turnHash(pos.turn)
 	return
+}
+
+// xorHashPartialMove updates a position hash incrementally.
+//
+// This function does not account for changes in en passant squares.
+func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
+	// turn
+	h := polyTurn
+
+	// piece
+	p1, p2 := m.P1(), m.P2()
+	s1, s2 := m.S1(), m.S2()
+	c := p1.Color()
+
+	h ^= polyRandom[64*int(p1)+int(s1)]
+	if promo := m.Promo(); promo == NoPiece {
+		h ^= polyRandom[64*int(p1)+int(s2)]
+	} else {
+		h ^= polyRandom[64*int(promo)+int(s2)]
+	}
+
+	switch enPassant := m.HasTag(EnPassant); {
+	case p2 != NoPiece && !enPassant:
+		h ^= polyRandom[64*int(p2)+int(s2)]
+	case c == White && enPassant:
+		h ^= polyRandom[64*int(BlackPawn)+int(s2-8)]
+	case c == Black && enPassant:
+		h ^= polyRandom[64*int(WhitePawn)+int(s2+8)]
+	case c == White && m.HasTag(KingSideCastle):
+		h ^= polyRandom[64*int(WhiteRook)+int(H1)]
+		h ^= polyRandom[64*int(WhiteRook)+int(F1)]
+	case c == White && m.HasTag(QueenSideCastle):
+		h ^= polyRandom[64*int(WhiteRook)+int(A1)]
+		h ^= polyRandom[64*int(WhiteRook)+int(D1)]
+	case c == Black && m.HasTag(KingSideCastle):
+		h ^= polyRandom[64*int(BlackRook)+int(H8)]
+		h ^= polyRandom[64*int(BlackRook)+int(F8)]
+	case c == Black && m.HasTag(QueenSideCastle):
+		h ^= polyRandom[64*int(BlackRook)+int(A8)]
+		h ^= polyRandom[64*int(BlackRook)+int(D8)]
+	}
+
+	// castling rights
+	if cr1 != cr2 {
+		h ^= castleHash(cr1) ^ castleHash(cr2)
+	}
+	return h
 }
 
 // pieceHash returns a hash (uint64)

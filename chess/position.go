@@ -8,6 +8,7 @@ import (
 // Position represents the state of the game.
 type Position struct {
 	board          board
+	hash           Hash
 	turn           Color
 	castlingRights castlingRights
 	enPassant      Square
@@ -57,6 +58,8 @@ func NewPosition(fen string) (*Position, error) {
 		return nil, err
 	}
 
+	pos.hash = newZobristHash(pos)
+
 	return pos, nil
 }
 
@@ -64,6 +67,11 @@ func NewPosition(fen string) (*Position, error) {
 func StartingPosition() *Position {
 	pos, _ := NewPosition(startFEN)
 	return pos
+}
+
+// Hash returns the position Zobrist hash.
+func (pos *Position) Hash() Hash {
+	return pos.hash
 }
 
 // MakeMove makes a move.
@@ -74,11 +82,22 @@ func StartingPosition() *Position {
 func (pos *Position) MakeMove(m Move) Metadata {
 	metadata := newMetadata(pos.turn, pos.castlingRights,
 		pos.halfMoveClock, pos.fullMoves, pos.enPassant)
+	cr := pos.castlingRights
+
+	if pos.enPassant != NoSquare {
+		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
+			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
+	}
 
 	pos.board.makeMove(m)
 	pos.turn = pos.turn.other()
 	pos.castlingRights = moveCastlingRights(pos.castlingRights, m)
 	pos.enPassant = moveEnPassant(m)
+	if pos.enPassant != NoSquare {
+		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
+			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
+	}
+	pos.hash ^= xorHashPartialMove(m, cr, pos.castlingRights)
 
 	if m.P1().Type() == Pawn || m.HasTag(Capture) {
 		pos.halfMoveClock = 0
@@ -95,10 +114,20 @@ func (pos *Position) MakeMove(m Move) Metadata {
 
 // UnmakeMove unmakes a move and restores the previous position.
 func (pos *Position) UnmakeMove(m Move, meta Metadata) {
+	cr := pos.castlingRights
+	if pos.enPassant != NoSquare {
+		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
+			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
+	}
 	pos.board.makeMove(m)
 	pos.turn = meta.turn()
 	pos.castlingRights = meta.castleRights()
 	pos.enPassant = meta.enPassant()
+	if pos.enPassant != NoSquare {
+		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
+			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
+	}
+	pos.hash ^= xorHashPartialMove(m, cr, pos.castlingRights)
 	pos.halfMoveClock = meta.halfMoveClock()
 	pos.fullMoves = meta.fullMoves()
 }
