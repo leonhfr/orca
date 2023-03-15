@@ -55,52 +55,44 @@ func TestPieceBitboard(t *testing.T) {
 }
 
 func TestPawnMoveBitboard(t *testing.T) {
-	type args struct {
-		fen string
-		sq  Square
-	}
 	tests := []struct {
-		args args
-		want []Square
+		fen   string
+		upOne []Square
+		upTwo []Square
 	}{
-		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", F2}, []Square{F3, F4}},
-		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", D4}, []Square{D5}},
-		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", C4}, []Square{C3}},
-		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", D7}, []Square{D6, D5}},
-		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", E6}, []Square{E5}},
+		{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", []Square{F3, D5}, []Square{F4}},
+		{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", []Square{C3, D6, E5}, []Square{D5}},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.args.sq.String(), func(t *testing.T) {
-			pos := unsafeFEN(tt.args.fen)
+		t.Run(tt.fen, func(t *testing.T) {
+			pos := unsafeFEN(tt.fen)
+			pawn := pos.board.getBitboard(Pawn.color(pos.turn))
 			occupancy := pos.board.getColor(White) ^ pos.board.getColor(Black)
-			got := pawnMoveBitboard(tt.args.sq, occupancy, pos.turn)
-			assert.ElementsMatch(t, tt.want, got.mapping())
+			upOne, upTwo := pawnMoveBitboard(pawn, occupancy, pos.turn)
+			assert.ElementsMatch(t, tt.upOne, upOne.mapping())
+			assert.ElementsMatch(t, tt.upTwo, upTwo.mapping())
 		})
 	}
 }
 
 func TestPawnCaptureBitboard(t *testing.T) {
-	type args struct {
-		fen string
-		sq  Square
-	}
 	tests := []struct {
-		args args
-		want []Square
+		fen      string
+		captureR []Square
+		captureL []Square
 	}{
-		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", F2}, []Square{E3, G3}},
-		{args{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", D4}, []Square{C5, E5}},
-		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", C4}, []Square{B3, D3}},
-		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", D7}, []Square{C6, E6}},
-		{args{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", E6}, []Square{D5, F5}},
+		{"k7/3p4/4p3/8/2pP4/8/5P2/K7 w - - 0 1", []Square{E5, G3}, []Square{C5, E3}},
+		{"k7/3p4/4p3/5N2/2pP4/8/5P2/K7 b - d3 0 1", []Square{D3, E6, F5}, []Square{B3, C6, D5}},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.args.sq.String(), func(t *testing.T) {
-			pos := unsafeFEN(tt.args.fen)
-			got := pawnCaptureBitboard(tt.args.sq, pos.turn)
-			assert.ElementsMatch(t, tt.want, got.mapping())
+		t.Run(tt.fen, func(t *testing.T) {
+			pos := unsafeFEN(tt.fen)
+			pawn := pos.board.getBitboard(Pawn.color(pos.turn))
+			captureR, captureL := pawnCaptureBitboard(pawn, pos.turn)
+			assert.ElementsMatch(t, tt.captureR, captureR.mapping())
+			assert.ElementsMatch(t, tt.captureL, captureL.mapping())
 		})
 	}
 }

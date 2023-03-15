@@ -96,38 +96,32 @@ func pieceBitboard(sq Square, pt PieceType, occupancy bitboard) bitboard {
 }
 
 // pawnMoveBitboard returns the pawn move bitboard.
-//
-// The returned bitboard has to be NOT AND with the bitboard of the color whose turn it is.
-func pawnMoveBitboard(sq Square, occupancy bitboard, color Color) bitboard {
-	bb := sq.bitboard()
-
+func pawnMoveBitboard(pawn, occupancy bitboard, color Color) (upOne bitboard, upTwo bitboard) {
 	if color == Black {
-		upOne := ^occupancy & (bb >> 8)
-		upTwo := ^occupancy & ((upOne & bbRank6) >> 8)
-		return upOne | upTwo
+		upOne = ^occupancy & (pawn >> 8)
+		upTwo = ^occupancy & ((upOne & bbRank6) >> 8)
+		return
 	}
 
-	upOne := ^occupancy & (bb << 8)
-	upTwo := ^occupancy & ((upOne & bbRank3) << 8)
-	return upOne | upTwo
+	upOne = ^occupancy & (pawn << 8)
+	upTwo = ^occupancy & ((upOne & bbRank3) << 8)
+	return
 }
 
 // pawnCaptureBitboard returns the pawn capture bitboard.
 //
-// The returned bitboard has to be NOT AND with the bitboard of the color whose turn it is
-// which has been OR with the en passant square bitboard.
-func pawnCaptureBitboard(sq Square, color Color) bitboard {
-	bb := sq.bitboard()
-
+// The returned bitboard has to be NOT AND with the bitboard of the color whose turn it ism
+// which has already been OR with the en passant square bitboard.
+func pawnCaptureBitboard(pawn bitboard, color Color) (captureR bitboard, captureL bitboard) {
 	if color == Black {
-		captureR := (bb & ^bbFileH & ^bbRank1) >> 7
-		captureL := (bb & ^bbFileA & ^bbRank1) >> 9
-		return captureR | captureL
+		captureR = (pawn & ^bbFileH) >> 7
+		captureL = (pawn & ^bbFileA) >> 9
+		return
 	}
 
-	captureR := (bb & ^bbFileH & ^bbRank8) << 9
-	captureL := (bb & ^bbFileA & ^bbRank8) << 7
-	return captureR | captureL
+	captureR = (pawn & ^bbFileH) << 9
+	captureL = (pawn & ^bbFileA) << 7
+	return
 }
 
 // slowMoves computes the move bitboard for each piece type.
