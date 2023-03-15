@@ -124,6 +124,30 @@ func TestBoard_String(t *testing.T) {
 	assert.Equal(t, expected, startingBoard.String())
 }
 
+func BenchmarkBoard_PieceAt(b *testing.B) {
+	squares := []Square{E1, E4, B7}
+	pos := unsafeFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	for _, sq := range squares {
+		b.Run(sq.String(), func(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				pos.board.pieceAt(E1)
+			}
+		})
+	}
+}
+
+func BenchmarkBoard_PieceByColor(b *testing.B) {
+	squares := []Square{E1, E4, B7}
+	pos := unsafeFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	for _, sq := range squares {
+		b.Run(sq.String(), func(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				pos.board.pieceByColor(E1, White)
+			}
+		})
+	}
+}
+
 // unsafeFEN returns a position without error checking, only meant for tests
 func unsafeFEN(fen string) *Position {
 	p, err := NewPosition(fen)

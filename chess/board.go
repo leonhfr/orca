@@ -27,16 +27,34 @@ func newBoard(m map[Square]Piece) board {
 
 // pieceAt returns the piece, if any, present at the given square.
 func (b board) pieceAt(sq Square) Piece {
-	p := BlackPawn
-	if b.bbWhite&sq.bitboard() > 0 {
-		p = WhitePawn
+	switch bb := sq.bitboard(); {
+	case b.bbWhite&bb > 0:
+		return b.pieceByColor(sq, White)
+	case b.bbBlack&bb > 0:
+		return b.pieceByColor(sq, Black)
+	default:
+		return NoPiece
 	}
-	for bb := sq.bitboard(); p <= WhiteKing; p += 2 {
-		if (b.getBitboard(p) & bb) > 0 {
-			return p
-		}
+}
+
+// pieceByColor returns the piece present at the given square.
+func (b board) pieceByColor(sq Square, c Color) Piece {
+	switch bb := sq.bitboard(); {
+	case b.bbPawn&bb > 0:
+		return Pawn.color(c)
+	case b.bbKnight&bb > 0:
+		return Knight.color(c)
+	case b.bbBishop&bb > 0:
+		return Bishop.color(c)
+	case b.bbRook&bb > 0:
+		return Rook.color(c)
+	case b.bbQueen&bb > 0:
+		return Queen.color(c)
+	case b.bbKing&bb > 0:
+		return King.color(c)
+	default:
+		return NoPiece
 	}
-	return NoPiece
 }
 
 // makeMove makes and unmakes a move on the board.
