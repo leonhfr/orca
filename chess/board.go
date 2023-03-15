@@ -103,33 +103,25 @@ func (b *board) makeMove(m Move) {
 	}
 }
 
-// getBitboard returns the bitboard of the given piece.
-func (b board) getBitboard(p Piece) bitboard {
-	switch p {
-	case WhiteKing:
-		return b.bbWhite & b.bbKing
-	case WhiteQueen:
-		return b.bbWhite & b.bbQueen
-	case WhiteRook:
-		return b.bbWhite & b.bbRook
-	case WhiteBishop:
-		return b.bbWhite & b.bbBishop
-	case WhiteKnight:
-		return b.bbWhite & b.bbKnight
-	case WhitePawn:
-		return b.bbWhite & b.bbPawn
-	case BlackKing:
-		return b.bbBlack & b.bbKing
-	case BlackQueen:
-		return b.bbBlack & b.bbQueen
-	case BlackRook:
-		return b.bbBlack & b.bbRook
-	case BlackBishop:
-		return b.bbBlack & b.bbBishop
-	case BlackKnight:
-		return b.bbBlack & b.bbKnight
-	case BlackPawn:
-		return b.bbBlack & b.bbPawn
+// getBitboard returns the bitboard of the given piece type and color.
+func (b board) getBitboard(pt PieceType, c Color) bitboard {
+	bbColor := b.bbWhite
+	if c == Black {
+		bbColor = b.bbBlack
+	}
+	switch pt {
+	case King:
+		return bbColor & b.bbKing
+	case Queen:
+		return bbColor & b.bbQueen
+	case Rook:
+		return bbColor & b.bbRook
+	case Bishop:
+		return bbColor & b.bbBishop
+	case Knight:
+		return bbColor & b.bbKnight
+	case Pawn:
+		return bbColor & b.bbPawn
 	default:
 		panic("unknown piece")
 	}

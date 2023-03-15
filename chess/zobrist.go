@@ -28,7 +28,7 @@ type Hash uint64
 func newZobristHash(pos *Position) (hash Hash) {
 	hash ^= pieceHash(pos)
 	hash ^= castleHash(pos.castlingRights)
-	hash ^= enPassantHash(pos.enPassant, pos.turn, pos.board.getBitboard(WhitePawn), pos.board.getBitboard(BlackPawn))
+	hash ^= enPassantHash(pos.enPassant, pos.turn, pos.board.getBitboard(Pawn, White), pos.board.getBitboard(Pawn, Black))
 	hash ^= turnHash(pos.turn)
 	return
 }
@@ -88,7 +88,7 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
 //	offset = 64 * pieceKindOffsets[piece] + 8 * rank + file
 func pieceHash(pos *Position) (hash Hash) {
 	for p := BlackPawn; p <= WhiteKing; p++ {
-		for bb := pos.board.getBitboard(p); bb > 0; bb = bb.resetLSB() {
+		for bb := pos.board.getBitboard(p.Type(), p.Color()); bb > 0; bb = bb.resetLSB() {
 			switch sq := bb.scanForward(); p.Color() {
 			case White:
 				offset := 64*int(p) + int(sq)
