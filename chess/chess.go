@@ -101,6 +101,88 @@ func (pos *Position) PseudoMoves() []Move {
 	return moves
 }
 
+// isDiscoveredCheck checks whether the moving piece uncovers
+// a check given by an enemy piece.
+func (pos *Position) isDiscoveredCheck(m Move) bool {
+	kingSq := (pos.board.bbKing & pos.board.getColor(pos.turn)).scanForward()
+	bbCaptured := m.S2().bitboard()
+	bbOpponent := pos.board.getColor(pos.turn.other()) & ^bbCaptured
+
+	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	bbOccupancy &= ^m.S1().bitboard()
+	bbOccupancy |= bbCaptured
+	if m.HasTag(EnPassant) {
+		if pos.turn == White {
+			bbOccupancy &= ^(bbCaptured >> 8)
+		} else {
+			bbOccupancy &= ^(bbCaptured << 8)
+		}
+	}
+	bbRookMoves := bbMagicRookMoves[rookMagics[kingSq].index(bbOccupancy)]
+	bbBishopMoves := bbMagicBishopMoves[bishopMagics[kingSq].index(bbOccupancy)]
+
+	return (pos.board.bbQueen^pos.board.bbRook)&bbRookMoves&bbOpponent > 0 ||
+		(pos.board.bbQueen^pos.board.bbBishop)&bbBishopMoves&bbOpponent > 0
+}
+
+// isSquareAttacked checks whether the square is attacked by
+// an enemy piece.
+func (pos *Position) isSquareAttacked(sq Square) bool {
+	bbOpponent := pos.board.getColor(pos.turn.other())
+	if singlePawnCaptureBitboard(sq, pos.turn)&pos.board.bbPawn&bbOpponent > 0 ||
+		bbKingMoves[sq]&pos.board.bbKing&bbOpponent > 0 ||
+		bbKnightMoves[sq]&pos.board.bbKnight&bbOpponent > 0 {
+		return true
+	}
+
+	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	bbRookMoves := bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
+	bbBishopMoves := bbMagicBishopMoves[bishopMagics[sq].index(bbOccupancy)]
+
+	return (pos.board.bbQueen|pos.board.bbRook)&bbRookMoves&bbOpponent > 0 ||
+		(pos.board.bbQueen|pos.board.bbBishop)&bbBishopMoves&bbOpponent > 0
+}
+
+// isCastleLegal checks whether the castle move is legal.
+//
+// Assumes that the castle rights have already been checked and
+// that the king's travel path is clear.
+//
+// Checks that the king does not leave, cross over, or finish on
+// s square attacked by an enemy piece.
+func (pos *Position) isCastleLegal(m Move) bool {
+	side := kingSide
+	if m.HasTag(QueenSideCastle) {
+		side = queenSide
+	}
+	bbOpponent := pos.board.getColor(pos.turn.other())
+	cc := castleChecks[2*uint8(pos.turn)+uint8(side)]
+
+	if cc.bbPawn&pos.board.bbPawn&bbOpponent > 0 ||
+		cc.bbKnight&pos.board.bbKnight&bbOpponent > 0 ||
+		cc.bbKing&pos.board.bbKing&bbOpponent > 0 {
+		return false
+	}
+
+	var bbBishopAttacks, bbRookAttacks bitboard
+	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	for _, sq := range cc.squares {
+		index := bishopMagics[sq].index(bbOccupancy)
+		bbBishopAttacks |= bbMagicBishopMoves[index]
+	}
+
+	if bb := pos.board.bbBishop | pos.board.bbQueen; bbBishopAttacks&bbOpponent&bb > 0 {
+		return false
+	}
+
+	for _, sq := range cc.squares {
+		index := rookMagics[sq].index(bbOccupancy)
+		bbRookAttacks |= bbMagicRookMoves[index]
+	}
+
+	return bbRookAttacks&(pos.board.bbRook|pos.board.bbQueen)&bbOpponent == 0
+}
+
 // bbDir associates a bitboard with a direction
 type bbDir struct {
 	bb  bitboard
@@ -116,7 +198,7 @@ type bbPt struct {
 // castles contains the castles' data
 //
 // indexed by 2*Color+side
-var castles = []castleData{
+var castles = [4]castleData{
 	{1<<F8 | 1<<G8, E8, G8},         // black, king side
 	{1<<B8 | 1<<C8 | 1<<D8, E8, C8}, // black, queen side
 	{1<<F1 | 1<<G1, E1, G1},         // white, king side
@@ -128,4 +210,43 @@ type castleData struct {
 	bbTravel bitboard // bitboard traveled by the king
 	s1       Square   // king s1
 	s2       Square   // king s2
+}
+
+// castleCheck represents a castle's check
+type castleCheck struct {
+	bbPawn   bitboard
+	bbKnight bitboard
+	bbKing   bitboard
+	squares  [3]Square
+}
+
+// castleChecks contains the castle checks
+//
+// indexed by 2*Color+side
+var castleChecks [4]castleCheck
+
+// initializes castleChecks
+//
+// requires bbKingMoves, bbKnightMoves
+func initCastleChecks() {
+	castles := [4]struct {
+		color   Color
+		squares [3]Square
+	}{
+		{Black, [3]Square{E8, F8, G8}},
+		{Black, [3]Square{C8, D8, E8}},
+		{White, [3]Square{E1, F1, G1}},
+		{White, [3]Square{C1, D1, E1}},
+	}
+
+	for i, castle := range castles {
+		var bbPawn, bbKnight, bbKing bitboard
+		for _, sq := range castle.squares {
+			bbPawn |= singlePawnCaptureBitboard(sq, castle.color)
+			bbKnight |= bbKnightMoves[sq]
+			bbKing |= bbKingMoves[sq]
+		}
+
+		castleChecks[i] = castleCheck{bbPawn, bbKnight, bbKing, castle.squares}
+	}
 }

@@ -124,6 +124,15 @@ func pawnCaptureBitboard(pawn bitboard, color Color) (captureR bitboard, capture
 	return
 }
 
+// singlePawnCaptureBitboard returns a single pawn capture bitboard.
+func singlePawnCaptureBitboard(sq Square, color Color) bitboard {
+	bbPawn := sq.bitboard()
+	if color == Black {
+		return (bbPawn & ^bbFileH)>>7 | (bbPawn & ^bbFileA)>>9
+	}
+	return (bbPawn & ^bbFileH)<<9 | (bbPawn & ^bbFileA)<<7
+}
+
 // slowMoves computes the move bitboard for each piece type.
 //
 // This function is intended to be used during initialization of move tables.

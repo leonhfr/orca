@@ -76,10 +76,27 @@ func (pos *Position) Hash() Hash {
 
 // MakeMove makes a move.
 //
-// Does not check the legality of the resulting position.
-// The returned metadata can be used to return the position
-// to the same anterior state.
-func (pos *Position) MakeMove(m Move) Metadata {
+// Checks the legality of the resulting position.
+// Returns true if the move was legal and has been made.
+//
+// The returned metadata can be used to unmake the move and
+// restore the position to the previous state.
+func (pos *Position) MakeMove(m Move) (Metadata, bool) {
+	switch {
+	case m.HasTag(KingSideCastle) || m.HasTag(QueenSideCastle):
+		if !pos.isCastleLegal(m) {
+			return NoMetadata, false
+		}
+	case m.P1() == WhiteKing || m.P1() == BlackKing:
+		if pos.isSquareAttacked(m.S2()) {
+			return NoMetadata, false
+		}
+	default:
+		if pos.isDiscoveredCheck(m) {
+			return NoMetadata, false
+		}
+	}
+
 	metadata := newMetadata(pos.turn, pos.castlingRights,
 		pos.halfMoveClock, pos.fullMoves, pos.enPassant)
 	cr := pos.castlingRights
@@ -90,6 +107,11 @@ func (pos *Position) MakeMove(m Move) Metadata {
 	}
 
 	pos.board.makeMove(m)
+	if pos.isSquareAttacked((pos.board.bbKing & pos.board.getColor(pos.turn)).scanForward()) {
+		pos.board.makeMove(m)
+		return NoMetadata, false
+	}
+
 	pos.turn = pos.turn.other()
 	pos.castlingRights = moveCastlingRights(pos.castlingRights, m)
 	pos.enPassant = moveEnPassant(m)
@@ -109,7 +131,7 @@ func (pos *Position) MakeMove(m Move) Metadata {
 		pos.fullMoves++
 	}
 
-	return metadata
+	return metadata, true
 }
 
 // UnmakeMove unmakes a move and restores the previous position.

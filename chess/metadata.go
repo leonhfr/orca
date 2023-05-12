@@ -12,6 +12,9 @@ package chess
 //	_           unused bit
 type Metadata uint32
 
+// NoMetadata represents the absence of metadata.
+const NoMetadata Metadata = 0
+
 // newMetadata create a new metadata.
 func newMetadata(c Color, cr castlingRights, halfMoveClock, fullMoves uint8, enPassant Square) Metadata {
 	return Metadata(c) |

@@ -48,7 +48,7 @@ func BenchmarkPosition_MakeMove(b *testing.B) {
 		pos := unsafeFEN(bb.preFEN)
 		b.Run(bb.moveUCI, func(b *testing.B) {
 			for n := 0; n < b.N; n++ {
-				meta := pos.MakeMove(bb.move)
+				meta, _ := pos.MakeMove(bb.move)
 				pos.UnmakeMove(bb.move, meta)
 			}
 		})
@@ -60,7 +60,7 @@ func TestPosition_UnmakeMove(t *testing.T) {
 		t.Run(tt.moveUCI, func(t *testing.T) {
 			pos := unsafeFEN(tt.preFEN)
 			pre := unsafeFEN(tt.preFEN)
-			meta := pos.MakeMove(tt.move)
+			meta, _ := pos.MakeMove(tt.move)
 			pos.UnmakeMove(tt.move, meta)
 			assert.Equal(t, tt.preFEN, pos.String())
 			assert.Equal(t, pre.hash, pos.hash)
