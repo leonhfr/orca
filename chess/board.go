@@ -76,6 +76,10 @@ func (b *board) makeMove(m Move) {
 
 	b.xorColor(c, mbb)
 
+	if m.HasTag(Quiet) {
+		return
+	}
+
 	switch enPassant := m.HasTag(EnPassant); {
 	case p2 != NoPiece && !enPassant: // capture
 		b.xorBitboard(p2.Type(), s2bb)

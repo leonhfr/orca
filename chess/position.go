@@ -154,7 +154,12 @@ func (pos Position) String() string {
 
 // moveCastlingRights computes the new castling rights after a move.
 func moveCastlingRights(cr castlingRights, m Move) castlingRights {
-	switch p1, s1, s2 := m.P1(), m.S1(), m.S2(); {
+	p1 := m.P1()
+	if pt := p1.Type(); pt != King && pt != Rook {
+		return cr
+	}
+
+	switch s1, s2 := m.S1(), m.S2(); {
 	case p1 == WhiteKing:
 		return cr & ^(castleWhiteKing | castleWhiteQueen)
 	case p1 == BlackKing:

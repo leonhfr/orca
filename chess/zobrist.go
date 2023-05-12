@@ -52,6 +52,16 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
 		h ^= polyRandom[64*int(promo)+int(s2)]
 	}
 
+	// castling rights
+	if cr1 != cr2 {
+		h ^= castleHash(cr1) ^ castleHash(cr2)
+	}
+
+	if m.HasTag(Quiet) {
+		return h
+	}
+
+	// non quiet moves
 	switch enPassant := m.HasTag(EnPassant); {
 	case p2 != NoPiece && !enPassant:
 		h ^= polyRandom[64*int(p2)+int(s2)]
@@ -73,10 +83,6 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
 		h ^= polyRandom[64*int(BlackRook)+int(D8)]
 	}
 
-	// castling rights
-	if cr1 != cr2 {
-		h ^= castleHash(cr1) ^ castleHash(cr2)
-	}
 	return h
 }
 

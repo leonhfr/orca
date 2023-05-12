@@ -130,17 +130,20 @@ func pawnCaptureBitboard(pawn bitboard, color Color) (captureR bitboard, capture
 func slowMoves(pt PieceType, sq Square, blockers bitboard) bitboard {
 	switch pt {
 	case Rook:
-		return rayBitboard(sq, north, blockers) | rayBitboard(sq, east, blockers) |
-			rayBitboard(sq, south, blockers) | rayBitboard(sq, west, blockers)
+		return slowRayBitboard(sq, north, blockers) | slowRayBitboard(sq, east, blockers) |
+			slowRayBitboard(sq, south, blockers) | slowRayBitboard(sq, west, blockers)
 	case Bishop:
-		return rayBitboard(sq, northEast, blockers) | rayBitboard(sq, southEast, blockers) |
-			rayBitboard(sq, southWest, blockers) | rayBitboard(sq, northWest, blockers)
+		return slowRayBitboard(sq, northEast, blockers) | slowRayBitboard(sq, southEast, blockers) |
+			slowRayBitboard(sq, southWest, blockers) | slowRayBitboard(sq, northWest, blockers)
 	default:
 		panic("slow moves not defined for piece type")
 	}
 }
 
-func rayBitboard(sq Square, d direction, blockers bitboard) bitboard {
+// slowRayBitboard computes the ray bitboard in one direction.
+//
+// This function is intended to be used during initialization of move tables.
+func slowRayBitboard(sq Square, d direction, blockers bitboard) bitboard {
 	m := map[direction]func(sq Square) bool{
 		north:     func(sq Square) bool { return sq.Rank() == Rank8 },
 		northEast: func(sq Square) bool { return sq.File() == FileH || sq.Rank() == Rank8 },
