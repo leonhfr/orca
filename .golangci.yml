@@ -6,6 +6,8 @@ linters:
     - gosimple
     - govet
     - ineffassign
+    - makezero
+    - prealloc
     - revive
     - staticcheck
     - typecheck
