@@ -89,8 +89,10 @@ func (pos *Position) PseudoMoves() []Move {
 		for ; origin.bb > 0; origin.bb = origin.bb.resetLSB() {
 			s1 := origin.bb.scanForward()
 			for bbs2 := pieceBitboard(s1, p1.Type(), bbOccupancy) & ^bbPlayer; bbs2 > 0; bbs2 = bbs2.resetLSB() {
-				s2 := bbs2.scanForward()
-				p2 := pos.board.pieceByColor(s2, opponent)
+				s2, p2 := bbs2.scanForward(), NoPiece
+				if s2.bitboard()&bbOpponent > 0 {
+					p2 = pos.board.pieceByColor(s2, opponent)
+				}
 				moves = append(moves, newMove(p1, p2, s1, s2, pos.enPassant, NoPiece))
 			}
 		}
