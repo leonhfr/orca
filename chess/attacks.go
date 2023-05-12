@@ -110,8 +110,8 @@ func pawnMoveBitboard(pawn, occupancy bitboard, color Color) (upOne bitboard, up
 
 // pawnCaptureBitboard returns the pawn capture bitboard.
 //
-// The returned bitboard has to be NOT AND with the bitboard of the color whose turn it ism
-// which has already been OR with the en passant square bitboard.
+// The returned bitboard has to be AND with the bitboard of the opponent of the player
+// whose turn it is, which should have already been OR with the en passant square bitboard.
 func pawnCaptureBitboard(pawn bitboard, color Color) (captureR bitboard, captureL bitboard) {
 	if color == Black {
 		captureR = (pawn & ^bbFileH) >> 7

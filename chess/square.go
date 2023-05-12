@@ -116,4 +116,7 @@ const (
 	southWest direction = -9
 	west      direction = -1
 	northWest direction = 7
+
+	doubleNorth direction = 16
+	doubleSouth direction = -16
 )
