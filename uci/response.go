@@ -184,7 +184,7 @@ func (r responseBestMove) String() string {
 // If <cpunr> is greater than 1, always send all k lines in k strings together.
 // The engine should only send this if the option "UCI_ShowCurrLine" is set to true.
 type responseOutput struct {
-	Output
+	*Output
 	time time.Duration
 }
 

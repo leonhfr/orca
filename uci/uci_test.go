@@ -14,7 +14,7 @@ type mockEngine struct {
 }
 
 // Search implements the engine interface.
-func (m *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan Output {
+func (m *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *Output {
 	args := m.Called(ctx, pos, maxDepth)
-	return args.Get(0).(chan Output)
+	return args.Get(0).(chan *Output)
 }

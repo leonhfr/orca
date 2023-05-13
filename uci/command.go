@@ -257,7 +257,7 @@ func (c commandGo) run(ctx context.Context, e engine, s *State) {
 		defer s.mu.Unlock()
 		defer cancel()
 
-		var output Output
+		var output *Output
 		for output = range outputs {
 			s.respond(responseOutput{
 				Output: output,

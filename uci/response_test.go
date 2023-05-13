@@ -25,7 +25,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info score positive",
 			args: responseOutput{
-				Output{
+				&Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: 3000,
@@ -38,7 +38,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info score negative",
 			args: responseOutput{
-				Output{
+				&Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: -3000,
@@ -51,7 +51,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info mate positive",
 			args: responseOutput{
-				Output{
+				&Output{
 					Depth: 8,
 					Score: 3000,
 					Nodes: 1024,
@@ -65,7 +65,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info mate negative",
 			args: responseOutput{
-				Output{
+				&Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: -3000,

@@ -20,5 +20,5 @@ type engine interface {
 	// Search runs a search on the given position until the given depth.
 	//
 	// Cancelling the context stops the search.
-	Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan Output
+	Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *Output
 }
