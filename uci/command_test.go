@@ -11,6 +11,7 @@ import (
 )
 
 func TestCommandUCI(t *testing.T) {
+	e := new(mockEngine)
 	name, author := "NAME", "AUTHOR"
 	w := &strings.Builder{}
 	state := New(name, author, w)
@@ -20,7 +21,9 @@ func TestCommandUCI(t *testing.T) {
 		responseUCIOK{},
 	})
 
-	commandUCI{}.run(context.Background(), state)
+	commandUCI{}.run(context.Background(), e, state)
+
+	e.AssertExpectations(t)
 	assert.Equal(t, expected, w.String())
 }
 
@@ -29,7 +32,10 @@ func TestCommandDebug(t *testing.T) {
 
 	for _, tt := range []bool{true, false} {
 		t.Run(fmt.Sprint(tt), func(t *testing.T) {
-			commandDebug{on: tt}.run(context.Background(), state)
+			e := new(mockEngine)
+			commandDebug{on: tt}.run(context.Background(), e, state)
+
+			e.AssertExpectations(t)
 			assert.Equal(t, tt, state.debug)
 		})
 	}
@@ -76,9 +82,13 @@ func TestCommandPosition(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {
+			e := new(mockEngine)
 			w := &strings.Builder{}
 			state := New("", "", w)
-			tt.c.run(context.Background(), state)
+
+			tt.c.run(context.Background(), e, state)
+
+			e.AssertExpectations(t)
 			assert.Equal(t, tt.want, state.position.String())
 			assert.Equal(t, concatenateStrings(tt.r), w.String())
 		})

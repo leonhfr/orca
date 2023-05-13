@@ -11,7 +11,7 @@ import (
 // command is the interface implemented by objects that represent
 // UCI commands from the GUI to the Engine.
 type command interface {
-	run(ctx context.Context, s *State)
+	run(ctx context.Context, e engine, s *State)
 }
 
 // commandUCI represents a "uci" command.
@@ -28,7 +28,7 @@ type command interface {
 type commandUCI struct{}
 
 // run implements the command interface.
-func (commandUCI) run(_ context.Context, s *State) {
+func (commandUCI) run(_ context.Context, _ engine, s *State) {
 	s.respond(responseID{
 		name:   s.name,
 		author: s.author,
@@ -50,7 +50,7 @@ type commandDebug struct {
 }
 
 // run implements the command interface.
-func (c commandDebug) run(_ context.Context, s *State) {
+func (c commandDebug) run(_ context.Context, _ engine, s *State) {
 	s.debug = c.on
 	s.logDebug("debug set to ", c.on)
 }
@@ -71,7 +71,7 @@ func (c commandDebug) run(_ context.Context, s *State) {
 type commandIsReady struct{}
 
 // run implements the command interface.
-func (commandIsReady) run(_ context.Context, _ *State) {
+func (commandIsReady) run(_ context.Context, _ engine, _ *State) {
 }
 
 // commandSetOption represents a "setoption" command.
@@ -98,7 +98,7 @@ type commandSetOption struct {
 }
 
 // run implements the command interface.
-func (c commandSetOption) run(_ context.Context, _ *State) {
+func (c commandSetOption) run(_ context.Context, _ engine, _ *State) {
 }
 
 // commandUCINewGame represents a "ucinewgame" command.
@@ -116,7 +116,7 @@ func (c commandSetOption) run(_ context.Context, _ *State) {
 type commandUCINewGame struct{}
 
 // run implements the command interface.
-func (commandUCINewGame) run(_ context.Context, _ *State) {
+func (commandUCINewGame) run(_ context.Context, _ engine, _ *State) {
 }
 
 // commandPosition represents a "position" command.
@@ -137,7 +137,7 @@ type commandPosition struct {
 }
 
 // run implements the command interface.
-func (c commandPosition) run(_ context.Context, s *State) {
+func (c commandPosition) run(_ context.Context, _ engine, s *State) {
 	if c.startPos {
 		s.position = chess.StartingPosition()
 	} else if len(c.fen) > 0 {
@@ -246,7 +246,7 @@ type commandGo struct {
 }
 
 // run implements the command interface.
-func (c commandGo) run(_ context.Context, _ *State) {
+func (c commandGo) run(_ context.Context, _ engine, _ *State) {
 }
 
 // commandStop represents a "stop" command.
@@ -256,7 +256,7 @@ func (c commandGo) run(_ context.Context, _ *State) {
 type commandStop struct{}
 
 // run implements the command interface.
-func (commandStop) run(_ context.Context, _ *State) {
+func (commandStop) run(_ context.Context, _ engine, _ *State) {
 }
 
 // commandQuit represents a "quit" command.
@@ -265,5 +265,5 @@ func (commandStop) run(_ context.Context, _ *State) {
 type commandQuit struct{}
 
 // run implements the command interface.
-func (commandQuit) run(_ context.Context, _ *State) {
+func (commandQuit) run(_ context.Context, _ engine, _ *State) {
 }
