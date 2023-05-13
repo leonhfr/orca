@@ -74,6 +74,11 @@ func (pos *Position) Hash() Hash {
 	return pos.hash
 }
 
+// Turn returns the color of the next player to move in this position.
+func (pos Position) Turn() Color {
+	return pos.turn
+}
+
 // MakeMove makes a move.
 //
 // Checks the legality of the resulting position.
@@ -154,6 +159,29 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata) {
 	pos.fullMoves = meta.fullMoves()
 }
 
+// PieceMap executes the callback for each piece on the board, passing the piece
+// and its square as arguments. Intended to be used in evaluation functions.
+func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
+	for _, bbp := range []bbP{
+		{BlackPawn, pos.board.bbBlack & pos.board.bbPawn},
+		{WhitePawn, pos.board.bbWhite & pos.board.bbPawn},
+		{BlackKnight, pos.board.bbBlack & pos.board.bbKnight},
+		{WhiteKnight, pos.board.bbWhite & pos.board.bbKnight},
+		{BlackBishop, pos.board.bbBlack & pos.board.bbBishop},
+		{WhiteBishop, pos.board.bbWhite & pos.board.bbBishop},
+		{BlackRook, pos.board.bbBlack & pos.board.bbRook},
+		{WhiteRook, pos.board.bbWhite & pos.board.bbRook},
+		{BlackQueen, pos.board.bbBlack & pos.board.bbQueen},
+		{WhiteQueen, pos.board.bbWhite & pos.board.bbQueen},
+		{BlackKing, pos.board.bbBlack & pos.board.bbKing},
+		{WhiteKing, pos.board.bbWhite & pos.board.bbKing},
+	} {
+		for ; bbp.bb > 0; bbp.bb = bbp.bb.resetLSB() {
+			cb(bbp.p, bbp.bb.scanForward())
+		}
+	}
+}
+
 // String implements the Stringer interface.
 //
 // Returns a FEN formatted string.
@@ -217,4 +245,10 @@ func moveEnPassant(m Move) Square {
 	default:
 		return NoSquare
 	}
+}
+
+// bbP associates a bitboard with a Piece
+type bbP struct {
+	p  Piece
+	bb bitboard
 }
