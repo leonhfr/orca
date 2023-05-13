@@ -26,6 +26,12 @@ type commandUCI struct{}
 
 // run implements the command interface.
 func (commandUCI) run(ctx context.Context, s *State) {
+	s.respond(responseID{
+		name:   s.name,
+		author: s.author,
+	})
+
+	s.respond(responseUCIOK{})
 }
 
 // commandDebug represents a "debug" command.
@@ -42,6 +48,7 @@ type commandDebug struct {
 
 // run implements the command interface.
 func (c commandDebug) run(ctx context.Context, s *State) {
+	s.debug = c.on
 }
 
 // commandIsReady represents an "isready" command.

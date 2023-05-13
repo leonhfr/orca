@@ -15,6 +15,9 @@ type response interface {
 	fmt.Stringer
 }
 
+// responder processes responses.
+type responder func(response)
+
 // responseID represents a "id" command.
 //
 //	name <x>
