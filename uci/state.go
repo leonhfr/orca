@@ -3,6 +3,7 @@ package uci
 import (
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/leonhfr/orca/chess"
 )
@@ -14,6 +15,8 @@ type State struct {
 	debug    bool
 	position *chess.Position
 	writer   io.Writer
+	mu       sync.Mutex
+	stop     chan struct{}
 }
 
 // New creates a new State.
@@ -23,6 +26,8 @@ func New(name, author string, writer io.Writer) *State {
 		author:   author,
 		position: chess.StartingPosition(),
 		writer:   writer,
+		mu:       sync.Mutex{},
+		stop:     make(chan struct{}),
 	}
 }
 

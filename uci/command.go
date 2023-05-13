@@ -246,7 +246,45 @@ type commandGo struct {
 }
 
 // run implements the command interface.
-func (c commandGo) run(_ context.Context, _ engine, _ *State) {
+func (c commandGo) run(ctx context.Context, e engine, s *State) {
+	s.mu.Lock()
+	start := time.Now()
+	ctx, cancel := searchContext(ctx, s.stop)
+
+	outputs := e.Search(ctx, s.position, c.depth)
+
+	go func() {
+		defer s.mu.Unlock()
+		defer cancel()
+
+		var output Output
+		for output = range outputs {
+			s.respond(responseOutput{
+				Output: output,
+				time:   time.Since(start),
+			})
+		}
+		if len(output.PV) > 0 {
+			s.respond(responseBestMove{output.PV[0]})
+		}
+	}()
+}
+
+// searchContext creates a new context that is cancelled when
+// a struct is emitted on the stop channel.
+func searchContext(ctx context.Context, stop <-chan struct{}) (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(ctx)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			return
+		case <-stop:
+			cancel()
+		}
+	}()
+
+	return ctx, cancel
 }
 
 // commandStop represents a "stop" command.
@@ -256,7 +294,11 @@ func (c commandGo) run(_ context.Context, _ engine, _ *State) {
 type commandStop struct{}
 
 // run implements the command interface.
-func (commandStop) run(_ context.Context, _ engine, _ *State) {
+func (commandStop) run(_ context.Context, _ engine, s *State) {
+	select {
+	case s.stop <- struct{}{}:
+	default:
+	}
 }
 
 // commandQuit represents a "quit" command.
@@ -265,5 +307,12 @@ func (commandStop) run(_ context.Context, _ engine, _ *State) {
 type commandQuit struct{}
 
 // run implements the command interface.
-func (commandQuit) run(_ context.Context, _ engine, _ *State) {
+func (commandQuit) run(_ context.Context, _ engine, s *State) {
+	select {
+	case s.stop <- struct{}{}:
+	default:
+	}
+
+	// prevents future searches and ensures all search routines have been shut down
+	s.mu.Lock()
 }
