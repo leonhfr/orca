@@ -2,7 +2,10 @@ package uci
 
 import (
 	"context"
+	"fmt"
 	"time"
+
+	"github.com/leonhfr/orca/chess"
 )
 
 // command is the interface implemented by objects that represent
@@ -49,6 +52,7 @@ type commandDebug struct {
 // run implements the command interface.
 func (c commandDebug) run(ctx context.Context, s *State) {
 	s.debug = c.on
+	s.logDebug("debug set to ", c.on)
 }
 
 // commandIsReady represents an "isready" command.
@@ -134,6 +138,31 @@ type commandPosition struct {
 
 // run implements the command interface.
 func (c commandPosition) run(ctx context.Context, s *State) {
+	if c.startPos {
+		s.position = chess.StartingPosition()
+	} else if len(c.fen) > 0 {
+		pos, err := chess.NewPosition(c.fen)
+		if err != nil {
+			s.logError(err)
+			return
+		}
+		s.position = pos
+	}
+
+	for _, move := range c.moves {
+		m, err := chess.NewMove(s.position, move)
+		if err != nil {
+			s.logError(err)
+			return
+		}
+
+		if _, ok := s.position.MakeMove(m); !ok {
+			s.logError(fmt.Errorf("failed to play move %s", move))
+			return
+		}
+	}
+
+	s.logDebug("position set to FEN ", s.position.String())
 }
 
 // commandGo represents a "go" command.
