@@ -20,7 +20,7 @@ const (
 // Engine represents the search engine.
 type Engine struct{}
 
-// Search implements the UCI engine interface.
+// Search implements the uci.Engine interface.
 func (Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *uci.Output {
 	output := make(chan *uci.Output)
 

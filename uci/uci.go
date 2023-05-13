@@ -18,8 +18,8 @@ type Output struct {
 	PV    []chess.Move // Principal variation, best line found.
 }
 
-// engine is the interface implemented by the search engine.
-type engine interface {
+// Engine is the interface implemented by the search Engine.
+type Engine interface {
 	// Search runs a search on the given position until the given depth.
 	//
 	// Cancelling the context stops the search.
@@ -30,7 +30,7 @@ type engine interface {
 //
 // Run parses command from the reader, executes them with the provided
 // search engine and writes the responses on the writer.
-func Run(ctx context.Context, e engine, r io.Reader, s *State) {
+func Run(ctx context.Context, e Engine, r io.Reader, s *State) {
 	for scanner := bufio.NewScanner(r); scanner.Scan(); {
 		c := parse(strings.Fields(scanner.Text()))
 		if c == nil {
