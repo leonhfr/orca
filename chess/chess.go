@@ -183,21 +183,21 @@ func (pos *Position) isCastleLegal(m Move) bool {
 	return bbRookAttacks&(pos.board.bbRook|pos.board.bbQueen)&bbOpponent == 0
 }
 
-// bbDir associates a bitboard with a direction
+// bbDir associates a bitboard with a direction.
 type bbDir struct {
 	bb  bitboard
 	dir direction
 }
 
-// bbPt associates a bitboard with a PieceType
+// bbPt associates a bitboard with a PieceType.
 type bbPt struct {
 	pt PieceType
 	bb bitboard
 }
 
-// castles contains the castles' data
+// castles contains the castles' data.
 //
-// indexed by 2*Color+side
+// indexed by `2*Color+side`.
 var castles = [4]castleData{
 	{1<<F8 | 1<<G8, E8, G8},         // black, king side
 	{1<<B8 | 1<<C8 | 1<<D8, E8, C8}, // black, queen side
@@ -205,14 +205,14 @@ var castles = [4]castleData{
 	{1<<B1 | 1<<C1 | 1<<D1, E1, C1}, // white, queen side
 }
 
-// casteData represents a castle's data
+// casteData represents a castle's data.
 type castleData struct {
 	bbTravel bitboard // bitboard traveled by the king
 	s1       Square   // king s1
 	s2       Square   // king s2
 }
 
-// castleCheck represents a castle's check
+// castleCheck represents a castle's check.
 type castleCheck struct {
 	bbPawn   bitboard
 	bbKnight bitboard
@@ -220,14 +220,14 @@ type castleCheck struct {
 	squares  [3]Square
 }
 
-// castleChecks contains the castle checks
+// castleChecks contains the castle checks.
 //
-// indexed by 2*Color+side
+// indexed by `2*Color+side`.
 var castleChecks [4]castleCheck
 
-// initializes castleChecks
+// initializes castleChecks.
 //
-// requires bbKingMoves, bbKnightMoves
+// requires bbKingMoves, bbKnightMoves.
 func initCastleChecks() {
 	castles := [4]struct {
 		color   Color

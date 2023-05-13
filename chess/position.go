@@ -253,7 +253,7 @@ func moveEnPassant(m Move) Square {
 	}
 }
 
-// bbP associates a bitboard with a Piece
+// bbP associates a bitboard with a Piece.
 type bbP struct {
 	p  Piece
 	bb bitboard

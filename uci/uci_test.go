@@ -8,7 +8,7 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-// mockEngine is a mock that implements the Engine interface
+// mockEngine is a mock that implements the Engine interface.
 type mockEngine struct {
 	mock.Mock
 }

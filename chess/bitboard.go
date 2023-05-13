@@ -99,7 +99,7 @@ var (
 	bbAntiDiagonals [64]bitboard // bbAntiDiagonals contains the anti diagonal bitboards indexed by Square.
 )
 
-// initializes bbFiles
+// initializes bbFiles.
 func initBBFiles() {
 	files := [8]bitboard{bbFileA, bbFileB, bbFileC, bbFileD, bbFileE, bbFileF, bbFileG, bbFileH}
 	for sq := A1; sq <= H8; sq++ {
@@ -107,7 +107,7 @@ func initBBFiles() {
 	}
 }
 
-// initBBRanks bbRanks
+// initBBRanks bbRanks.
 func initBBRanks() {
 	ranks := [8]bitboard{bbRank1, bbRank2, bbRank3, bbRank4, bbRank5, bbRank6, bbRank7, bbRank8}
 	for sq := A1; sq <= H8; sq++ {
@@ -115,7 +115,7 @@ func initBBRanks() {
 	}
 }
 
-// initializes bbDiagonals
+// initializes bbDiagonals.
 func initBBDiagonals() {
 	for sq := A1; sq <= H8; sq++ {
 		var bb bitboard
@@ -129,7 +129,7 @@ func initBBDiagonals() {
 	}
 }
 
-// initializes bbAntiDiagonals
+// initializes bbAntiDiagonals.
 func initBBAntiDiagonals() {
 	for sq := A1; sq <= H8; sq++ {
 		var bb bitboard

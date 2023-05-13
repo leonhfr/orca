@@ -119,7 +119,7 @@ var (
 	promoPieceTypeTable = [58]PieceType{}
 )
 
-// initializes pieceTable
+// initializes pieceTable.
 func initPieceTable() {
 	m := map[rune]Piece{
 		'K': WhiteKing, 'k': BlackKing,
@@ -139,7 +139,7 @@ func initPieceTable() {
 	}
 }
 
-// initializes promoPieceTypeTable
+// initializes promoPieceTypeTable.
 func initPromoPieceTypeTable() {
 	m := map[rune]PieceType{
 		'q': Queen,

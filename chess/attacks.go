@@ -7,7 +7,7 @@ var (
 	bbMagicBishopMoves []bitboard       // bbMagicBishopMoves contains a lookup table of bishop moves indexed by magics.
 )
 
-// initializes bbKingMoves
+// initializes bbKingMoves.
 func initBBKingMoves() {
 	for sq := A1; sq <= H8; sq++ {
 		var bb bitboard
@@ -29,7 +29,7 @@ func initBBKingMoves() {
 	}
 }
 
-// initializes bbKnightMoves
+// initializes bbKnightMoves.
 func initBBKnightMoves() {
 	for sq := A1; sq <= H8; sq++ {
 		var bb bitboard
@@ -51,9 +51,9 @@ func initBBKnightMoves() {
 	}
 }
 
-// initializes rookMoves
+// initializes rookMoves.
 //
-// requires bbFiles, bbRanks, bbDiagonals, bbAntiDiagonals
+// requires bbFiles, bbRanks, bbDiagonals, bbAntiDiagonals.
 func initBBMagicRookMoves() {
 	for sq := A1; sq <= H8; sq++ {
 		moves, _ := slowMoveTable(Rook, sq, rookMagics[sq])
@@ -61,9 +61,9 @@ func initBBMagicRookMoves() {
 	}
 }
 
-// initializes bishopMoves
+// initializes bishopMoves.
 //
-// requires bbFiles, bbRanks, bbDiagonals, bbAntiDiagonals
+// requires bbFiles, bbRanks, bbDiagonals, bbAntiDiagonals.
 func initBBMagicBishopMoves() {
 	for sq := A1; sq <= H8; sq++ {
 		moves, _ := slowMoveTable(Bishop, sq, bishopMagics[sq])

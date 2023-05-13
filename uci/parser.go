@@ -54,7 +54,7 @@ top:
 	return nil
 }
 
-// parseCommandSetOption parses setoption UCI commands
+// parseCommandSetOption parses setoption UCI commands.
 func parseCommandSetOption(command []string) commandSetOption {
 	var c commandSetOption
 	if len(command) >= 4 && command[0] == "name" && command[2] == "value" {
@@ -64,7 +64,7 @@ func parseCommandSetOption(command []string) commandSetOption {
 	return c
 }
 
-// parseCommandPosition parses position UCI commands
+// parseCommandPosition parses position UCI commands.
 func parseCommandPosition(command []string) commandPosition {
 	var c commandPosition
 	var index int
@@ -86,7 +86,7 @@ func parseCommandPosition(command []string) commandPosition {
 	return c
 }
 
-// parseCommandGo parses go UCI commands
+// parseCommandGo parses go UCI commands.
 func parseCommandGo(command []string) commandGo {
 	var c commandGo
 
