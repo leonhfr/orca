@@ -35,3 +35,19 @@ func evaluate(pos *chess.Position) int {
 
 	return (phase*mg + (24-phase)*eg) / 24
 }
+
+// incMateDistance increases the distance to the mate by a count of one.
+//
+// In case of a positive score, it is decreased by 1.
+// In case of a negative score, it is increased by 1.
+func incMateDistance(score int) int {
+	sign := 1
+	if score < 0 {
+		sign = -1
+	}
+	delta := mate - sign*score
+	if delta <= maxPkgDepth {
+		return score - sign
+	}
+	return score
+}

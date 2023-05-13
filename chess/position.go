@@ -159,6 +159,12 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata) {
 	pos.fullMoves = meta.fullMoves()
 }
 
+// InCheck returns whether the current player is in check.
+func (pos *Position) InCheck() bool {
+	bbKing := pos.board.getColor(pos.turn) & pos.board.bbKing
+	return pos.isSquareAttacked(bbKing.scanForward())
+}
+
 // PieceMap executes the callback for each piece on the board, passing the piece
 // and its square as arguments. Intended to be used in evaluation functions.
 func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
