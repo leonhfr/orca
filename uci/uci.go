@@ -1,7 +1,10 @@
 package uci
 
 import (
+	"bufio"
 	"context"
+	"io"
+	"strings"
 
 	"github.com/leonhfr/orca/chess"
 )
@@ -21,4 +24,21 @@ type engine interface {
 	//
 	// Cancelling the context stops the search.
 	Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *Output
+}
+
+// Run runs the program in UCI mode.
+//
+// Run parses command from the reader, executes them with the provided
+// search engine and writes the responses on the writer.
+func Run(ctx context.Context, e engine, r io.Reader, s *State) {
+	for scanner := bufio.NewScanner(r); scanner.Scan(); {
+		c := parse(strings.Fields(scanner.Text()))
+		if c == nil {
+			continue
+		}
+		c.run(ctx, e, s)
+		if _, ok := c.(commandQuit); ok {
+			break
+		}
+	}
 }

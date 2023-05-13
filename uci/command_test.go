@@ -19,7 +19,7 @@ func TestCommandUCI(t *testing.T) {
 	name, author := "NAME", "AUTHOR"
 	e := new(mockEngine)
 	w := &strings.Builder{}
-	s := New(name, author, w)
+	s := NewState(name, author, w)
 
 	expected := concatenateResponses([]response{
 		responseID{name, author},
@@ -33,7 +33,7 @@ func TestCommandUCI(t *testing.T) {
 }
 
 func TestCommandDebug(t *testing.T) {
-	s := New("", "", io.Discard)
+	s := NewState("", "", io.Discard)
 
 	for _, tt := range []bool{true, false} {
 		t.Run(fmt.Sprint(tt), func(t *testing.T) {
@@ -89,7 +89,7 @@ func TestCommandPosition(t *testing.T) {
 		t.Run(tt.want, func(t *testing.T) {
 			e := new(mockEngine)
 			w := &strings.Builder{}
-			s := New("", "", w)
+			s := NewState("", "", w)
 
 			tt.c.run(context.Background(), e, s)
 
@@ -135,7 +135,7 @@ func TestCommandGo(t *testing.T) {
 
 			expected := concatenateResponses(tt.rr)
 			w := newMockWaitWriter(len(expected))
-			s := New("", "", w)
+			s := NewState("", "", w)
 
 			tt.c.run(context.Background(), e, s)
 

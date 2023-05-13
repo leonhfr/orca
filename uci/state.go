@@ -19,8 +19,8 @@ type State struct {
 	stop     chan struct{}
 }
 
-// New creates a new State.
-func New(name, author string, writer io.Writer) *State {
+// NewState creates a new State.
+func NewState(name, author string, writer io.Writer) *State {
 	return &State{
 		name:     name,
 		author:   author,
