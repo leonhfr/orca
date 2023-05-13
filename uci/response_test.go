@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/leonhfr/orca/chess"
-	"github.com/leonhfr/orca/search"
 )
 
 func TestResponseString(t *testing.T) {
@@ -26,7 +25,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info score positive",
 			args: responseOutput{
-				search.Output{
+				Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: 3000,
@@ -39,7 +38,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info score negative",
 			args: responseOutput{
-				search.Output{
+				Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: -3000,
@@ -52,7 +51,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info mate positive",
 			args: responseOutput{
-				search.Output{
+				Output{
 					Depth: 8,
 					Score: 3000,
 					Nodes: 1024,
@@ -66,7 +65,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info mate negative",
 			args: responseOutput{
-				search.Output{
+				Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: -3000,

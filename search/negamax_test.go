@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/leonhfr/orca/chess"
+	"github.com/leonhfr/orca/uci"
 )
 
 var searchTestPositions = []struct {
@@ -44,27 +45,27 @@ var searchTestPositions = []struct {
 
 func TestNegamax(t *testing.T) {
 	results := [5]struct {
-		output Output
+		output uci.Output
 		moves  []string
 	}{
 		{
-			output: Output{0, 1, -mate, 0, nil},
+			output: uci.Output{Depth: 0, Nodes: 1, Score: -mate, Mate: 0, PV: nil},
 			moves:  []string{},
 		},
 		{
-			output: Output{1, 39, mate - 1, 1, nil},
+			output: uci.Output{Depth: 1, Nodes: 39, Score: mate - 1, Mate: 1, PV: nil},
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: Output{1, 1219, mate - 1, 1, nil},
+			output: uci.Output{Depth: 1, Nodes: 1219, Score: mate - 1, Mate: 1, PV: nil},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: Output{3, 4103853, mate - 3, 2, nil},
+			output: uci.Output{Depth: 3, Nodes: 4103853, Score: mate - 3, Mate: 2, PV: nil},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: Output{3, 9561, 549, 0, nil},
+			output: uci.Output{Depth: 3, Nodes: 9561, Score: 549, Mate: 0, PV: nil},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}

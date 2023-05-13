@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/leonhfr/orca/chess"
+	"github.com/leonhfr/orca/uci"
 )
 
 // negamax performs a search using the Negamax algorithm.
 //
 // Negamax is a variant of minimax that relies on the
 // zero-sum property of a two-player game.
-func negamax(ctx context.Context, pos *chess.Position, depth int) (*Output, error) {
+func negamax(ctx context.Context, pos *chess.Position, depth int) (*uci.Output, error) {
 	select {
 	case <-ctx.Done():
 		return nil, context.Canceled
@@ -20,23 +21,23 @@ func negamax(ctx context.Context, pos *chess.Position, depth int) (*Output, erro
 	moves := pos.PseudoMoves()
 	switch inCheck := pos.InCheck(); {
 	case len(moves) == 0 && inCheck:
-		return &Output{
+		return &uci.Output{
 			Nodes: 1,
 			Score: -mate,
 		}, nil
 	case len(moves) == 0:
-		return &Output{
+		return &uci.Output{
 			Nodes: 1,
 			Score: draw,
 		}, nil
 	case depth == 0:
-		return &Output{
+		return &uci.Output{
 			Nodes: 1,
 			Score: evaluate(pos),
 		}, nil
 	}
 
-	result := &Output{
+	result := &uci.Output{
 		Nodes: 1,
 		Depth: depth,
 		Score: -mate,
