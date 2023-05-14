@@ -39,7 +39,7 @@ func (Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-c
 // iterativeSearch performs an iterative search.
 func iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth int, output chan<- *uci.Output) {
 	for depth := 1; depth <= maxDepth; depth++ {
-		o, err := negamax(ctx, pos, depth)
+		o, err := alphaBeta(ctx, pos, -mate, mate, depth)
 		if err != nil {
 			return
 		}
