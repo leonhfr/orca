@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -77,7 +76,6 @@ func TestNegamax(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.NotNil(t, output)
-			fmt.Println(output)
 			assert.Equal(t, want.output.Nodes, output.Nodes)
 			assert.Equal(t, want.output.Score, output.Score)
 			assert.Equal(t, want.moves, movesString(output.PV))
