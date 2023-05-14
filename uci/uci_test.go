@@ -17,7 +17,7 @@ func TestRun(t *testing.T) {
 	w := &strings.Builder{}
 	s := NewState(name, author, w)
 
-	r := strings.NewReader("uci\nfake command\nquit")
+	r := strings.NewReader("uci\nfake command\nquit\n")
 
 	Run(context.Background(), e, r, s)
 	e.AssertExpectations(t)

@@ -31,7 +31,13 @@ type Engine interface {
 // Run parses command from the reader, executes them with the provided
 // search engine and writes the responses on the writer.
 func Run(ctx context.Context, e Engine, r io.Reader, s *State) {
-	for scanner := bufio.NewScanner(r); scanner.Scan(); {
+	// graceful shutdown when context canceled
+	// sending EOF to the UCI scanner by closing the pipeW
+	pipeR, pipeW := io.Pipe()
+	go func() { _, _ = io.Copy(pipeW, r) }()
+	go func() { <-ctx.Done(); pipeW.Close() }()
+
+	for scanner := bufio.NewScanner(pipeR); scanner.Scan(); {
 		c := parse(strings.Fields(scanner.Text()))
 		if c == nil {
 			continue
