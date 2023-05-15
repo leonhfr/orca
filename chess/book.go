@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"sort"
 )
 
 // Book holds the opening book data.
@@ -77,6 +78,11 @@ func (b *Book) Lookup(pos *Position) []WeightedMove {
 			Weight: move.weight,
 		})
 	}
+
+	sort.Slice(weightedMoves, func(i, j int) bool {
+		return weightedMoves[i].Weight > weightedMoves[j].Weight
+	})
+
 	return weightedMoves
 }
 
