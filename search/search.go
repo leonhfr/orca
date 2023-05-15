@@ -3,6 +3,7 @@ package search
 import (
 	"context"
 	"math"
+	"sync"
 
 	"github.com/leonhfr/orca/chess"
 	"github.com/leonhfr/orca/uci"
@@ -18,10 +19,44 @@ const (
 )
 
 // Engine represents the search engine.
-type Engine struct{}
+type Engine struct {
+	once      sync.Once
+	tableSize int
+	table     *transpositionTable
+}
 
-// Search implements the uci.Engine interface.
-func (Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *uci.Output {
+// New creates a new search engine.
+func New() *Engine {
+	return &Engine{
+		tableSize: 64,
+	}
+}
+
+// Init initializes the search engine.
+//
+// Implements the uci.Engine interface.
+func (e *Engine) Init() error {
+	var err error
+	e.once.Do(func() {
+		e.table, err = newTable(e.tableSize)
+	})
+	return err
+}
+
+// Close shuts down the resources used by the search engine.
+//
+// Implements the uci.Engine interface.
+func (e *Engine) Close() {
+	_ = e.Init()
+	e.table.close()
+}
+
+// Search runs a search on the given position until the given depth.
+// Cancelling the context stops the search.
+//
+// Implements the uci.Engine interface.
+func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *uci.Output {
+	_ = e.Init()
 	output := make(chan *uci.Output)
 
 	if maxDepth == 0 || maxDepth > maxPkgDepth {

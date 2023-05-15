@@ -10,6 +10,16 @@ import (
 	"github.com/leonhfr/orca/uci"
 )
 
+func TestInit(t *testing.T) {
+	engine := New()
+	assert.Nil(t, engine.table)
+
+	err := engine.Init()
+
+	assert.Nil(t, err)
+	assert.IsType(t, &transpositionTable{}, engine.table)
+}
+
 func TestSearch(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -30,7 +40,8 @@ func TestSearch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			output := Engine{}.Search(context.Background(), unsafeFEN(tt.fen), tt.depth)
+			engine := New()
+			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth)
 			var outputs []uci.Output
 			for o := range output {
 				outputs = append(outputs, *o)

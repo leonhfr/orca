@@ -71,7 +71,14 @@ func (c commandDebug) run(_ context.Context, _ Engine, s *State) {
 type commandIsReady struct{}
 
 // run implements the command interface.
-func (commandIsReady) run(_ context.Context, _ Engine, _ *State) {
+func (commandIsReady) run(_ context.Context, e Engine, s *State) {
+	go func() {
+		err := e.Init()
+		if err != nil {
+			s.logError(err)
+		}
+		s.respond(responseReadyOK{})
+	}()
 }
 
 // commandSetOption represents a "setoption" command.
@@ -307,11 +314,10 @@ func (commandStop) run(_ context.Context, _ Engine, s *State) {
 type commandQuit struct{}
 
 // run implements the command interface.
-func (commandQuit) run(_ context.Context, _ Engine, s *State) {
-	select {
-	case s.stop <- struct{}{}:
-	default:
-	}
+func (commandQuit) run(ctx context.Context, e Engine, s *State) {
+	commandStop{}.run(ctx, e, s)
+
+	e.Close()
 
 	// prevents future searches and ensures all search routines have been shut down
 	s.mu.Lock()

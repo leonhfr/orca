@@ -18,10 +18,13 @@ type Output struct {
 	PV    []chess.Move // Principal variation, best line found.
 }
 
-// Engine is the interface implemented by the search Engine.
+// Engine is the interface that should be implemented by the search Engine.
 type Engine interface {
+	// Init initializes the search engine.
+	Init() error
+	// Close shuts down the resources used by the search engine.
+	Close()
 	// Search runs a search on the given position until the given depth.
-	//
 	// Cancelling the context stops the search.
 	Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *Output
 }
@@ -32,7 +35,7 @@ type Engine interface {
 // search engine and writes the responses on the writer.
 func Run(ctx context.Context, e Engine, r io.Reader, s *State) {
 	// graceful shutdown when context canceled
-	// sending EOF to the UCI scanner by closing the pipeW
+	// sending EOF to the UCI scanner by closing the pipe
 	pipeR, pipeW := io.Pipe()
 	go func() { _, _ = io.Copy(pipeW, r) }()
 	go func() { <-ctx.Done(); pipeW.Close() }()

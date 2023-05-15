@@ -14,6 +14,7 @@ import (
 func TestRun(t *testing.T) {
 	name, author := "NAME", "AUTHOR"
 	e := new(mockEngine)
+	e.On("Close")
 	w := &strings.Builder{}
 	s := NewState(name, author, w)
 
@@ -24,13 +25,27 @@ func TestRun(t *testing.T) {
 	assert.Equal(t, "id name NAME\nid author AUTHOR\nuciok\n", w.String())
 }
 
-// mockEngine is a mock that implements the engine interface.
+// mockEngine is a mock that implements the Engine interface.
 type mockEngine struct {
 	mock.Mock
 }
 
-// Search implements the engine interface.
-func (m *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *Output {
-	args := m.Called(ctx, pos, maxDepth)
+// Init implements the Engine interface.
+func (me *mockEngine) Init() error {
+	args := me.Called()
+	if err, ok := args.Get(0).(error); ok {
+		return err
+	}
+	return nil
+}
+
+// Init implements the Engine interface.
+func (me *mockEngine) Close() {
+	me.Called()
+}
+
+// Search implements the Engine interface.
+func (me *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *Output {
+	args := me.Called(ctx, pos, maxDepth)
 	return args.Get(0).(chan *Output)
 }

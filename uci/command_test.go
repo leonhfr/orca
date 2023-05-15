@@ -46,6 +46,36 @@ func TestCommandDebug(t *testing.T) {
 	}
 }
 
+func TestCommandIsReady(t *testing.T) {
+	tests := []struct {
+		err  error
+		logs []string
+		rr   []response
+	}{
+		{nil, nil, []response{responseReadyOK{}}},
+		{fmt.Errorf("ERROR"), []string{"info string ERROR"}, []response{responseReadyOK{}}},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			e := new(mockEngine)
+			e.On("Init").Return(tt.err)
+			w := &strings.Builder{}
+			s := NewState("", "", w)
+			want := concatenateResponses(tt.rr)
+			if len(tt.logs) > 0 {
+				want = strings.Join(tt.logs, "\n") + "\n" + want
+			}
+
+			commandIsReady{}.run(context.Background(), e, s)
+			time.Sleep(10 * time.Millisecond)
+
+			e.AssertExpectations(t)
+			assert.Equal(t, want, w.String())
+		})
+	}
+}
+
 func TestCommandPosition(t *testing.T) {
 	tests := []struct {
 		c    commandPosition
@@ -144,6 +174,68 @@ func TestCommandGo(t *testing.T) {
 			assert.Equal(t, expected, w.String())
 		})
 	}
+}
+
+func TestCommandStop(t *testing.T) {
+	e := new(mockEngine)
+	s := NewState("", "", io.Discard)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	var stopCalled bool
+
+	go func() {
+		defer wg.Done()
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-s.stop:
+			stopCalled = true
+		}
+	}()
+
+	time.Sleep(10 * time.Millisecond)
+	commandStop{}.run(context.Background(), e, s)
+	wg.Wait()
+
+	assert.True(t, stopCalled)
+}
+
+func TestCommandQuit(t *testing.T) {
+	e := new(mockEngine)
+	e.On("Close")
+	s := NewState("", "", io.Discard)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	var stopCalled bool
+
+	go func() {
+		defer wg.Done()
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-s.stop:
+			stopCalled = true
+		}
+	}()
+
+	time.Sleep(10 * time.Millisecond)
+	commandQuit{}.run(context.Background(), e, s)
+	wg.Wait()
+
+	e.AssertExpectations(t)
+	assert.True(t, stopCalled)
 }
 
 // concatenateStrings concatenate strings and adds a newline.

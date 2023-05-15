@@ -20,10 +20,11 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
+	e := search.New()
 	s := uci.NewState(
 		fmt.Sprintf("%s v%s", name, version),
 		author,
 		os.Stdout,
 	)
-	uci.Run(ctx, search.Engine{}, os.Stdin, s)
+	uci.Run(ctx, e, os.Stdin, s)
 }
