@@ -51,6 +51,20 @@ func (e *Engine) Close() {
 	e.table.close()
 }
 
+// Options lists the available options.
+//
+// Implements the uci.Engine interface.
+func (e *Engine) Options() []uci.Option {
+	return nil
+}
+
+// SetOption sets an option.
+//
+// Implements the uci.Engine interface.
+func (e *Engine) SetOption(_, _ string) error {
+	return nil
+}
+
 // Search runs a search on the given position until the given depth.
 // Cancelling the context stops the search.
 //

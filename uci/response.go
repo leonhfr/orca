@@ -214,3 +214,90 @@ func (o responseOutput) String() string {
 
 	return fmt.Sprintf("info %s", strings.Join(res, " "))
 }
+
+// Option represents an "option" command.
+//
+// This command tells the GUI which parameters can be changed in the engine.
+// This should be sent once at engine startup after the "uci" and the "id" commands
+// if any parameter can be changed in the engine.
+// The GUI should parse this and build a dialog for the user to change the settings.
+//
+// Note that not every option needs to appear in this dialog as some options like
+// "Ponder", "UCI_AnalyseMode", etc. are better handled elsewhere or are set automatically.
+// If the user wants to change some settings, the GUI will send a "setoption" command to the engine.
+//
+// Note that the GUI need not send the setoption command when starting the engine for every option if
+// it doesn't want to change the default value.
+// For all allowed combinations see the examples below,
+// as some combinations of this tokens don't make sense.
+// One string will be sent for each parameter.
+//
+//	name <id>
+//
+// The option has the name id.
+//
+// Certain options have a fixed value for <id>, which means that the semantics of this option is fixed.
+// Usually those options should not be displayed in the normal engine options window of the GUI but
+// get a special treatment. "Pondering" for example should be set automatically when pondering is
+// enabled or disabled in the GUI options. The same for "UCI_AnalyseMode" which should also be set
+// automatically by the GUI. All those certain options have the prefix "UCI_" except for the
+// first 6 options below. If the GUI gets an unknown Option with the prefix "UCI_", it should just
+// ignore it and not display it in the engine's options dialog.
+//
+//	type <t>
+//
+// The option has type t.
+// There are 5 different types of options the engine can send
+//
+//   - check: a checkbox that can either be true or false
+//
+//   - spin: a spin wheel that can be an integer in a certain range
+//
+//   - combo: a combo box that can have different predefined strings as a value
+//
+//   - button: a button that can be pressed to send a command to the engine
+//
+//   - string: a text field that has a string as a value, an empty string has the value "<empty>"
+//
+//     default <x>
+//
+// The default value of this parameter is x.
+//
+//	min <x>
+//
+// The minimum value of this parameter is x.
+//
+//	max <x>
+//
+// The maximum value of this parameter is x.
+//
+//	var <x>
+//
+// A predefined value of this parameter is x.
+//
+// Examples:
+//
+// Here are 5 strings for each of the 5 possible types of options
+//   - "option name Nullmove type check default true\n"
+//   - "option name Selectivity type spin default 2 min 0 max 4\n"
+//   - "option name Style type combo default Normal var Solid var Normal var Risky\n"
+//   - "option name NalimovPath type string default c:\\n"
+//   - "option name Clear Hash type button\n"
+func (o Option) String() string {
+	switch o.Type {
+	case OptionInteger:
+		var min, max string
+		if len(o.Min) > 0 {
+			min = fmt.Sprintf(" min %s", o.Min)
+		}
+		if len(o.Max) > 0 {
+			max = fmt.Sprintf(" max %s", o.Max)
+		}
+		return fmt.Sprintf(
+			"option name %s type spin default %s%s%s",
+			o.Name, o.Default, min, max,
+		)
+	default:
+		return ""
+	}
+}

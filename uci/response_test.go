@@ -76,6 +76,11 @@ func TestResponseString(t *testing.T) {
 			},
 			want: "info depth 8 nodes 1024 score mate -5 pv b1a3 e6e7 time 5000",
 		},
+		{
+			name: "option integer",
+			args: testOptions[OptionInteger],
+			want: "option name INTEGER OPTION type spin default 32 min 2 max 1024",
+		},
 	}
 
 	for _, tt := range tests {

@@ -2,6 +2,7 @@ package uci
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -18,11 +19,15 @@ import (
 func TestCommandUCI(t *testing.T) {
 	name, author := "NAME", "AUTHOR"
 	e := new(mockEngine)
+	e.On("Options").Return([]Option{
+		testOptions[OptionInteger],
+	})
 	w := &strings.Builder{}
 	s := NewState(name, author, w)
 
 	expected := concatenateResponses([]response{
 		responseID{name, author},
+		testOptions[OptionInteger],
 		responseUCIOK{},
 	})
 
@@ -72,6 +77,44 @@ func TestCommandIsReady(t *testing.T) {
 
 			e.AssertExpectations(t)
 			assert.Equal(t, want, w.String())
+		})
+	}
+}
+
+func TestCommandSetOption(t *testing.T) {
+	type args struct {
+		cmd commandSetOption
+		err error
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			"valid option",
+			args{commandSetOption{"NAME", "VALUE"}, nil},
+			[]string{},
+		},
+		{
+			"invalid option",
+			args{commandSetOption{"NAME", "VALUE"}, errors.New("ERROR")},
+			[]string{"info string ERROR"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := new(mockEngine)
+			e.On("SetOption", tt.args.cmd.name, tt.args.cmd.value).Return(tt.args.err)
+			w := &strings.Builder{}
+			s := NewState("", "", w)
+
+			commandSetOption{tt.args.cmd.name, tt.args.cmd.value}.run(context.Background(), e, s)
+
+			e.AssertExpectations(t)
+			assert.Equal(t, concatenateStrings(tt.want), w.String())
 		})
 	}
 }

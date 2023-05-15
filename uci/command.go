@@ -28,11 +28,15 @@ type command interface {
 type commandUCI struct{}
 
 // run implements the command interface.
-func (commandUCI) run(_ context.Context, _ Engine, s *State) {
+func (commandUCI) run(_ context.Context, e Engine, s *State) {
 	s.respond(responseID{
 		name:   s.name,
 		author: s.author,
 	})
+
+	for _, option := range e.Options() {
+		s.respond(option)
+	}
 
 	s.respond(responseUCIOK{})
 }
@@ -105,7 +109,10 @@ type commandSetOption struct {
 }
 
 // run implements the command interface.
-func (c commandSetOption) run(_ context.Context, _ Engine, _ *State) {
+func (c commandSetOption) run(_ context.Context, e Engine, s *State) {
+	if err := e.SetOption(c.name, c.value); err != nil {
+		s.logError(err)
+	}
 }
 
 // commandUCINewGame represents a "ucinewgame" command.
