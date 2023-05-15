@@ -22,12 +22,12 @@ func TestWithTableSize(t *testing.T) {
 
 func TestInit(t *testing.T) {
 	engine := New()
-	assert.Nil(t, engine.table)
+	assert.Equal(t, noTable{}, engine.table)
 
 	err := engine.Init()
 
 	assert.Nil(t, err)
-	assert.IsType(t, &transpositionTable{}, engine.table)
+	assert.IsType(t, &ristrettoTable{}, engine.table)
 }
 
 func TestOptions(t *testing.T) {

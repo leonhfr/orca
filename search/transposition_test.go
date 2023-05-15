@@ -12,8 +12,8 @@ import (
 
 var wait = 10 * time.Millisecond
 
-func TestNewTable(t *testing.T) {
-	table, err := newTable(1)
+func TestNewRistrettoTable(t *testing.T) {
+	table, err := newRistrettoTable(1)
 	defer table.close()
 
 	require.Nil(t, err)
@@ -23,7 +23,7 @@ func TestNewTable(t *testing.T) {
 func TestTableGet(t *testing.T) {
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
-	table, err := newTable(1)
+	table, err := newRistrettoTable(1)
 	defer table.close()
 
 	require.Nil(t, err)
@@ -40,10 +40,9 @@ func TestTableSet(t *testing.T) {
 		score:    rand.Int(),
 		depth:    rand.Int(),
 		nodeType: exact,
-		best:     true,
 	}
 
-	table, err := newTable(1)
+	table, err := newRistrettoTable(1)
 	defer table.close()
 
 	require.Nil(t, err)

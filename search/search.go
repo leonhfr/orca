@@ -22,12 +22,14 @@ const (
 type Engine struct {
 	once      sync.Once
 	tableSize int
-	table     *transpositionTable
+	table     transpositionTable
 }
 
 // New creates a new search engine.
 func New(options ...func(*Engine)) *Engine {
-	e := &Engine{}
+	e := &Engine{
+		table: noTable{},
+	}
 	for _, o := range availableOptions {
 		o.defaultFunc()(e)
 	}
@@ -50,7 +52,7 @@ func WithTableSize(size int) func(*Engine) {
 func (e *Engine) Init() error {
 	var err error
 	e.once.Do(func() {
-		e.table, err = newTable(e.tableSize)
+		e.table, err = newRistrettoTable(e.tableSize)
 	})
 	return err
 }
