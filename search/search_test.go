@@ -10,6 +10,16 @@ import (
 	"github.com/leonhfr/orca/uci"
 )
 
+func TestNew(t *testing.T) {
+	e := New()
+	assert.Equal(t, 64, e.tableSize)
+}
+
+func TestWithTableSize(t *testing.T) {
+	e := New(WithTableSize(128))
+	assert.Equal(t, 128, e.tableSize)
+}
+
 func TestInit(t *testing.T) {
 	engine := New()
 	assert.Nil(t, engine.table)
@@ -18,6 +28,55 @@ func TestInit(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.IsType(t, &transpositionTable{}, engine.table)
+}
+
+func TestOptions(t *testing.T) {
+	e := New()
+	options := e.Options()
+	assert.Equal(t, []uci.Option{
+		{
+			Type:    uci.OptionInteger,
+			Name:    "Hash",
+			Default: "64",
+			Min:     "1",
+			Max:     "16384",
+		},
+	}, options)
+}
+
+func TestSetOption(t *testing.T) {
+	type args struct {
+		name, value string
+		tableSize   int
+		err         error
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			"option exists",
+			args{"Hash", "128", 128, nil},
+		},
+		{
+			"option outside bounds",
+			args{"Hash", "0", 64, errOutsideBound},
+		},
+		{
+			"option does not exist",
+			args{"Whatever", "Whatever", 64, errOptionName},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := New()
+			err := e.SetOption(tt.args.name, tt.args.value)
+			assert.Equal(t, tt.args.tableSize, e.tableSize)
+			assert.Equal(t, tt.args.err, err)
+		})
+	}
 }
 
 func TestSearch(t *testing.T) {

@@ -26,9 +26,21 @@ type Engine struct {
 }
 
 // New creates a new search engine.
-func New() *Engine {
-	return &Engine{
-		tableSize: 64,
+func New(options ...func(*Engine)) *Engine {
+	e := &Engine{}
+	for _, o := range availableOptions {
+		o.defaultFunc()(e)
+	}
+	for _, fn := range options {
+		fn(e)
+	}
+	return e
+}
+
+// WithTableSize sets the size of the transposition table in MB.
+func WithTableSize(size int) func(*Engine) {
+	return func(e *Engine) {
+		e.tableSize = size
 	}
 }
 
@@ -55,14 +67,29 @@ func (e *Engine) Close() {
 //
 // Implements the uci.Engine interface.
 func (e *Engine) Options() []uci.Option {
-	return nil
+	options := make([]uci.Option, len(availableOptions))
+	for i, option := range availableOptions {
+		options[i] = option.uci()
+	}
+	return options
 }
 
 // SetOption sets an option.
 //
 // Implements the uci.Engine interface.
-func (e *Engine) SetOption(_, _ string) error {
-	return nil
+func (e *Engine) SetOption(name, value string) error {
+	for _, option := range availableOptions {
+		if option.String() == name {
+			fn, err := option.optionFunc(value)
+			if err != nil {
+				return err
+			}
+			fn(e)
+			return nil
+		}
+	}
+
+	return errOptionName
 }
 
 // Search runs a search on the given position until the given depth.
