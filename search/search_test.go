@@ -103,7 +103,7 @@ func TestSearch(t *testing.T) {
 			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth)
 			var outputs []uci.Output
 			for o := range output {
-				outputs = append(outputs, *o)
+				outputs = append(outputs, o)
 			}
 
 			assert.Equal(t, tt.oo, outputs)

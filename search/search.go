@@ -98,9 +98,9 @@ func (e *Engine) SetOption(name, value string) error {
 // Cancelling the context stops the search.
 //
 // Implements the uci.Engine interface.
-func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *uci.Output {
+func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan uci.Output {
 	_ = e.Init()
-	output := make(chan *uci.Output)
+	output := make(chan uci.Output)
 
 	if maxDepth == 0 || maxDepth > maxPkgDepth {
 		maxDepth = maxPkgDepth
@@ -115,7 +115,7 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 }
 
 // iterativeSearch performs an iterative search.
-func iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth int, output chan<- *uci.Output) {
+func iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth int, output chan<- uci.Output) {
 	for depth := 1; depth <= maxDepth; depth++ {
 		o, err := alphaBeta(ctx, pos, -mate, mate, depth)
 		if err != nil {

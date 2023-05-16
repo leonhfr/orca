@@ -177,17 +177,17 @@ func TestCommandGo(t *testing.T) {
 	m1 := chess.Move(chess.B1) ^ chess.Move(chess.A3)<<6 ^ chess.Move(chess.NoPiece)<<20
 	m2 := chess.Move(chess.E6) ^ chess.Move(chess.E7)<<6 ^ chess.Move(chess.NoPiece)<<20
 
-	output1 := &Output{Score: 1000, PV: []chess.Move{m1}}
-	output2 := &Output{Score: 2000, PV: []chess.Move{m1, m2}}
+	output1 := Output{Score: 1000, PV: []chess.Move{m1}}
+	output2 := Output{Score: 2000, PV: []chess.Move{m1, m2}}
 
 	tests := []struct {
 		c  commandGo
-		oo []*Output
+		oo []Output
 		rr []response
 	}{
 		{
 			commandGo{},
-			[]*Output{output1, output2},
+			[]Output{output1, output2},
 			[]response{
 				responseOutput{Output: output1, time: 1 * time.Nanosecond},
 				responseOutput{Output: output2, time: 1 * time.Nanosecond},
@@ -199,7 +199,7 @@ func TestCommandGo(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
 			e := new(mockEngine)
-			oc := make(chan *Output, len(tt.oo))
+			oc := make(chan Output, len(tt.oo))
 			for _, o := range tt.oo {
 				oc <- o
 			}

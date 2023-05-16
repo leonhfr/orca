@@ -11,33 +11,33 @@ import (
 //
 // Negamax is a variant of minimax that relies on the
 // zero-sum property of a two-player game.
-func negamax(ctx context.Context, pos *chess.Position, depth int) (*uci.Output, error) {
+func negamax(ctx context.Context, pos *chess.Position, depth int) (uci.Output, error) {
 	select {
 	case <-ctx.Done():
-		return nil, context.Canceled
+		return uci.Output{}, context.Canceled
 	default:
 	}
 
 	moves := pos.PseudoMoves()
 	switch inCheck := pos.InCheck(); {
 	case len(moves) == 0 && inCheck:
-		return &uci.Output{
+		return uci.Output{
 			Nodes: 1,
 			Score: -mate,
 		}, nil
 	case len(moves) == 0:
-		return &uci.Output{
+		return uci.Output{
 			Nodes: 1,
 			Score: draw,
 		}, nil
 	case depth == 0:
-		return &uci.Output{
+		return uci.Output{
 			Nodes: 1,
 			Score: evaluate(pos),
 		}, nil
 	}
 
-	result := &uci.Output{
+	result := uci.Output{
 		Nodes: 1,
 		Depth: depth,
 		Score: -mate,
@@ -54,7 +54,7 @@ func negamax(ctx context.Context, pos *chess.Position, depth int) (*uci.Output, 
 
 		current, err := negamax(ctx, pos, depth-1)
 		if err != nil {
-			return nil, err
+			return uci.Output{}, err
 		}
 
 		result.Nodes += current.Nodes

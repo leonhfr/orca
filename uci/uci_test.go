@@ -61,9 +61,9 @@ func (me *mockEngine) SetOption(name, value string) error {
 }
 
 // Search implements the Engine interface.
-func (me *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan *Output {
+func (me *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan Output {
 	args := me.Called(ctx, pos, maxDepth)
-	return args.Get(0).(chan *Output)
+	return args.Get(0).(chan Output)
 }
 
 // testOptions contains test options.
