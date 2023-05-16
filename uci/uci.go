@@ -59,7 +59,10 @@ type Output struct {
 // OptionType represent an option type.
 type OptionType uint8
 
-const OptionInteger OptionType = iota // OptionInteger represents an integer option.
+const (
+	OptionInteger OptionType = iota // OptionInteger represents an integer option.
+	OptionBoolean                   // OptionInteger represents a boolean option.
+)
 
 // Option represents an available option.
 //

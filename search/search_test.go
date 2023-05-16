@@ -20,6 +20,11 @@ func TestWithTableSize(t *testing.T) {
 	assert.Equal(t, 128, e.tableSize)
 }
 
+func TestWithOwnBook(t *testing.T) {
+	e := New(WithOwnBook(true))
+	assert.True(t, e.ownBook)
+}
+
 func TestInit(t *testing.T) {
 	engine := New()
 	assert.Equal(t, noTable{}, engine.table)
@@ -40,6 +45,11 @@ func TestOptions(t *testing.T) {
 			Default: "64",
 			Min:     "1",
 			Max:     "16384",
+		},
+		{
+			Type:    uci.OptionBoolean,
+			Name:    "OwnBook",
+			Default: "false",
 		},
 	}, options)
 }

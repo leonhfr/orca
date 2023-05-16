@@ -75,4 +75,9 @@ var testOptions = []Option{
 		Min:     "2",
 		Max:     "1024",
 	},
+	{
+		Type:    OptionBoolean,
+		Name:    "BOOLEAN OPTION",
+		Default: "false",
+	},
 }

@@ -23,6 +23,7 @@ const (
 //nolint:govet
 type Engine struct {
 	once      sync.Once
+	ownBook   bool
 	tableSize int
 	table     transpositionTable
 }
@@ -45,6 +46,13 @@ func New(options ...func(*Engine)) *Engine {
 func WithTableSize(size int) func(*Engine) {
 	return func(e *Engine) {
 		e.tableSize = size
+	}
+}
+
+// WithOwnBook determines the use of the search engine's own opening book.
+func WithOwnBook(on bool) func(*Engine) {
+	return func(e *Engine) {
+		e.ownBook = on
 	}
 }
 

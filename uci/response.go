@@ -297,6 +297,11 @@ func (o Option) String() string {
 			"option name %s type spin default %s%s%s",
 			o.Name, o.Default, min, max,
 		)
+	case OptionBoolean:
+		return fmt.Sprintf(
+			"option name %s type check default %s",
+			o.Name, o.Default,
+		)
 	default:
 		return ""
 	}

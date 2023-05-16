@@ -10,7 +10,7 @@ import (
 
 var (
 	// availableOptions holds all the search engine available options.
-	availableOptions = []option{tableSizeOption}
+	availableOptions = []option{tableSizeOption, ownBookOption}
 
 	// tableSizeOption represents the size of the transposition hash table.
 	tableSizeOption = optionInteger{
@@ -19,6 +19,13 @@ var (
 		min:  1,
 		max:  16 * 1024,
 		fn:   WithTableSize,
+	}
+
+	// ownBook represents whether the search engine should use its own opening book.
+	ownBookOption = optionBoolean{
+		name: "OwnBook",
+		def:  false,
+		fn:   WithOwnBook,
 	}
 
 	errOptionName   = errors.New("option name not found")
@@ -75,4 +82,42 @@ func (o optionInteger) optionFunc(value string) (func(*Engine), error) {
 	}
 
 	return o.fn(int(v)), nil
+}
+
+// optionBoolean represents a boolean option.
+//
+//nolint:govet
+type optionBoolean struct {
+	name string
+	def  bool
+	fn   func(bool) func(*Engine)
+}
+
+// String implements the option interface.
+func (o optionBoolean) String() string {
+	return o.name
+}
+
+// uci implements the option interface.
+func (o optionBoolean) uci() uci.Option {
+	return uci.Option{
+		Type:    uci.OptionBoolean,
+		Name:    o.name,
+		Default: fmt.Sprint(o.def),
+	}
+}
+
+// defaultFunc implements the option interface.
+func (o optionBoolean) defaultFunc() func(*Engine) {
+	return o.fn(o.def)
+}
+
+// optionFunc implements the option interface.
+func (o optionBoolean) optionFunc(value string) (func(*Engine), error) {
+	v, err := strconv.ParseBool(value)
+	if err != nil {
+		return func(e *Engine) {}, err
+	}
+
+	return o.fn(v), nil
 }

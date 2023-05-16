@@ -66,3 +66,59 @@ func TestOptionIntegerOptionFunc(t *testing.T) {
 		})
 	}
 }
+
+func TestOptionBooleanString(t *testing.T) {
+	assert.Equal(t, ownBookOption.name, ownBookOption.String())
+}
+
+func TestOptionBooleanUCI(t *testing.T) {
+	assert.Equal(t, uci.Option{
+		Type:    uci.OptionBoolean,
+		Name:    ownBookOption.name,
+		Default: fmt.Sprint(ownBookOption.def),
+	}, ownBookOption.uci())
+}
+
+// optionBoolean.defaultFunc tested in New
+
+func TestOptionBooleanOptionFunc(t *testing.T) {
+	type want struct {
+		value bool
+		err   string
+	}
+
+	tests := []struct {
+		name string
+		args string
+		want want
+	}{
+		{
+			name: "value cannot be parsed as bool",
+			args: "foobar",
+			want: want{false, "strconv.ParseBool: parsing \"foobar\": invalid syntax"},
+		},
+		{
+			name: "true",
+			args: "true",
+			want: want{true, ""},
+		},
+		{
+			name: "false",
+			args: "false",
+			want: want{false, ""},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fn, err := ownBookOption.optionFunc(tt.args)
+			if err != nil {
+				assert.Equal(t, tt.want.err, err.Error())
+			}
+
+			e := New()
+			fn(e)
+			assert.Equal(t, tt.want.value, e.ownBook)
+		})
+	}
+}
