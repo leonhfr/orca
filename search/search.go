@@ -110,16 +110,16 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 
 	go func() {
 		defer close(output)
-		iterativeSearch(ctx, pos, maxDepth, output)
+		e.iterativeSearch(ctx, pos, maxDepth, output)
 	}()
 
 	return output
 }
 
 // iterativeSearch performs an iterative search.
-func iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth int, output chan<- uci.Output) {
+func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth int, output chan<- uci.Output) {
 	for depth := 1; depth <= maxDepth; depth++ {
-		o, err := alphaBeta(ctx, pos, -mate, mate, depth)
+		o, err := e.alphaBeta(ctx, pos, -mate, mate, depth)
 		if err != nil {
 			return
 		}

@@ -9,11 +9,34 @@ import (
 
 // alphaBeta performs a search using the Negamax algorithm
 // and alpha-beta pruning.
-func alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta, depth int) (uci.Output, error) {
+func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta, depth int) (uci.Output, error) {
 	select {
 	case <-ctx.Done():
 		return uci.Output{}, context.Canceled
 	default:
+	}
+
+	alphaOriginal := alpha
+	cached, ok := e.table.get(pos.Hash())
+	if ok && cached.depth >= depth {
+		switch {
+		case cached.nodeType == exact:
+			return uci.Output{
+				Nodes: 1,
+				Score: cached.score,
+			}, nil
+		case cached.nodeType == lowerBound && cached.score > alpha:
+			alpha = cached.score
+		case cached.nodeType == upperBound && cached.score < beta:
+			beta = cached.score
+		}
+
+		if alpha >= beta {
+			return uci.Output{
+				Nodes: 1,
+				Score: cached.score,
+			}, nil
+		}
 	}
 
 	moves := pos.PseudoMoves()
@@ -52,7 +75,7 @@ func alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta, depth int)
 		}
 		validMoves++
 
-		current, err := alphaBeta(ctx, pos, -beta, -alpha, depth-1)
+		current, err := e.alphaBeta(ctx, pos, -beta, -alpha, depth-1)
 		if err != nil {
 			return uci.Output{}, err
 		}
@@ -79,5 +102,19 @@ func alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta, depth int)
 		result.Nodes--
 		result.Score = incMateDistance(result.Score)
 	}
+
+	nodeType := exact
+	switch {
+	case result.Score <= alphaOriginal:
+		nodeType = upperBound
+	case result.Score >= beta:
+		nodeType = lowerBound
+	}
+	e.table.set(pos.Hash(), tableEntry{
+		score:    result.Score,
+		depth:    result.Depth,
+		nodeType: nodeType,
+	})
+
 	return result, nil
 }

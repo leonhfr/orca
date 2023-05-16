@@ -36,11 +36,12 @@ func TestAlphaBeta(t *testing.T) {
 		},
 	}
 
+	e := New()
 	for i, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
 			res := results[i]
 			pos := unsafeFEN(tt.fen)
-			output, err := alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
+			output, err := e.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
 
 			assert.Equal(t, res.output.Nodes, output.Nodes)
 			assert.Equal(t, res.output.Score, output.Score)
@@ -51,11 +52,41 @@ func TestAlphaBeta(t *testing.T) {
 }
 
 func BenchmarkAlphaBeta(b *testing.B) {
+	e := New()
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {
-				_, _ = alphaBeta(context.Background(), pos, -mate, mate, bb.depth)
+				_, _ = e.alphaBeta(context.Background(), pos, -mate, mate, bb.depth)
+			}
+		})
+	}
+}
+
+func BenchmarkCachedAlphaBeta(b *testing.B) {
+	fen := "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"
+	depth := 5
+
+	benchs := []struct {
+		name   string
+		cached bool
+	}{
+		{"not cached", false},
+		{"cached", true},
+	}
+
+	for _, bb := range benchs {
+		b.Run(bb.name, func(b *testing.B) {
+			b.StopTimer()
+			e := New()
+			if bb.cached {
+				_ = e.Init()
+			}
+			b.StartTimer()
+
+			for n := 0; n < b.N; n++ {
+				pos := unsafeFEN(fen)
+				_, _ = e.alphaBeta(context.Background(), pos, -mate, mate, depth)
 			}
 		})
 	}
