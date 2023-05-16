@@ -34,6 +34,8 @@ type option interface {
 }
 
 // optionInteger represents an integer option.
+//
+//nolint:govet
 type optionInteger struct {
 	name          string
 	def, min, max int

@@ -146,8 +146,8 @@ func (commandUCINewGame) run(_ context.Context, _ Engine, _ *State) {
 // the last position sent to the engine, the GUI should have sent a "ucinewgame" in between.
 type commandPosition struct {
 	fen      string
-	startPos bool
 	moves    []string
+	startPos bool
 }
 
 // run implements the command interface.
@@ -246,6 +246,8 @@ func (c commandPosition) run(_ context.Context, _ Engine, s *State) {
 //	infinite
 //
 // Search until the "stop" command. Do not exit the search without being told so in this mode!
+//
+//nolint:govet
 type commandGo struct {
 	whiteTime      time.Duration // White has <x> ms left on the clock.
 	blackTime      time.Duration // Black has <x> ms left on the clock.

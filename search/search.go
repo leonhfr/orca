@@ -19,6 +19,8 @@ const (
 )
 
 // Engine represents the search engine.
+//
+//nolint:govet
 type Engine struct {
 	once      sync.Once
 	tableSize int

@@ -49,11 +49,11 @@ func Run(ctx context.Context, e Engine, r io.Reader, s *State) {
 
 // Output holds a search output.
 type Output struct {
+	PV    []chess.Move // Principal variation, best line found.
 	Depth int          // Search depth in plies.
 	Nodes int          // Number of nodes searched.
 	Score int          // Score from the engine's point of view in centipawns.
 	Mate  int          // Number of moves before mate. Positive for the current player to mate, negative for the current player to be mated.
-	PV    []chess.Move // Principal variation, best line found.
 }
 
 // OptionType represent an option type.
@@ -62,6 +62,8 @@ type OptionType uint8
 const OptionInteger OptionType = iota // OptionInteger represents an integer option.
 
 // Option represents an available option.
+//
+//nolint:govet
 type Option struct {
 	Type    OptionType
 	Name    string

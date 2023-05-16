@@ -9,6 +9,8 @@ import (
 )
 
 // State contains the UCI engine's state.
+//
+//nolint:govet
 type State struct {
 	name     string
 	author   string

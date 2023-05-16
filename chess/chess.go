@@ -151,12 +151,12 @@ func (pos *Position) isSquareAttacked(sq Square) bool {
 // Checks that the king does not leave, cross over, or finish on
 // s square attacked by an enemy piece.
 func (pos *Position) isCastleLegal(m Move) bool {
-	side := kingSide
+	s := kingSide
 	if m.HasTag(QueenSideCastle) {
-		side = queenSide
+		s = queenSide
 	}
 	bbOpponent := pos.board.getColor(pos.turn.other())
-	cc := castleChecks[2*uint8(pos.turn)+uint8(side)]
+	cc := castleChecks[2*uint8(pos.turn)+uint8(s)]
 
 	if cc.bbPawn&pos.board.bbPawn&bbOpponent > 0 ||
 		cc.bbKnight&pos.board.bbKnight&bbOpponent > 0 ||
