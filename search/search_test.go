@@ -91,32 +91,49 @@ func TestSetOption(t *testing.T) {
 
 func TestSearch(t *testing.T) {
 	tests := []struct {
-		name  string
-		fen   string
-		depth int
-		oo    []uci.Output
+		name    string
+		fen     string
+		depth   int
+		book    bool
+		outputs []uci.Output
 	}{
 		{
 			name:  "mate in 2",
 			fen:   "r1b1kb1r/pppp1ppp/2n1pq2/8/3Pn2N/2P3P1/PP1NPP1P/R1BQKB1R b KQkq - 3 6",
 			depth: 2,
-			oo: []uci.Output{
+			outputs: []uci.Output{
 				{Depth: 1, Nodes: 46, Score: 357, Mate: 0, PV: []chess.Move{0x2c322dc}},
 				{Depth: 2, Nodes: 58, Score: 9223372036854775806, Mate: 1, PV: []chess.Move{0x2c1836d}},
 			},
+		},
+		{
+			name:    "lasker trap without opening book",
+			fen:     "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
+			depth:   2,
+			outputs: []uci.Output{{PV: []chess.Move{0x2c106a3}, Depth: 1, Nodes: 34, Score: 38, Mate: 0}, {PV: []chess.Move{0x1cc3481, 0x2c106a3}, Depth: 2, Nodes: 64, Score: 5, Mate: 0}},
+		},
+		{
+			name:    "lasker trap with opening book",
+			fen:     "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
+			depth:   2,
+			book:    true,
+			outputs: []uci.Output{{PV: []chess.Move{0x1cc2b7e}, Depth: 1, Nodes: 1, Score: 1, Mate: 0}},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			engine := New()
+			if tt.book {
+				engine.ownBook = true
+			}
 			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth)
 			var outputs []uci.Output
 			for o := range output {
 				outputs = append(outputs, o)
 			}
 
-			assert.Equal(t, tt.oo, outputs)
+			assert.Equal(t, tt.outputs, outputs)
 		})
 	}
 }

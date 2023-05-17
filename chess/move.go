@@ -40,7 +40,7 @@ const (
 type Move uint32
 
 // NullMove represents a null move.
-const NullMove = 1 << 30
+const NullMove Move = 0
 
 // newMove creates a new move.
 func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {

@@ -1,11 +1,14 @@
 package search
 
 import (
+	"bytes"
 	"context"
 	"math"
+	"math/rand"
 	"sync"
 
 	"github.com/leonhfr/orca/chess"
+	books "github.com/leonhfr/orca/data/books"
 	"github.com/leonhfr/orca/uci"
 )
 
@@ -22,6 +25,7 @@ const (
 //
 //nolint:govet
 type Engine struct {
+	book      *chess.Book
 	once      sync.Once
 	ownBook   bool
 	tableSize int
@@ -31,6 +35,7 @@ type Engine struct {
 // New creates a new search engine.
 func New(options ...func(*Engine)) *Engine {
 	e := &Engine{
+		book:  chess.NewBook(),
 		table: noTable{},
 	}
 	for _, o := range availableOptions {
@@ -62,6 +67,10 @@ func WithOwnBook(on bool) func(*Engine) {
 func (e *Engine) Init() error {
 	var err error
 	e.once.Do(func() {
+		performance := bytes.NewReader(books.Performance)
+		if err = e.book.Init(performance); err != nil {
+			return
+		}
 		e.table, err = newRistrettoTable(e.tableSize)
 	})
 	return err
@@ -112,12 +121,24 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 	_ = e.Init()
 	output := make(chan uci.Output)
 
-	if maxDepth == 0 || maxDepth > maxPkgDepth {
-		maxDepth = maxPkgDepth
-	}
-
 	go func() {
 		defer close(output)
+
+		if e.ownBook {
+			if moves := e.book.Lookup(pos); len(moves) > 0 {
+				if move := weightedRandomMove(moves); move != chess.NullMove {
+					output <- uci.Output{
+						PV:    []chess.Move{move},
+						Depth: 1,
+						Nodes: 1,
+						Score: 1,
+					}
+
+					return
+				}
+			}
+		}
+
 		e.iterativeSearch(ctx, pos, maxDepth, output)
 	}()
 
@@ -126,6 +147,10 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 
 // iterativeSearch performs an iterative search.
 func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth int, output chan<- uci.Output) {
+	if maxDepth <= 0 || maxDepth > maxPkgDepth {
+		maxDepth = maxPkgDepth
+	}
+
 	for depth := 1; depth <= maxDepth; depth++ {
 		o, err := e.alphaBeta(ctx, pos, -mate, mate, depth)
 		if err != nil {
@@ -134,6 +159,25 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 		o.Mate = mateIn(o.Score)
 		output <- o
 	}
+}
+
+// weightedRandomMove randomly selects a move with weighted probabilities.
+func weightedRandomMove(moves []chess.WeightedMove) chess.Move {
+	var sum int
+	for _, move := range moves {
+		sum += move.Weight
+	}
+	if sum <= 0 {
+		return chess.NullMove
+	}
+	index := rand.Intn(sum) //nolint:gosec
+	for _, move := range moves {
+		if index < move.Weight {
+			return move.Move
+		}
+		index -= move.Weight
+	}
+	return chess.NullMove
 }
 
 // mateIn returns the number of moves before mate.
