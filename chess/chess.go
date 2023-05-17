@@ -22,7 +22,7 @@ func (pos *Position) PseudoMoves() []Move {
 	bbPawn := pos.board.bbPawn & bbPlayer
 
 	// Castles
-	for _, s := range []side{kingSide, queenSide} {
+	for _, s := range [2]side{kingSide, queenSide} {
 		data := castles[2*uint8(player)+uint8(s)]
 		if pos.castlingRights.canCastle(player, s) && bbOccupancy&data.bbTravel == 0 {
 			moves = append(moves, newMove(King.color(player), NoPiece, data.s1, data.s2, NoSquare, NoPiece))
@@ -31,7 +31,7 @@ func (pos *Position) PseudoMoves() []Move {
 
 	// Pawn moves
 	bbUpOne, bbUpTwo := pawnMoveBitboard(bbPawn, bbOccupancy, player)
-	for _, dest := range []bbDir{
+	for _, dest := range [2]bbDir{
 		{bbUpOne, upOne},
 		{bbUpTwo, upTwo},
 	} {
@@ -54,7 +54,7 @@ func (pos *Position) PseudoMoves() []Move {
 	// Pawn Captures
 	bbCaptureR, bbCaptureL := pawnCaptureBitboard(bbPawn, player)
 	bbEnPassant := pos.enPassant.bitboard()
-	for _, dest := range []bbDir{
+	for _, dest := range [2]bbDir{
 		{bbCaptureR & (bbOpponent | bbEnPassant), captureR},
 		{bbCaptureL & (bbOpponent | bbEnPassant), captureL},
 	} {
@@ -73,12 +73,11 @@ func (pos *Position) PseudoMoves() []Move {
 			} else {
 				moves = append(moves, newMove(pawn, p2, s1, s2, pos.enPassant, NoPiece))
 			}
-
 		}
 	}
 
 	// Other pieces
-	for _, origin := range []bbPt{
+	for _, origin := range [5]bbPt{
 		{Knight, bbPlayer & pos.board.bbKnight},
 		{Bishop, bbPlayer & pos.board.bbBishop},
 		{Rook, bbPlayer & pos.board.bbRook},
@@ -88,7 +87,7 @@ func (pos *Position) PseudoMoves() []Move {
 		p1 := origin.pt.color(player)
 		for ; origin.bb > 0; origin.bb = origin.bb.resetLSB() {
 			s1 := origin.bb.scanForward()
-			for bbs2 := pieceBitboard(s1, p1.Type(), bbOccupancy) & ^bbPlayer; bbs2 > 0; bbs2 = bbs2.resetLSB() {
+			for bbs2 := pieceBitboard(s1, origin.pt, bbOccupancy) & ^bbPlayer; bbs2 > 0; bbs2 = bbs2.resetLSB() {
 				s2, p2 := bbs2.scanForward(), NoPiece
 				if s2.bitboard()&bbOpponent > 0 {
 					p2 = pos.board.pieceByColor(s2, opponent)
