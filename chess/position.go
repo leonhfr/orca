@@ -97,11 +97,8 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 			return NoMetadata, false
 		}
 	default:
-		bb := bbFiles[m.S1()] | bbRanks[m.S1()] | bbDiagonals[m.S1()] | bbAntiDiagonals[m.S1()]
-		if bb&pos.board.bbKing&pos.board.getColor(pos.turn) > 0 {
-			if pos.isDiscoveredCheck(m) {
-				return NoMetadata, false
-			}
+		if pos.isDiscoveredCheck(m) {
+			return NoMetadata, false
 		}
 	}
 

@@ -51,7 +51,7 @@ func (pos *Position) PseudoMoves() []Move {
 		}
 	}
 
-	// Pawn Captures
+	// Pawn captures
 	bbCaptureR, bbCaptureL := pawnCaptureBitboard(bbPawn, player)
 	bbEnPassant := pos.enPassant.bitboard()
 	for _, dest := range [2]bbDir{
@@ -92,7 +92,74 @@ func (pos *Position) PseudoMoves() []Move {
 				if s2.bitboard()&bbOpponent > 0 {
 					p2 = pos.board.pieceByColor(s2, opponent)
 				}
-				moves = append(moves, newMove(p1, p2, s1, s2, pos.enPassant, NoPiece))
+				moves = append(moves, newMove(p1, p2, s1, s2, NoSquare, NoPiece))
+			}
+		}
+	}
+
+	return moves
+}
+
+// LoudMoves returns the list of pseudo loud moves.
+// Loud moves are moves that capture an opponent piece.
+//
+// Some moves may be putting the moving player's king in check and therefore be illegal.
+func (pos *Position) LoudMoves() []Move {
+	moves := make([]Move, 0, 20)
+
+	// Setting up variables
+	player, opponent := pos.turn, pos.turn.other()
+	pawn := WhitePawn
+	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	bbPlayer, bbOpponent := pos.board.bbWhite, pos.board.bbBlack
+	captureR, captureL := northEast, northWest
+	if pos.turn == Black {
+		pawn = BlackPawn
+		bbPlayer, bbOpponent = pos.board.bbBlack, pos.board.bbWhite
+		captureR, captureL = southEast, southWest
+	}
+	bbPawn := pos.board.bbPawn & bbPlayer
+
+	// Pawn captures
+	bbCaptureR, bbCaptureL := pawnCaptureBitboard(bbPawn, player)
+	bbEnPassant := pos.enPassant.bitboard()
+	for _, dest := range [2]bbDir{
+		{bbCaptureR & (bbOpponent | bbEnPassant), captureR},
+		{bbCaptureL & (bbOpponent | bbEnPassant), captureL},
+	} {
+		for ; dest.bb > 0; dest.bb = dest.bb.resetLSB() {
+			s2 := dest.bb.scanForward()
+			s1 := s2 - Square(dest.dir)
+			p2 := pos.board.pieceByColor(s2, opponent)
+
+			if pawn == WhitePawn && s2.Rank() == Rank8 || pawn == BlackPawn && s2.Rank() == Rank1 {
+				moves = append(moves,
+					newMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)),
+					newMove(pawn, p2, s1, s2, NoSquare, Rook.color(player)),
+					newMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player)),
+					newMove(pawn, p2, s1, s2, NoSquare, Knight.color(player)),
+				)
+			} else {
+				moves = append(moves, newMove(pawn, p2, s1, s2, pos.enPassant, NoPiece))
+			}
+		}
+	}
+
+	// Other pieces
+	for _, origin := range [5]bbPt{
+		{Knight, bbPlayer & pos.board.bbKnight},
+		{Bishop, bbPlayer & pos.board.bbBishop},
+		{Rook, bbPlayer & pos.board.bbRook},
+		{Queen, bbPlayer & pos.board.bbQueen},
+		{King, bbPlayer & pos.board.bbKing},
+	} {
+		p1 := origin.pt.color(player)
+		for ; origin.bb > 0; origin.bb = origin.bb.resetLSB() {
+			s1 := origin.bb.scanForward()
+			for bbs2 := pieceBitboard(s1, origin.pt, bbOccupancy) & bbOpponent; bbs2 > 0; bbs2 = bbs2.resetLSB() {
+				s2 := bbs2.scanForward()
+				p2 := pos.board.pieceByColor(s2, opponent)
+				moves = append(moves, newMove(p1, p2, s1, s2, NoSquare, NoPiece))
 			}
 		}
 	}
@@ -103,12 +170,18 @@ func (pos *Position) PseudoMoves() []Move {
 // isDiscoveredCheck checks whether the moving piece uncovers
 // a check given by an enemy piece.
 func (pos *Position) isDiscoveredCheck(m Move) bool {
+	s1, s2 := m.S1(), m.S2()
+	bb := bbFiles[s1] | bbRanks[s1] | bbDiagonals[s1] | bbAntiDiagonals[s1]
+	if bb&pos.board.bbKing&pos.board.getColor(pos.turn) == 0 {
+		return false
+	}
+
 	kingSq := pos.board.kingSquare(pos.turn)
-	bbCaptured := m.S2().bitboard()
+	bbCaptured := s2.bitboard()
 	bbOpponent := pos.board.getColor(pos.turn.other()) & ^bbCaptured
 
 	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
-	bbOccupancy &= ^m.S1().bitboard()
+	bbOccupancy &= ^s1.bitboard()
 	bbOccupancy |= bbCaptured
 	if m.HasTag(EnPassant) {
 		if pos.turn == White {
