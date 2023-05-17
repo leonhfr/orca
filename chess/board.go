@@ -57,6 +57,14 @@ func (b board) pieceByColor(sq Square, c Color) Piece {
 	}
 }
 
+// kingSquare returns the king's square.
+func (b *board) kingSquare(c Color) Square {
+	if c == White {
+		return (b.bbWhite & b.bbKing).scanForward()
+	}
+	return (b.bbBlack & b.bbKing).scanForward()
+}
+
 // makeMove makes and unmakes a move on the board.
 func (b *board) makeMove(m Move) {
 	p1, p2 := m.P1(), m.P2()

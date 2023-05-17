@@ -97,8 +97,11 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 			return NoMetadata, false
 		}
 	default:
-		if pos.isDiscoveredCheck(m) {
-			return NoMetadata, false
+		bb := bbFiles[m.S1()] | bbRanks[m.S1()] | bbDiagonals[m.S1()] | bbAntiDiagonals[m.S1()]
+		if bb&pos.board.bbKing&pos.board.getColor(pos.turn) > 0 {
+			if pos.isDiscoveredCheck(m) {
+				return NoMetadata, false
+			}
 		}
 	}
 
@@ -112,7 +115,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 	}
 
 	pos.board.makeMove(m)
-	if pos.isSquareAttacked((pos.board.bbKing & pos.board.getColor(pos.turn)).scanForward()) {
+	if pos.isSquareAttacked(pos.board.kingSquare(pos.turn)) {
 		pos.board.makeMove(m)
 		return NoMetadata, false
 	}
@@ -161,8 +164,7 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata) {
 
 // InCheck returns whether the current player is in check.
 func (pos *Position) InCheck() bool {
-	bbKing := pos.board.getColor(pos.turn) & pos.board.bbKing
-	return pos.isSquareAttacked(bbKing.scanForward())
+	return pos.isSquareAttacked(pos.board.kingSquare(pos.turn))
 }
 
 // PieceMap executes the callback for each piece on the board, passing the piece

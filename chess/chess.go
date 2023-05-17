@@ -103,7 +103,7 @@ func (pos *Position) PseudoMoves() []Move {
 // isDiscoveredCheck checks whether the moving piece uncovers
 // a check given by an enemy piece.
 func (pos *Position) isDiscoveredCheck(m Move) bool {
-	kingSq := (pos.board.bbKing & pos.board.getColor(pos.turn)).scanForward()
+	kingSq := pos.board.kingSquare(pos.turn)
 	bbCaptured := m.S2().bitboard()
 	bbOpponent := pos.board.getColor(pos.turn.other()) & ^bbCaptured
 
