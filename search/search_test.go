@@ -110,7 +110,7 @@ func TestSearch(t *testing.T) {
 			name:    "lasker trap without opening book",
 			fen:     "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
 			depth:   2,
-			outputs: []uci.Output{{PV: []chess.Move{0x2c106a3}, Depth: 1, Nodes: 34, Score: 38, Mate: 0}, {PV: []chess.Move{0x1cc3481, 0x2c106a3}, Depth: 2, Nodes: 64, Score: 5, Mate: 0}},
+			outputs: []uci.Output{{PV: []chess.Move{0x2c106a3}, Depth: 1, Nodes: 34, Score: 38, Mate: 0}, {PV: []chess.Move{0x2c106a3, 0x1cc3481}, Depth: 2, Nodes: 64, Score: 5, Mate: 0}},
 		},
 		{
 			name:    "lasker trap with opening book",

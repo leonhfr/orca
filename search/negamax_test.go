@@ -76,7 +76,6 @@ func negamax(ctx context.Context, pos *chess.Position, depth int) (uci.Output, e
 		Nodes: 1,
 		Depth: depth,
 		Score: -mate,
-		PV:    make([]chess.Move, 0, depth),
 	}
 
 	var validMoves int

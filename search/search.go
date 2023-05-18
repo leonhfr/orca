@@ -156,7 +156,12 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 		if err != nil {
 			return
 		}
+		pv := make([]chess.Move, len(o.PV))
+		for i, m := range o.PV {
+			pv[len(o.PV)-i-1] = m
+		}
 		o.Mate = mateIn(o.Score)
+		o.PV = pv
 		output <- o
 	}
 }

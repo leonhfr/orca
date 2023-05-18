@@ -64,7 +64,6 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		Nodes: 1,
 		Depth: depth,
 		Score: -mate,
-		PV:    make([]chess.Move, 0, depth),
 	}
 
 	var validMoves int
