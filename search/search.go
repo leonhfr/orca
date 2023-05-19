@@ -126,7 +126,7 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 
 		if e.ownBook {
 			if moves := e.book.Lookup(pos); len(moves) > 0 {
-				if move := weightedRandomMove(moves); move != chess.NullMove {
+				if move := weightedRandomMove(moves); move != chess.NoMove {
 					output <- uci.Output{
 						PV:    []chess.Move{move},
 						Depth: 1,
@@ -173,7 +173,7 @@ func weightedRandomMove(moves []chess.WeightedMove) chess.Move {
 		sum += move.Weight
 	}
 	if sum <= 0 {
-		return chess.NullMove
+		return chess.NoMove
 	}
 	index := rand.Intn(sum) //nolint:gosec
 	for _, move := range moves {
@@ -182,7 +182,7 @@ func weightedRandomMove(moves []chess.WeightedMove) chess.Move {
 		}
 		index -= move.Weight
 	}
-	return chess.NullMove
+	return chess.NoMove
 }
 
 // mateIn returns the number of moves before mate.

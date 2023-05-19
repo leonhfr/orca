@@ -39,8 +39,12 @@ const (
 //	FFFFFF     from square
 type Move uint32
 
-// NullMove represents a null move.
-const NullMove Move = 0
+const (
+	// NoMove represents the absence of a move.
+	NoMove Move = iota
+	// NullMove represents a null move.
+	NullMove
+)
 
 // newMove creates a new move.
 func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {

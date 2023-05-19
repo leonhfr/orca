@@ -14,20 +14,21 @@ import (
 type transpositionTable interface {
 	// get returns the entry (if any) for the given hash
 	// and a boolean representing whether the value was found or not.
-	get(key chess.Hash) (tableEntry, bool)
+	get(key chess.Hash) (searchEntry, bool)
 	// set adds an entry to the table for the given hash.
 	// If an entry already exists, it is replaced.
 	// The addition is not guaranteed.
-	set(key chess.Hash, entry tableEntry)
+	set(key chess.Hash, entry searchEntry)
 	// close initiates a graceful shutdown of the transposition table.
 	close()
 }
 
-// tableEntry holds a search result entry.
+// searchEntry holds a search result entry.
 // Only essential information is retained.
-type tableEntry struct {
+type searchEntry struct {
 	score    int
 	depth    int
+	best     chess.Move
 	nodeType nodeType
 }
 
@@ -44,9 +45,9 @@ const (
 // noTable does not store anything at all.
 type noTable struct{}
 
-func (noTable) get(_ chess.Hash) (tableEntry, bool) { return tableEntry{}, false } // implements transpositionTable.
-func (noTable) set(_ chess.Hash, _ tableEntry)      {}                             // implements transpositionTable.
-func (noTable) close()                              {}                             // implements transpositionTable.
+func (noTable) get(_ chess.Hash) (searchEntry, bool) { return searchEntry{}, false } // implements transpositionTable.
+func (noTable) set(_ chess.Hash, _ searchEntry)      {}                              // implements transpositionTable.
+func (noTable) close()                               {}                              // implements transpositionTable.
 
 // ristrettoTable uses dgraph-io/ristretto as backend.
 //
@@ -59,7 +60,7 @@ type ristrettoTable struct {
 //
 // Takes the desired table size in Megabytes as argument.
 func newRistrettoTable(size int) (*ristrettoTable, error) {
-	entrySize := uint64(unsafe.Sizeof(tableEntry{}))
+	entrySize := uint64(unsafe.Sizeof(searchEntry{}))
 	maxCost := int64(1024 * 1024 * uint64(size) / entrySize)
 
 	cache, err := ristretto.NewCache(&ristretto.Config{
@@ -78,16 +79,16 @@ func newRistrettoTable(size int) (*ristrettoTable, error) {
 }
 
 // Implements the transpositionTable interface.
-func (tt *ristrettoTable) get(key chess.Hash) (tableEntry, bool) {
+func (tt *ristrettoTable) get(key chess.Hash) (searchEntry, bool) {
 	entry, found := tt.cache.Get(key)
 	if !found {
-		return tableEntry{}, false
+		return searchEntry{}, false
 	}
-	return entry.(tableEntry), true
+	return entry.(searchEntry), true
 }
 
 // Implements the transpositionTable interface.
-func (tt *ristrettoTable) set(key chess.Hash, entry tableEntry) {
+func (tt *ristrettoTable) set(key chess.Hash, entry searchEntry) {
 	tt.cache.Set(key, entry, 1)
 }
 

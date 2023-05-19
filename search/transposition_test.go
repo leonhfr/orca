@@ -36,7 +36,7 @@ func TestTableSet(t *testing.T) {
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
 	//nolint:gosec
-	want := tableEntry{
+	want := searchEntry{
 		score:    rand.Int(),
 		depth:    rand.Int(),
 		nodeType: exact,

@@ -65,7 +65,7 @@ func BenchmarkAlphaBeta(b *testing.B) {
 
 func BenchmarkCachedAlphaBeta(b *testing.B) {
 	fen := "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"
-	depth := 5
+	depth := 6
 
 	benchs := []struct {
 		name   string
@@ -77,15 +77,14 @@ func BenchmarkCachedAlphaBeta(b *testing.B) {
 
 	for _, bb := range benchs {
 		b.Run(bb.name, func(b *testing.B) {
-			b.StopTimer()
-			e := New()
-			if bb.cached {
-				_ = e.Init()
-			}
-			b.StartTimer()
-
 			for n := 0; n < b.N; n++ {
+				b.StopTimer()
+				e := New()
+				if bb.cached {
+					_ = e.Init()
+				}
 				pos := unsafeFEN(fen)
+				b.StartTimer()
 				_, _ = e.alphaBeta(context.Background(), pos, -mate, mate, depth)
 			}
 		})
