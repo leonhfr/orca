@@ -32,7 +32,7 @@ func TestInit(t *testing.T) {
 	err := engine.Init()
 
 	assert.Nil(t, err)
-	assert.IsType(t, &ristrettoTable{}, engine.table)
+	assert.IsType(t, &arrayTable{}, engine.table)
 }
 
 func TestOptions(t *testing.T) {

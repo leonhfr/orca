@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/leonhfr/orca/chess"
-	books "github.com/leonhfr/orca/data/books"
+	"github.com/leonhfr/orca/data/books"
 	"github.com/leonhfr/orca/uci"
 )
 
@@ -68,10 +68,8 @@ func (e *Engine) Init() error {
 	var err error
 	e.once.Do(func() {
 		performance := bytes.NewReader(books.Performance)
-		if err = e.book.Init(performance); err != nil {
-			return
-		}
-		e.table, err = newRistrettoTable(e.tableSize)
+		err = e.book.Init(performance)
+		e.table = newArrayTable(e.tableSize)
 	})
 	return err
 }
@@ -139,6 +137,7 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 			}
 		}
 
+		e.table.inc()
 		e.iterativeSearch(ctx, pos, uint8(maxDepth), output)
 	}()
 
