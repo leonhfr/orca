@@ -7,13 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/leonhfr/orca/chess"
-	"github.com/leonhfr/orca/uci"
 )
 
 var searchTestPositions = [5]struct {
 	name  string
 	fen   string
-	depth int
+	depth uint8
 }{
 	{
 		name:  "checkmate",
@@ -46,36 +45,35 @@ var searchTestPositions = [5]struct {
 //
 // Negamax is a variant of minimax that relies on the
 // zero-sum property of a two-player game.
-func negamax(ctx context.Context, pos *chess.Position, depth int) (uci.Output, error) {
+func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResult, error) {
 	select {
 	case <-ctx.Done():
-		return uci.Output{}, context.Canceled
+		return searchResult{}, context.Canceled
 	default:
 	}
 
 	moves, inCheck := pos.PseudoMoves()
 	switch {
 	case len(moves) == 0 && inCheck:
-		return uci.Output{
-			Nodes: 1,
-			Score: -mate,
+		return searchResult{
+			nodes: 1,
+			score: -mate,
 		}, nil
 	case len(moves) == 0:
-		return uci.Output{
-			Nodes: 1,
-			Score: draw,
+		return searchResult{
+			nodes: 1,
+			score: draw,
 		}, nil
 	case depth == 0:
-		return uci.Output{
-			Nodes: 1,
-			Score: evaluate(pos),
+		return searchResult{
+			nodes: 1,
+			score: evaluate(pos),
 		}, nil
 	}
 
-	result := uci.Output{
-		Nodes: 1,
-		Depth: depth,
-		Score: -mate,
+	result := searchResult{
+		nodes: 1,
+		score: -mate,
 	}
 
 	var validMoves int
@@ -88,49 +86,49 @@ func negamax(ctx context.Context, pos *chess.Position, depth int) (uci.Output, e
 
 		current, err := negamax(ctx, pos, depth-1)
 		if err != nil {
-			return uci.Output{}, err
+			return searchResult{}, err
 		}
 
-		result.Nodes += current.Nodes
-		current.Score = -current.Score
-		if current.Score > result.Score {
-			result.Score = current.Score
-			result.PV = append(current.PV, move)
+		result.nodes += current.nodes
+		current.score = -current.score
+		if current.score > result.score {
+			result.score = current.score
+			result.pv = append(current.pv, move)
 		}
 
 		pos.UnmakeMove(move, metadata)
 	}
 
 	if validMoves > 0 {
-		result.Nodes--
-		result.Score = incMateDistance(result.Score)
+		result.nodes--
+		result.score = incMateDistance(result.score)
 	}
 	return result, nil
 }
 
 func TestNegamax(t *testing.T) {
 	results := [5]struct {
-		output uci.Output
+		output searchResult
 		moves  []string
 	}{
 		{
-			output: uci.Output{Depth: 1, Nodes: 1, Score: -mate},
+			output: searchResult{nodes: 1, score: -mate},
 			moves:  []string{},
 		},
 		{
-			output: uci.Output{Depth: 2, Nodes: 39, Score: mate - 1},
+			output: searchResult{nodes: 39, score: mate - 1},
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: uci.Output{Depth: 2, Nodes: 1219, Score: mate - 1},
+			output: searchResult{nodes: 1219, score: mate - 1},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: uci.Output{Depth: 4, Nodes: 4103853, Score: mate - 3},
+			output: searchResult{nodes: 4103853, score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: uci.Output{Depth: 3, Nodes: 9561, Score: 549},
+			output: searchResult{nodes: 9561, score: 549},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}
@@ -142,10 +140,9 @@ func TestNegamax(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.NotNil(t, output)
-			assert.Equal(t, want.output.Nodes, output.Nodes)
-			assert.Equal(t, want.output.Score, output.Score)
-			assert.Equal(t, want.output.Depth, output.Depth)
-			assert.Equal(t, want.moves, movesString(output.PV))
+			assert.Equal(t, want.output.nodes, output.nodes)
+			assert.Equal(t, want.output.score, output.score)
+			assert.Equal(t, want.moves, movesString(output.pv))
 		})
 	}
 }

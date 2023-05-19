@@ -4,15 +4,21 @@ import (
 	"context"
 
 	"github.com/leonhfr/orca/chess"
-	"github.com/leonhfr/orca/uci"
 )
+
+// searchResult contains a search result.
+type searchResult struct {
+	pv    []chess.Move
+	score int32
+	nodes uint32
+}
 
 // alphaBeta performs a search using the Negamax algorithm
 // and alpha-beta pruning.
-func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta, depth int) (uci.Output, error) {
+func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta int32, depth uint8) (searchResult, error) {
 	select {
 	case <-ctx.Done():
-		return uci.Output{}, context.Canceled
+		return searchResult{}, context.Canceled
 	default:
 	}
 
@@ -21,9 +27,9 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	if ok && cached.depth >= depth {
 		switch {
 		case cached.nodeType == exact:
-			return uci.Output{
-				Nodes: 1,
-				Score: cached.score,
+			return searchResult{
+				nodes: 1,
+				score: cached.score,
 			}, nil
 		case cached.nodeType == lowerBound && cached.score > alpha:
 			alpha = cached.score
@@ -32,9 +38,9 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 
 		if alpha >= beta {
-			return uci.Output{
-				Nodes: 1,
-				Score: cached.score,
+			return searchResult{
+				nodes: 1,
+				score: cached.score,
 			}, nil
 		}
 	}
@@ -42,28 +48,27 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	moves, inCheck := pos.PseudoMoves()
 	switch {
 	case len(moves) == 0 && inCheck:
-		return uci.Output{
-			Nodes: 1,
-			Score: -mate,
+		return searchResult{
+			nodes: 1,
+			score: -mate,
 		}, nil
 	case len(moves) == 0:
-		return uci.Output{
-			Nodes: 1,
-			Score: draw,
+		return searchResult{
+			nodes: 1,
+			score: draw,
 		}, nil
 	case depth == 0:
-		return uci.Output{
-			Nodes: 1,
-			Score: evaluate(pos),
+		return searchResult{
+			nodes: 1,
+			score: evaluate(pos),
 		}, nil
 	}
 
 	oracle(moves, cached.best)
 
-	result := uci.Output{
-		Nodes: 1,
-		Depth: depth,
-		Score: -mate,
+	result := searchResult{
+		nodes: 1,
+		score: -mate,
 	}
 
 	var validMoves int
@@ -76,18 +81,18 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 
 		current, err := e.alphaBeta(ctx, pos, -beta, -alpha, depth-1)
 		if err != nil {
-			return uci.Output{}, err
+			return searchResult{}, err
 		}
 
-		result.Nodes += current.Nodes
-		current.Score = -current.Score
-		if current.Score > result.Score {
-			result.Score = current.Score
-			result.PV = append(current.PV, move)
+		result.nodes += current.nodes
+		current.score = -current.score
+		if current.score > result.score {
+			result.score = current.score
+			result.pv = append(current.pv, move)
 		}
 
-		if current.Score > alpha {
-			alpha = current.Score
+		if current.score > alpha {
+			alpha = current.score
 		}
 
 		pos.UnmakeMove(move, metadata)
@@ -98,25 +103,24 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	if validMoves > 0 {
-		result.Nodes--
-		result.Score = incMateDistance(result.Score)
+		result.nodes--
+		result.score = incMateDistance(result.score)
 	}
 
 	nodeType := exact
 	switch {
-	case result.Score <= alphaOriginal:
+	case result.score <= alphaOriginal:
 		nodeType = upperBound
-	case result.Score >= beta:
+	case result.score >= beta:
 		nodeType = lowerBound
 	}
 
 	se := searchEntry{
-		score:    result.Score,
-		depth:    result.Depth,
+		score:    result.score,
 		nodeType: nodeType,
 	}
-	if len(result.PV) > 0 {
-		se.best = result.PV[len(result.PV)-1]
+	if len(result.pv) > 0 {
+		se.best = result.pv[len(result.pv)-1]
 	}
 	e.table.set(pos.Hash(), se)
 

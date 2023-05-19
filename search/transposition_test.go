@@ -17,7 +17,7 @@ func TestNewRistrettoTable(t *testing.T) {
 	defer table.close()
 
 	require.Nil(t, err)
-	require.Equal(t, int64(43690), table.cache.MaxCost())
+	require.Equal(t, int64(87381), table.cache.MaxCost())
 }
 
 func TestTableGet(t *testing.T) {
@@ -37,8 +37,8 @@ func TestTableSet(t *testing.T) {
 	hash := chess.Hash(rand.Uint64())
 	//nolint:gosec
 	want := searchEntry{
-		score:    rand.Int(),
-		depth:    rand.Int(),
+		score:    rand.Int31(),
+		depth:    uint8(rand.Uint32()),
 		nodeType: exact,
 	}
 

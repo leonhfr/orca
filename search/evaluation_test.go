@@ -10,7 +10,7 @@ import (
 
 var testPositions = []struct {
 	fen   string
-	score int
+	score int32
 }{
 	{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 0},
 	{"2r3k1/1q1nbppp/r3p3/3pP3/pPpP4/P1Q2N2/2RN1PPP/2R4K b - b3 0 23", 10},

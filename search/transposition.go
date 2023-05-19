@@ -26,9 +26,9 @@ type transpositionTable interface {
 // searchEntry holds a search result entry.
 // Only essential information is retained.
 type searchEntry struct {
-	score    int
-	depth    int
+	score    int32
 	best     chess.Move
+	depth    uint8
 	nodeType nodeType
 }
 

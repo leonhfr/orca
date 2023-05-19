@@ -16,7 +16,7 @@ const (
 	// maxPkgDepth is the maximum depth at which the package will search.
 	maxPkgDepth = 64
 	// mate is the score of a checkmate.
-	mate = math.MaxInt
+	mate = math.MaxInt32
 	// draw is the score of a draw.
 	draw = 0
 )
@@ -139,30 +139,36 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 			}
 		}
 
-		e.iterativeSearch(ctx, pos, maxDepth, output)
+		e.iterativeSearch(ctx, pos, uint8(maxDepth), output)
 	}()
 
 	return output
 }
 
 // iterativeSearch performs an iterative search.
-func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth int, output chan<- uci.Output) {
+func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth uint8, output chan<- uci.Output) {
 	if maxDepth <= 0 || maxDepth > maxPkgDepth {
 		maxDepth = maxPkgDepth
 	}
 
-	for depth := 1; depth <= maxDepth; depth++ {
+	for depth := uint8(1); depth <= maxDepth; depth++ {
 		o, err := e.alphaBeta(ctx, pos, -mate, mate, depth)
 		if err != nil {
 			return
 		}
-		pv := make([]chess.Move, len(o.PV))
-		for i, m := range o.PV {
-			pv[len(o.PV)-i-1] = m
+		pv := make([]chess.Move, len(o.pv))
+		for i, m := range o.pv {
+			pv[len(o.pv)-i-1] = m
 		}
-		o.Mate = mateIn(o.Score)
-		o.PV = pv
-		output <- o
+		// o.Mate = mateIn(o.Score)
+		// o.PV = pv
+		output <- uci.Output{
+			Depth: int(depth),
+			Score: int(o.score),
+			Nodes: int(o.nodes),
+			Mate:  int(mateIn(o.score)),
+			PV:    pv,
+		}
 	}
 }
 
@@ -186,7 +192,7 @@ func weightedRandomMove(moves []chess.WeightedMove) chess.Move {
 }
 
 // mateIn returns the number of moves before mate.
-func mateIn(score int) int {
+func mateIn(score int32) int32 {
 	sign := sign(score)
 	delta := mate - sign*score
 	if delta > maxPkgDepth {
@@ -196,7 +202,7 @@ func mateIn(score int) int {
 }
 
 // sign returns the sign +/-1 of the passed integer.
-func sign(n int) int {
+func sign(n int32) int32 {
 	if n < 0 {
 		return -1
 	}

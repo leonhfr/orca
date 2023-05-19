@@ -5,33 +5,31 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/leonhfr/orca/uci"
 )
 
 func TestAlphaBeta(t *testing.T) {
 	results := [5]struct {
-		output uci.Output
+		output searchResult
 		moves  []string
 	}{
 		{
-			output: uci.Output{Depth: 1, Nodes: 1, Score: -mate},
+			output: searchResult{nodes: 1, score: -mate},
 			moves:  []string{},
 		},
 		{
-			output: uci.Output{Depth: 2, Nodes: 10, Score: mate - 1},
+			output: searchResult{nodes: 10, score: mate - 1},
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: uci.Output{Depth: 2, Nodes: 58, Score: mate - 1},
+			output: searchResult{nodes: 58, score: mate - 1},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: uci.Output{Depth: 4, Nodes: 1779, Score: mate - 3},
+			output: searchResult{nodes: 1779, score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: uci.Output{Depth: 3, Nodes: 306, Score: 549},
+			output: searchResult{nodes: 306, score: 549},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}
@@ -43,10 +41,9 @@ func TestAlphaBeta(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			output, err := e.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
 
-			assert.Equal(t, res.output.Nodes, output.Nodes)
-			assert.Equal(t, res.output.Score, output.Score)
-			assert.Equal(t, res.output.Depth, output.Depth)
-			assert.Equal(t, res.moves, movesString(output.PV))
+			assert.Equal(t, res.output.nodes, output.nodes)
+			assert.Equal(t, res.output.score, output.score)
+			assert.Equal(t, res.moves, movesString(output.pv))
 			assert.Nil(t, err)
 		})
 	}

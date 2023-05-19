@@ -11,8 +11,8 @@ import "github.com/leonhfr/orca/chess"
 // between piece-square tables values for opening and endgame.
 //
 // Source: https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
-func evaluate(pos *chess.Position) int {
-	var mg, eg, phase int
+func evaluate(pos *chess.Position) int32 {
+	var mg, eg, phase int32
 
 	pos.PieceMap(func(p chess.Piece, sq chess.Square) {
 		mgValue := pestoMGPieceTables[p][sq]
@@ -40,8 +40,8 @@ func evaluate(pos *chess.Position) int {
 //
 // In case of a positive score, it is decreased by 1.
 // In case of a negative score, it is increased by 1.
-func incMateDistance(score int) int {
-	sign := 1
+func incMateDistance(score int32) int32 {
+	var sign int32 = 1
 	if score < 0 {
 		sign = -1
 	}

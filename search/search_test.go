@@ -103,7 +103,7 @@ func TestSearch(t *testing.T) {
 			depth: 2,
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 46, Score: 357, Mate: 0, PV: []chess.Move{0x2c322dc}},
-				{Depth: 2, Nodes: 58, Score: 9223372036854775806, Mate: 1, PV: []chess.Move{0x2c1836d}},
+				{Depth: 2, Nodes: 58, Score: mate - 1, Mate: 1, PV: []chess.Move{0x2c1836d}},
 			},
 		},
 		{
