@@ -38,6 +38,8 @@ func FindMagics(pt PieceType) [64]Magic {
 }
 
 // findMagic finds a magic for a square.
+//
+// This function is intended to be used during generation of magics.
 func findMagic(pt PieceType, sq Square, indexBits int) (Magic, int) {
 	mask := uint64(slowMasks(pt, sq))
 	shift := 64 - indexBits

@@ -56,8 +56,8 @@ func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 			tags ^= QueenSideCastle
 		}
 	} else if pt == Pawn && s2 == enPassant {
-		tags |= EnPassant
-		tags |= Capture
+		tags ^= EnPassant
+		tags ^= Capture
 	} else if promo != NoPiece {
 		tags ^= Promotion
 	}
@@ -71,8 +71,8 @@ func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 	}
 
 	return Move(s1) ^ Move(s2)<<6 ^
-		Move(p1)<<12 ^ Move(p2&15)<<16 ^
-		Move(promo&15)<<20 ^ Move(tags)
+		Move(p1)<<12 ^ Move(p2)<<16 ^
+		Move(promo)<<20 ^ Move(tags)
 }
 
 // NewMove creates a new move from a UCI string.

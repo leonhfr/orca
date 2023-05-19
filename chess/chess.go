@@ -8,13 +8,13 @@ func (pos *Position) PseudoMoves() []Move {
 
 	// Setting up variables
 	player, opponent := pos.turn, pos.turn.other()
-	pawn := WhitePawn
+	pawn, promoRank := WhitePawn, Rank8
 	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
 	bbPlayer, bbOpponent := pos.board.bbWhite, pos.board.bbBlack
 	upOne, upTwo := north, doubleNorth
 	captureR, captureL := northEast, northWest
 	if pos.turn == Black {
-		pawn = BlackPawn
+		pawn, promoRank = BlackPawn, Rank1
 		bbPlayer, bbOpponent = pos.board.bbBlack, pos.board.bbWhite
 		upOne, upTwo = south, doubleSouth
 		captureR, captureL = southEast, southWest
@@ -38,7 +38,8 @@ func (pos *Position) PseudoMoves() []Move {
 		for ; dest.bb > 0; dest.bb = dest.bb.resetLSB() {
 			s2 := dest.bb.scanForward()
 			s1 := s2 - Square(dest.dir)
-			if pawn == WhitePawn && s2.Rank() == Rank8 || pawn == BlackPawn && s2.Rank() == Rank1 {
+
+			if s2.Rank() == promoRank {
 				moves = append(moves,
 					newMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)),
 					newMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player)),
@@ -63,7 +64,7 @@ func (pos *Position) PseudoMoves() []Move {
 			s1 := s2 - Square(dest.dir)
 			p2 := pos.board.pieceByColor(s2, opponent)
 
-			if pawn == WhitePawn && s2.Rank() == Rank8 || pawn == BlackPawn && s2.Rank() == Rank1 {
+			if s2.Rank() == promoRank {
 				moves = append(moves,
 					newMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)),
 					newMove(pawn, p2, s1, s2, NoSquare, Rook.color(player)),
@@ -109,12 +110,12 @@ func (pos *Position) LoudMoves() []Move {
 
 	// Setting up variables
 	player, opponent := pos.turn, pos.turn.other()
-	pawn := WhitePawn
+	pawn, promoRank := WhitePawn, Rank8
 	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
 	bbPlayer, bbOpponent := pos.board.bbWhite, pos.board.bbBlack
 	captureR, captureL := northEast, northWest
 	if pos.turn == Black {
-		pawn = BlackPawn
+		pawn, promoRank = BlackPawn, Rank1
 		bbPlayer, bbOpponent = pos.board.bbBlack, pos.board.bbWhite
 		captureR, captureL = southEast, southWest
 	}
@@ -132,7 +133,7 @@ func (pos *Position) LoudMoves() []Move {
 			s1 := s2 - Square(dest.dir)
 			p2 := pos.board.pieceByColor(s2, opponent)
 
-			if pawn == WhitePawn && s2.Rank() == Rank8 || pawn == BlackPawn && s2.Rank() == Rank1 {
+			if s2.Rank() == promoRank {
 				moves = append(moves,
 					newMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)),
 					newMove(pawn, p2, s1, s2, NoSquare, Rook.color(player)),
