@@ -109,17 +109,16 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	case result.Score >= beta:
 		nodeType = lowerBound
 	}
-	if result.Depth >= 2 {
-		se := searchEntry{
-			score:    result.Score,
-			depth:    result.Depth,
-			nodeType: nodeType,
-		}
-		if len(result.PV) > 0 {
-			se.best = result.PV[len(result.PV)-1]
-		}
-		e.table.set(pos.Hash(), se)
+
+	se := searchEntry{
+		score:    result.Score,
+		depth:    result.Depth,
+		nodeType: nodeType,
 	}
+	if len(result.PV) > 0 {
+		se.best = result.PV[len(result.PV)-1]
+	}
+	e.table.set(pos.Hash(), se)
 
 	return result, nil
 }
