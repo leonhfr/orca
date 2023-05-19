@@ -17,6 +17,14 @@ bench:
 lint:
 	golangci-lint run
 
+.PHONY: coverage-html
+coverage-html: coverage
+	go tool cover -html=coverage.out
+
+.PHONY: coverage
+coverage:
+	go test -coverprofile=coverage.out -coverpkg=github.com/leonhfr/orca/... ./...
+
 .PHONY: doc
 doc:
 	godoc -http=:6060
