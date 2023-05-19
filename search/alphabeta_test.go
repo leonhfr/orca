@@ -15,23 +15,23 @@ func TestAlphaBeta(t *testing.T) {
 		moves  []string
 	}{
 		{
-			output: uci.Output{Depth: 0, Nodes: 1, Score: -mate, Mate: 0, PV: nil},
+			output: uci.Output{Depth: 1, Nodes: 1, Score: -mate},
 			moves:  []string{},
 		},
 		{
-			output: uci.Output{Depth: 1, Nodes: 10, Score: mate - 1, Mate: 0, PV: nil},
+			output: uci.Output{Depth: 2, Nodes: 10, Score: mate - 1},
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: uci.Output{Depth: 1, Nodes: 58, Score: mate - 1, Mate: 0, PV: nil},
+			output: uci.Output{Depth: 2, Nodes: 58, Score: mate - 1},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: uci.Output{Depth: 3, Nodes: 1779, Score: mate - 3, Mate: 0, PV: nil},
+			output: uci.Output{Depth: 4, Nodes: 1779, Score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: uci.Output{Depth: 3, Nodes: 306, Score: 549, Mate: 0, PV: nil},
+			output: uci.Output{Depth: 3, Nodes: 306, Score: 549},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}
@@ -45,6 +45,7 @@ func TestAlphaBeta(t *testing.T) {
 
 			assert.Equal(t, res.output.Nodes, output.Nodes)
 			assert.Equal(t, res.output.Score, output.Score)
+			assert.Equal(t, res.output.Depth, output.Depth)
 			assert.Equal(t, res.moves, movesString(output.PV))
 			assert.Nil(t, err)
 		})

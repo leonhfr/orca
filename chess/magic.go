@@ -57,18 +57,18 @@ func findMagic(pt PieceType, sq Square, indexBits int) (Magic, int) {
 // This function is intended to be used during initialization of move tables.
 func slowMoveTable(pt PieceType, sq Square, magic Magic) ([]bitboard, error) {
 	table := make([]bitboard, 1<<(64-magic.Shift))
-	for blockers := emptyBitboard; ; {
+	for blockers := bbEmpty; ; {
 		index := magic.index(blockers) - magic.Offset
 		moves := slowMoves(pt, sq, blockers)
 
-		if table[index] == emptyBitboard {
+		if table[index] == bbEmpty {
 			table[index] = moves
 		} else if table[index] != moves {
 			return nil, errors.New("hash collision")
 		}
 
 		blockers = (blockers - bitboard(magic.Mask)) & bitboard(magic.Mask)
-		if blockers == emptyBitboard {
+		if blockers == bbEmpty {
 			break
 		}
 	}

@@ -50,21 +50,15 @@ func TestOrderMoves(t *testing.T) {
 				chess.Move(chess.NoPiece)<<20 ^
 				chess.Move(chess.Quiet),
 			[]string{
-				"d2d4", "b4a3", "b4a5", "h6f7", "a4b3",
-				"g2g3", "g2g4", "h2h4", "f3e1", "f3d4",
-				"f3h4", "f3e5", "f3g5", "h6g4", "h6f5",
-				"c4c5", "h6g8", "a4c2", "d2d3", "h2h3",
-				"b4c3", "e4e5", "b4c5", "b4d6", "b4e7",
-				"b4f8", "a1b1", "a1c1", "f1e1", "f1f2",
-				"d1b1", "d1c1", "d1e1", "d1c2", "d1e2",
-				"d1b3", "g1h1", "g1f2",
+				"d2d4", "c4c5", "f3d4", "b4c5", "f1f2",
+				"g1h1", "g1f2",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			moves := unsafeFEN(tt.fen).PseudoMoves()
+			moves, _ := unsafeFEN(tt.fen).PseudoMoves()
 			oracle(moves, tt.best)
 
 			assert.Equal(t, tt.want, movesString(moves))

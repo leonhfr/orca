@@ -10,7 +10,7 @@ import (
 	"github.com/leonhfr/orca/uci"
 )
 
-var searchTestPositions = []struct {
+var searchTestPositions = [5]struct {
 	name  string
 	fen   string
 	depth int
@@ -53,8 +53,8 @@ func negamax(ctx context.Context, pos *chess.Position, depth int) (uci.Output, e
 	default:
 	}
 
-	moves := pos.PseudoMoves()
-	switch inCheck := pos.InCheck(); {
+	moves, inCheck := pos.PseudoMoves()
+	switch {
 	case len(moves) == 0 && inCheck:
 		return uci.Output{
 			Nodes: 1,
@@ -114,23 +114,23 @@ func TestNegamax(t *testing.T) {
 		moves  []string
 	}{
 		{
-			output: uci.Output{Depth: 0, Nodes: 1, Score: -mate, Mate: 0, PV: nil},
+			output: uci.Output{Depth: 1, Nodes: 1, Score: -mate},
 			moves:  []string{},
 		},
 		{
-			output: uci.Output{Depth: 1, Nodes: 39, Score: mate - 1, Mate: 1, PV: nil},
+			output: uci.Output{Depth: 2, Nodes: 39, Score: mate - 1},
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: uci.Output{Depth: 1, Nodes: 1219, Score: mate - 1, Mate: 1, PV: nil},
+			output: uci.Output{Depth: 2, Nodes: 1219, Score: mate - 1},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: uci.Output{Depth: 3, Nodes: 4103853, Score: mate - 3, Mate: 2, PV: nil},
+			output: uci.Output{Depth: 4, Nodes: 4103853, Score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: uci.Output{Depth: 3, Nodes: 9561, Score: 549, Mate: 0, PV: nil},
+			output: uci.Output{Depth: 3, Nodes: 9561, Score: 549},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}
@@ -144,6 +144,7 @@ func TestNegamax(t *testing.T) {
 			assert.NotNil(t, output)
 			assert.Equal(t, want.output.Nodes, output.Nodes)
 			assert.Equal(t, want.output.Score, output.Score)
+			assert.Equal(t, want.output.Depth, output.Depth)
 			assert.Equal(t, want.moves, movesString(output.PV))
 		})
 	}

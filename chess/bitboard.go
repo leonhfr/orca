@@ -2,6 +2,7 @@ package chess
 
 import (
 	"fmt"
+	"math"
 	"math/bits"
 )
 
@@ -9,8 +10,12 @@ import (
 // The 64 squares board has A1 as the least significant bit and H8 as the most.
 type bitboard uint64
 
-// emptyBitboard is an empty bitboard.
-const emptyBitboard bitboard = 0
+const (
+	// bbEmpty is an empty bitboard.
+	bbEmpty bitboard = 0
+	// bbFull is a full bitboard.
+	bbFull bitboard = math.MaxUint64
+)
 
 // deBruijnMagicTable contains a lookup table of squares indexed by the result
 // of the de Bruijn multiplication.
@@ -78,10 +83,11 @@ const (
 )
 
 var (
-	bbFiles         [64]bitboard // bbFiles contains the file bitboards indexed by Square.
-	bbRanks         [64]bitboard // bbRanks contains the rank bitboards indexed by Square.
-	bbDiagonals     [64]bitboard // bbDiagonals contains the diagonal bitboards indexed by Square.
-	bbAntiDiagonals [64]bitboard // bbAntiDiagonals contains the anti diagonal bitboards indexed by Square.
+	bbFiles         [64]bitboard     // bbFiles contains the file bitboards indexed by Square.
+	bbRanks         [64]bitboard     // bbRanks contains the rank bitboards indexed by Square.
+	bbDiagonals     [64]bitboard     // bbDiagonals contains the diagonal bitboards indexed by Square.
+	bbAntiDiagonals [64]bitboard     // bbAntiDiagonals contains the anti diagonal bitboards indexed by Square.
+	bbInBetweens    [64][64]bitboard // bbInBetween contains the in between bitboards indexed by from and to Squares.
 )
 
 // initializes bbFiles.
@@ -125,6 +131,28 @@ func initBBAntiDiagonals() {
 			bb |= downLeft.bitboard()
 		}
 		bbAntiDiagonals[sq] = bb
+	}
+}
+
+// initializes bbInBetween.
+func initBBInBetweens() {
+	m1 := uint64(bbFull)
+	var a2a7 uint64 = 0x0001010101010100
+	var b2g7 uint64 = 0x0040201008040200
+	var h1b7 uint64 = 0x0002040810204080
+
+	for s1 := uint64(A1); s1 <= uint64(H8); s1++ {
+		for s2 := uint64(A1); s2 <= uint64(H8); s2++ {
+			btwn := m1<<s1 ^ m1<<s2
+			file := s2&7 - s1&7
+			rank := (s2 | 7 - s1) >> 3
+			line := (file&7 - 1) & a2a7
+			line += 2 * ((rank&7 - 1) >> 58)
+			line += ((rank-file)&15 - 1) & b2g7
+			line += ((rank+file)&15 - 1) & h1b7
+			line *= btwn & -btwn
+			bbInBetweens[s1][s2] = bitboard(line & btwn)
+		}
 	}
 }
 

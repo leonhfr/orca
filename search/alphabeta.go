@@ -39,8 +39,8 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 	}
 
-	moves := pos.PseudoMoves()
-	switch inCheck := pos.InCheck(); {
+	moves, inCheck := pos.PseudoMoves()
+	switch {
 	case len(moves) == 0 && inCheck:
 		return uci.Output{
 			Nodes: 1,

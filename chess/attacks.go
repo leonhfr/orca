@@ -91,7 +91,7 @@ func pieceBitboard(sq Square, pt PieceType, occupancy bitboard) bitboard {
 	case Knight:
 		return bbKnightMoves[sq]
 	default:
-		return emptyBitboard
+		return bbEmpty
 	}
 }
 

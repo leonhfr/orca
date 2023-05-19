@@ -9,6 +9,7 @@ func init() {
 	initBBRanks()
 	initBBDiagonals()
 	initBBAntiDiagonals()
+	initBBInBetweens()
 
 	// Attacks
 	initBBKingMoves()
