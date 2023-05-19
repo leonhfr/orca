@@ -1,5 +1,13 @@
 .PHONY: default
-default: test
+default: build
+
+.PHONY: build
+build:
+	go build .
+
+.PHONY: run
+run:
+	go run .
 
 .PHONY: gen
 gen:
@@ -28,3 +36,7 @@ coverage:
 .PHONY: doc
 doc:
 	godoc -http=:6060
+
+.PHONY: release
+release:
+	goreleaser release --snapshot --rm-dist

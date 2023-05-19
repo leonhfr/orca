@@ -30,3 +30,9 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+      - name: Build
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --snapshot --rm-dist
