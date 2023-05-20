@@ -9,14 +9,14 @@ func (pos *Position) PseudoMoves() ([]Move, bool) {
 	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn))
 	switch bits.OnesCount64(uint64(bbAttackedBy)) {
 	case 0:
-		return pos.pseudoMoves(bbFull, false, false), false
+		return pos.pseudoMoves(bbFull, false, false, false), false
 	case 1:
 		s1 := bbAttackedBy.scanForward()
 		s2 := pos.board.kingSquare(pos.turn)
 		bbInterference := bbInBetweens[s1][s2] | bbAttackedBy
-		return pos.pseudoMoves(bbInterference, false, false), true
+		return pos.pseudoMoves(bbInterference, false, false, false), true
 	default:
-		return pos.pseudoMoves(bbFull, true, false), true
+		return pos.pseudoMoves(bbFull, false, true, false), true
 	}
 }
 
@@ -25,7 +25,7 @@ func (pos *Position) PseudoMoves() ([]Move, bool) {
 //
 // Some moves may be putting the moving player's king in check and therefore be illegal.
 func (pos *Position) LoudMoves() []Move {
-	return pos.pseudoMoves(bbFull, false, true)
+	return pos.pseudoMoves(bbFull, false, false, true)
 }
 
 // pseudoMoves returns the pseudo moves depending on some options.
@@ -34,11 +34,14 @@ func (pos *Position) LoudMoves() []Move {
 // Use it when the king is in check so that pieces can either attack the checking piece or
 // interfere in case of an attack by a sliding piece.
 //
+// allPromos adds all promotion moves. Intending to be used in perft tests.
+// Setting it to false only adds queen promotions.
+//
 // onlyKing returns only the king moves, bypassing all others. Use it when the king is
 // in double check.
 //
 // loud returns only moves that capture enemy pieces. Use it in quiescence search.
-func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) []Move {
+func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, loud bool) []Move {
 	size := 50
 	if loud {
 		size = 20
@@ -47,14 +50,14 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 
 	// Setting up variables
 	player, opponent := pos.turn, pos.turn.other()
-	pawn, promoRank := WhitePawn, Rank8
+	pawn := WhitePawn
 	king := WhiteKing
 	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
 	bbPlayer, bbOpponent := pos.board.bbWhite, pos.board.bbBlack
 	upOne, upTwo := north, doubleNorth
 	captureR, captureL := northEast, northWest
 	if pos.turn == Black {
-		pawn, promoRank = BlackPawn, Rank1
+		pawn = BlackPawn
 		king = BlackKing
 		bbPlayer, bbOpponent = pos.board.bbBlack, pos.board.bbWhite
 		upOne, upTwo = south, doubleSouth
@@ -82,7 +85,7 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 
 	// Castles
 	if !loud {
-		for _, s := range [2]side{kingSide, queenSide} {
+		for s := kingSide; s <= queenSide; s++ {
 			data := castles[2*uint8(player)+uint8(s)]
 			if pos.castlingRights.canCastle(player, s) && bbOccupancy&data.bbTravel == 0 {
 				moves = append(moves, newMove(King.color(player), NoPiece, data.s1, data.s2, NoSquare, NoPiece))
@@ -101,16 +104,22 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 				s2 := dest.bb.scanForward()
 				s1 := s2 - Square(dest.dir)
 
-				if s2.Rank() == promoRank {
+				if s2.bitboard()&(bbRank1^bbRank8) == 0 {
+					moves = append(moves, newMove(pawn, NoPiece, s1, s2, NoSquare, NoPiece))
+					continue
+				}
+
+				if allPromos {
 					moves = append(moves,
 						newMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)),
 						newMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player)),
 						newMove(pawn, NoPiece, s1, s2, NoSquare, Bishop.color(player)),
 						newMove(pawn, NoPiece, s1, s2, NoSquare, Knight.color(player)),
 					)
-				} else {
-					moves = append(moves, newMove(pawn, NoPiece, s1, s2, NoSquare, NoPiece))
+					continue
 				}
+
+				moves = append(moves, newMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)))
 			}
 		}
 	}
@@ -120,7 +129,8 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 	bbEnPassant := pos.enPassant.bitboard()
 
 	bbPawnInterference := bbInterference
-	if (bbInterference&pos.board.bbPawn).scanForward()+Square(upOne) == pos.enPassant {
+	if pos.enPassant != NoSquare &&
+		(bbInterference&pos.board.bbPawn).scanForward()+Square(upOne) == pos.enPassant {
 		bbPawnInterference |= bbEnPassant
 	}
 
@@ -133,30 +143,31 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 			s1 := s2 - Square(dest.dir)
 			p2 := pos.board.pieceByColor(s2, opponent)
 
-			if s2.Rank() == promoRank {
+			if s2.bitboard()&(bbRank1^bbRank8) == 0 {
+				moves = append(moves, newMove(pawn, p2, s1, s2, pos.enPassant, NoPiece))
+				continue
+			}
+
+			if allPromos {
 				moves = append(moves,
 					newMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)),
 					newMove(pawn, p2, s1, s2, NoSquare, Rook.color(player)),
 					newMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player)),
 					newMove(pawn, p2, s1, s2, NoSquare, Knight.color(player)),
 				)
-			} else {
-				moves = append(moves, newMove(pawn, p2, s1, s2, pos.enPassant, NoPiece))
+				continue
 			}
+
+			moves = append(moves, newMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)))
 		}
 	}
 
 	// Other pieces
-	for _, origin := range [4]bbPt{
-		{Knight, bbPlayer & pos.board.bbKnight},
-		{Bishop, bbPlayer & pos.board.bbBishop},
-		{Rook, bbPlayer & pos.board.bbRook},
-		{Queen, bbPlayer & pos.board.bbQueen},
-	} {
-		p1 := origin.pt.color(player)
-		for ; origin.bb > 0; origin.bb = origin.bb.resetLSB() {
-			s1 := origin.bb.scanForward()
-			bbs2 := pieceBitboard(s1, origin.pt, bbOccupancy) & ^bbPlayer & bbInterference
+	for pt := Knight; pt <= Queen; pt += 2 {
+		p1 := pt.color(player)
+		for bbs1 := pos.board.getBitboard(pt, player); bbs1 > 0; bbs1 = bbs1.resetLSB() {
+			s1 := bbs1.scanForward()
+			bbs2 := pieceBitboard(s1, pt, bbOccupancy) & ^bbPlayer & bbInterference
 			if loud {
 				bbs2 &= bbOpponent
 			}
@@ -269,12 +280,6 @@ func (pos *Position) isCastleLegal(m Move) bool {
 type bbDir struct {
 	bb  bitboard
 	dir direction
-}
-
-// bbPt associates a bitboard with a PieceType.
-type bbPt struct {
-	pt PieceType
-	bb bitboard
 }
 
 // castles contains the castles' data.

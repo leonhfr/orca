@@ -128,7 +128,7 @@ func TestNegamax(t *testing.T) {
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 9561, score: 549},
+			output: searchResult{nodes: 9495, score: 549},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}

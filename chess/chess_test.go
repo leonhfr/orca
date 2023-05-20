@@ -52,7 +52,7 @@ func TestPseudoMoves(t *testing.T) {
 			"g8f6", "g8h6", "h7h5", "h7h6",
 		}},
 		{"r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1 w - - 0 1", []string{
-			"b7a8b", "b7a8n", "b7a8q", "b7a8r", "b7b8b", "b7b8n", "b7b8q", "b7b8r", "h3g2", "h3g4",
+			"b7a8q", "b7b8q", "h3g2", "h3g4",
 			// illegal moves
 			"g1f1", "g1h1",
 		}},
@@ -107,7 +107,7 @@ func TestLoudMoves(t *testing.T) {
 			"c6d4", "c6e5",
 		}},
 		{"r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1 w - - 0 1", []string{
-			"b7a8b", "b7a8n", "b7a8q", "b7a8r", "h3g2", "h3g4",
+			"b7a8q", "h3g2", "h3g4",
 		}},
 	}
 
@@ -210,7 +210,7 @@ func perft(pos *Position, depth int) int {
 	}
 
 	var count int
-	pseudoMoves, _ := pos.PseudoMoves()
+	pseudoMoves := pos.pseudoMoves(bbFull, true, false, false)
 	for _, m := range pseudoMoves {
 		if meta, ok := pos.MakeMove(m); ok {
 			count += perft(pos, depth-1)
@@ -222,7 +222,7 @@ func perft(pos *Position, depth int) int {
 
 func legalMoves(pos *Position) []Move {
 	var moves []Move
-	pseudoMoves, _ := pos.PseudoMoves()
+	pseudoMoves := pos.pseudoMoves(bbFull, true, false, false)
 	for _, m := range pseudoMoves {
 		if meta, ok := pos.MakeMove(m); ok {
 			moves = append(moves, m)
