@@ -58,10 +58,8 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 			score: draw,
 		}, nil
 	case depth == 0:
-		return searchResult{
-			nodes: 1,
-			score: evaluate(pos),
-		}, nil
+		result, err := e.quiesce(ctx, pos, -beta, -alpha)
+		return result, err
 	}
 
 	oracle(moves, cached.best)

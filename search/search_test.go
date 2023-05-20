@@ -102,15 +102,18 @@ func TestSearch(t *testing.T) {
 			fen:   "r1b1kb1r/pppp1ppp/2n1pq2/8/3Pn2N/2P3P1/PP1NPP1P/R1BQKB1R b KQkq - 3 6",
 			depth: 2,
 			outputs: []uci.Output{
-				{Depth: 1, Nodes: 46, Score: 357, Mate: 0, PV: []chess.Move{0x2c322dc}},
-				{Depth: 2, Nodes: 58, Score: mate - 1, Mate: 1, PV: []chess.Move{0x2c1836d}},
+				{Depth: 1, Nodes: 390, Score: 21, Mate: 0, PV: []chess.Move{0x2c1235c}},
+				{Depth: 2, Nodes: 548, Score: mate - 1, Mate: 1, PV: []chess.Move{0x2c1836d}},
 			},
 		},
 		{
-			name:    "lasker trap without opening book",
-			fen:     "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
-			depth:   2,
-			outputs: []uci.Output{{PV: []chess.Move{0x2c106a3}, Depth: 1, Nodes: 34, Score: 38, Mate: 0}, {PV: []chess.Move{0x2c106a3, 0x1cc3481}, Depth: 2, Nodes: 64, Score: 5, Mate: 0}},
+			name:  "lasker trap without opening book",
+			fen:   "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
+			depth: 2,
+			outputs: []uci.Output{
+				{PV: []chess.Move{0x2c106a3}, Depth: 1, Nodes: 71, Score: 38, Mate: 0},
+				{PV: []chess.Move{0x2c106a3, 0x1cc3481}, Depth: 2, Nodes: 70, Score: 5, Mate: 0},
+			},
 		},
 		{
 			name:    "lasker trap with opening book",
@@ -127,6 +130,7 @@ func TestSearch(t *testing.T) {
 			if tt.book {
 				engine.ownBook = true
 			}
+			engine.table = noTable{}
 			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth)
 			var outputs []uci.Output
 			for o := range output {

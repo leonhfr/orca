@@ -17,24 +17,25 @@ func TestAlphaBeta(t *testing.T) {
 			moves:  []string{},
 		},
 		{
-			output: searchResult{nodes: 23, score: mate - 1},
+			output: searchResult{nodes: 11, score: mate - 1},
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: searchResult{nodes: 58, score: mate - 1},
+			output: searchResult{nodes: 863, score: mate - 1},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: searchResult{nodes: 1914, score: mate - 3},
+			output: searchResult{nodes: 2020, score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 303, score: 549},
-			moves:  []string{"g7b2", "a1b2", "b3b2"},
+			output: searchResult{nodes: 432, score: 49},
+			moves:  []string{"f8d8", "e7a3", "d5d4"},
 		},
 	}
 
 	e := New()
+	e.table = noTable{}
 	for i, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
 			res := results[i]
@@ -51,6 +52,7 @@ func TestAlphaBeta(t *testing.T) {
 
 func BenchmarkAlphaBeta(b *testing.B) {
 	e := New()
+	e.table = noTable{}
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {
 			pos := unsafeFEN(bb.fen)
