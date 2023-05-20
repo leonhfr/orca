@@ -17,7 +17,7 @@ func TestAlphaBeta(t *testing.T) {
 			moves:  []string{},
 		},
 		{
-			output: searchResult{nodes: 10, score: mate - 1},
+			output: searchResult{nodes: 23, score: mate - 1},
 			moves:  []string{"f1h1"},
 		},
 		{
@@ -25,11 +25,11 @@ func TestAlphaBeta(t *testing.T) {
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: searchResult{nodes: 1779, score: mate - 3},
+			output: searchResult{nodes: 1914, score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 306, score: 549},
+			output: searchResult{nodes: 303, score: 549},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}

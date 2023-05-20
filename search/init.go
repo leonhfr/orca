@@ -19,30 +19,16 @@ func init() {
 		mgHuman := pestoMGHumanPieceTables[p.Type()/2]
 		egHuman := pestoEGHumanPieceTables[p.Type()/2]
 
-		if p.Color() == chess.White {
-			pestoMGPieceTables[p] = mapSquareTableToWhite(mgHuman, mgValue)
-			pestoEGPieceTables[p] = mapSquareTableToWhite(egHuman, egValue)
-		} else {
-			pestoMGPieceTables[p] = mapSquareTableToBlack(mgHuman, mgValue)
-			pestoEGPieceTables[p] = mapSquareTableToBlack(egHuman, egValue)
+		for i := 0; i < 64; i++ {
+			rank, file := 7-i/8, i%8
+			if p.Color() == chess.Black {
+				rank = i / 8
+			}
+
+			pestoMGPieceTables[p][i] = mgValue + mgHuman[rank][file]
+			pestoEGPieceTables[p][i] = egValue + egHuman[rank][file]
 		}
 	}
-}
-
-func mapSquareTableToWhite(human [8][8]int32, value int32) [64]int32 {
-	var table [64]int32
-	for i := 0; i < 64; i++ {
-		table[i] = value + human[7-i/8][i%8]
-	}
-	return table
-}
-
-func mapSquareTableToBlack(human [8][8]int32, value int32) [64]int32 {
-	var table [64]int32
-	for i := 0; i < 64; i++ {
-		table[i] = value + human[i/8][i%8]
-	}
-	return table
 }
 
 func pestoHumanPieceTables() ([6][8][8]int32, [6][8][8]int32) {

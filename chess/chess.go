@@ -9,14 +9,14 @@ func (pos *Position) PseudoMoves() ([]Move, bool) {
 	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn))
 	switch bits.OnesCount64(uint64(bbAttackedBy)) {
 	case 0:
-		return pos.pseudoMoves(bbFull, false), false
+		return pos.pseudoMoves(bbFull, false, false), false
 	case 1:
 		s1 := bbAttackedBy.scanForward()
 		s2 := pos.board.kingSquare(pos.turn)
 		bbInterference := bbInBetweens[s1][s2] | bbAttackedBy
-		return pos.pseudoMoves(bbInterference, false), true
+		return pos.pseudoMoves(bbInterference, false, false), true
 	default:
-		return pos.kingPseudoMoves(), true
+		return pos.pseudoMoves(bbFull, true, false), true
 	}
 }
 
@@ -25,11 +25,25 @@ func (pos *Position) PseudoMoves() ([]Move, bool) {
 //
 // Some moves may be putting the moving player's king in check and therefore be illegal.
 func (pos *Position) LoudMoves() []Move {
-	return pos.pseudoMoves(bbFull, true)
+	return pos.pseudoMoves(bbFull, false, true)
 }
 
-func (pos *Position) pseudoMoves(bbInterference bitboard, loud bool) []Move {
-	moves := make([]Move, 0, 50)
+// pseudoMoves returns the pseudo moves depending on some options.
+//
+// bbInterference passes the bitboard in which all pieces (except the king) must move to.
+// Use it when the king is in check so that pieces can either attack the checking piece or
+// interfere in case of an attack by a sliding piece.
+//
+// onlyKing returns only the king moves, bypassing all others. Use it when the king is
+// in double check.
+//
+// loud returns only moves that capture enemy pieces. Use it in quiescence search.
+func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) []Move {
+	size := 50
+	if loud {
+		size = 20
+	}
+	moves := make([]Move, 0, size)
 
 	// Setting up variables
 	player, opponent := pos.turn, pos.turn.other()
@@ -47,6 +61,24 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, loud bool) []Move {
 		captureR, captureL = southEast, southWest
 	}
 	bbPawn := pos.board.bbPawn & bbPlayer
+
+	// King moves
+	sqPlayer, sqOpponent := pos.board.kingSquare(player), pos.board.kingSquare(opponent)
+	bbKing := bbKingMoves[sqPlayer] & ^bbKingMoves[sqOpponent] & ^bbPlayer
+	if loud {
+		bbKing &= bbOpponent
+	}
+	for bbs2 := bbKing; bbs2 > 0; bbs2 = bbs2.resetLSB() {
+		s2, p2 := bbs2.scanForward(), NoPiece
+		if s2.bitboard()&bbOpponent > 0 {
+			p2 = pos.board.pieceByColor(s2, opponent)
+		}
+		moves = append(moves, newMove(king, p2, sqPlayer, s2, NoSquare, NoPiece))
+	}
+
+	if onlyKing {
+		return moves
+	}
 
 	// Castles
 	if !loud {
@@ -136,43 +168,6 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, loud bool) []Move {
 				moves = append(moves, newMove(p1, p2, s1, s2, NoSquare, NoPiece))
 			}
 		}
-	}
-
-	// King moves
-	sqPlayer, sqOpponent := pos.board.kingSquare(player), pos.board.kingSquare(opponent)
-	bbKing := bbKingMoves[sqPlayer] & ^bbKingMoves[sqOpponent] & ^bbPlayer
-	if loud {
-		bbKing &= bbOpponent
-	}
-	for bbs2 := bbKing; bbs2 > 0; bbs2 = bbs2.resetLSB() {
-		s2, p2 := bbs2.scanForward(), NoPiece
-		if s2.bitboard()&bbOpponent > 0 {
-			p2 = pos.board.pieceByColor(s2, opponent)
-		}
-		moves = append(moves, newMove(king, p2, sqPlayer, s2, NoSquare, NoPiece))
-	}
-
-	return moves
-}
-
-func (pos *Position) kingPseudoMoves() []Move {
-	moves := make([]Move, 0, 8)
-
-	// Setting up variables
-	player, opponent := pos.turn, pos.turn.other()
-	king := King.color(player)
-	bbPlayer, bbOpponent := pos.board.bbWhite, pos.board.bbBlack
-	if pos.turn == Black {
-		bbPlayer, bbOpponent = pos.board.bbBlack, pos.board.bbWhite
-	}
-
-	sqPlayer, sqOpponent := pos.board.kingSquare(player), pos.board.kingSquare(opponent)
-	for bbs2 := bbKingMoves[sqPlayer] & ^bbKingMoves[sqOpponent] & ^bbPlayer; bbs2 > 0; bbs2 = bbs2.resetLSB() {
-		s2, p2 := bbs2.scanForward(), NoPiece
-		if s2.bitboard()&bbOpponent > 0 {
-			p2 = pos.board.pieceByColor(s2, opponent)
-		}
-		moves = append(moves, newMove(king, p2, sqPlayer, s2, NoSquare, NoPiece))
 	}
 
 	return moves
