@@ -112,7 +112,7 @@ func TestSearch(t *testing.T) {
 			depth: 2,
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 29, Score: 38, Mate: 0, PV: []chess.Move{0x2c106a3}},
-				{Depth: 2, Nodes: 44, Score: 5, Mate: 0, PV: []chess.Move{0x2c106a3, 0x1cc3481}},
+				{Depth: 2, Nodes: 176, Score: 5, Mate: 0, PV: []chess.Move{0x2c106a3, 0x1cc3481}},
 			},
 		},
 		{
@@ -156,10 +156,10 @@ func TestCachedSearch(t *testing.T) {
 			false,
 			[]uci.Output{
 				{Depth: 1, Nodes: 1637, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
-				{Depth: 2, Nodes: 3627, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 103459, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
-				{Depth: 4, Nodes: 170757, Score: 1, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc38d2, 0x2c3455e}},
-				{Depth: 5, Nodes: 4096282, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915}},
+				{Depth: 2, Nodes: 5087, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
+				{Depth: 3, Nodes: 104000, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
+				{Depth: 5, Nodes: 279709, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915}},
+				{Depth: 6, Nodes: 4161537, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
 			},
 		},
 		{
@@ -167,10 +167,10 @@ func TestCachedSearch(t *testing.T) {
 			true,
 			[]uci.Output{
 				{Depth: 1, Nodes: 1637, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
-				{Depth: 2, Nodes: 3986, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 98708, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
-				{Depth: 4, Nodes: 153294, Score: 1, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc38d2, 0x2c3455e}},
-				{Depth: 5, Nodes: 3226640, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915}},
+				{Depth: 2, Nodes: 5446, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
+				{Depth: 3, Nodes: 98743, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
+				{Depth: 4, Nodes: 208992, Score: 1, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc38d2, 0x2c3455e}},
+				{Depth: 5, Nodes: 3195379, Score: 5, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c58b74, 0x1cc38d2, 0x1cc8eed, 0x1cc92cc}},
 			},
 		},
 	}

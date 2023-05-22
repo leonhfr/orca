@@ -46,21 +46,14 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 	}
 
-	moves, inCheck := pos.PseudoMoves()
-	switch {
-	case len(moves) == 0 && inCheck:
-		return searchResult{
-			nodes: 1,
-			score: -mate,
-		}, nil
-	case len(moves) == 0:
-		return searchResult{
-			nodes: 1,
-			score: draw,
-		}, nil
-	case depth == 0:
+	if depth == 0 {
 		result, err := e.quiesce(ctx, pos, -beta, -alpha)
 		return result, err
+	}
+
+	moves, inCheck := pos.PseudoMoves()
+	if inCheck {
+		depth++
 	}
 
 	oracle(moves, cached.best)
@@ -101,10 +94,25 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 	}
 
-	if validMoves > 0 {
-		result.nodes--
-		result.score = incMateDistance(result.score)
+	switch {
+	case validMoves == 0 && inCheck:
+		result = searchResult{
+			nodes: 1,
+			score: -mate,
+		}
+		e.storeResult(hash, depth, result, exact)
+		return result, nil
+	case validMoves == 0:
+		result = searchResult{
+			nodes: 1,
+			score: draw,
+		}
+		e.storeResult(hash, depth, result, exact)
+		return result, nil
 	}
+
+	result.nodes--
+	result.score = incMateDistance(result.score)
 
 	nodeType := exact
 	switch {
@@ -114,16 +122,21 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		nodeType = lowerBound
 	}
 
-	se := searchEntry{
-		hash:     hash,
-		score:    result.score,
-		nodeType: nodeType,
-		depth:    depth,
-	}
-	if len(result.pv) > 0 {
-		se.best = result.pv[len(result.pv)-1]
-	}
-	e.table.set(hash, se)
+	e.storeResult(hash, depth, result, nodeType)
 
 	return result, nil
+}
+
+// storeResult stores a search result in the transposition table.
+func (e *Engine) storeResult(hash chess.Hash, depth uint8, r searchResult, n nodeType) {
+	se := searchEntry{
+		hash:     hash,
+		score:    r.score,
+		nodeType: n,
+		depth:    depth,
+	}
+	if len(r.pv) > 0 {
+		se.best = r.pv[len(r.pv)-1]
+	}
+	e.table.set(hash, se)
 }

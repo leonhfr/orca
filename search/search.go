@@ -155,13 +155,19 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 		if err != nil {
 			return
 		}
+
 		pv := make([]chess.Move, len(o.pv))
 		for i, m := range o.pv {
 			pv[len(o.pv)-i-1] = m
 		}
 
+		maxDepth := int(depth)
+		if len(pv) > maxDepth {
+			maxDepth = len(pv)
+		}
+
 		output <- uci.Output{
-			Depth: int(depth),
+			Depth: maxDepth,
 			Score: int(o.score),
 			Nodes: int(o.nodes),
 			Mate:  int(mateIn(o.score)),
