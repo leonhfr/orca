@@ -146,6 +146,8 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 
 // iterativeSearch performs an iterative search.
 func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth uint8, output chan<- uci.Output) {
+	var nodes uint32
+
 	if maxDepth <= 0 || maxDepth > maxPkgDepth {
 		maxDepth = maxPkgDepth
 	}
@@ -166,10 +168,12 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 			maxDepth = len(pv)
 		}
 
+		nodes += o.nodes
+
 		output <- uci.Output{
 			Depth: maxDepth,
 			Score: int(o.score),
-			Nodes: int(o.nodes),
+			Nodes: int(nodes),
 			Mate:  int(mateIn(o.score)),
 			PV:    pv,
 		}
