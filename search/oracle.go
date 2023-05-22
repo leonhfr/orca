@@ -13,6 +13,13 @@ func oracle(moves []chess.Move, best chess.Move) {
 	})
 }
 
+// loudOracle orders the moves only by MVV-LVA.
+func loudOracle(moves []chess.Move) {
+	sort.Slice(moves, func(i, j int) bool {
+		return rankMvvLva(moves[i]) > rankMvvLva(moves[j])
+	})
+}
+
 // rank ranks the move.
 //
 // Rank is computed according to the following order:
@@ -40,6 +47,11 @@ func rank(m, best chess.Move) int {
 	default:
 		return 0
 	}
+}
+
+// rankMvvLva ranks the move by MVV-LVA.
+func rankMvvLva(m chess.Move) int {
+	return mvvRank[m.P2()] - lvaRank[m.P1()]
 }
 
 const (

@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,15 +22,15 @@ func TestAlphaBeta(t *testing.T) {
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: searchResult{nodes: 863, score: mate - 1},
+			output: searchResult{nodes: 485, score: mate - 1},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: searchResult{nodes: 2020, score: mate - 3},
+			output: searchResult{nodes: 1941, score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 432, score: 49},
+			output: searchResult{nodes: 467, score: 49},
 			moves:  []string{"f8d8", "e7a3", "d5d4"},
 		},
 	}
@@ -42,8 +43,8 @@ func TestAlphaBeta(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			output, err := e.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
 
-			assert.Equal(t, res.output.nodes, output.nodes)
-			assert.Equal(t, res.output.score, output.score)
+			assert.Equal(t, res.output.nodes, output.nodes, fmt.Sprintf("want %d, got %d", res.output.nodes, output.nodes))
+			assert.Equal(t, res.output.score, output.score, fmt.Sprintf("want %d, got %d", res.output.score, output.score))
 			assert.Equal(t, res.moves, movesString(output.pv))
 			assert.Nil(t, err)
 		})

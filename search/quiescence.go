@@ -24,6 +24,8 @@ func (e *Engine) quiesce(ctx context.Context, pos *chess.Position, alpha, beta i
 	}
 
 	moves := pos.LoudMoves()
+	loudOracle(moves)
+
 	var nodes uint32
 	for _, move := range moves {
 		metadata, ok := pos.MakeMove(move)
