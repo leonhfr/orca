@@ -1,3 +1,6 @@
+*.prof
+*.test
 /coverage.out
 /dist
 /orca
+/.todo
