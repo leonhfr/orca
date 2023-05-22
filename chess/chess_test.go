@@ -210,23 +210,25 @@ func perft(pos *Position, depth int) int {
 	}
 
 	var count int
+	hash := pos.Hash()
 	pseudoMoves := pos.pseudoMoves(bbFull, true, false, false)
 	for _, m := range pseudoMoves {
 		if meta, ok := pos.MakeMove(m); ok {
 			count += perft(pos, depth-1)
-			pos.UnmakeMove(m, meta)
+			pos.UnmakeMove(m, meta, hash)
 		}
 	}
 	return count
 }
 
 func legalMoves(pos *Position) []Move {
+	hash := pos.Hash()
 	var moves []Move
 	pseudoMoves := pos.pseudoMoves(bbFull, true, false, false)
 	for _, m := range pseudoMoves {
 		if meta, ok := pos.MakeMove(m); ok {
 			moves = append(moves, m)
-			pos.UnmakeMove(m, meta)
+			pos.UnmakeMove(m, meta, hash)
 		}
 	}
 	return moves

@@ -20,7 +20,7 @@ func evaluate(pos *chess.Position) int32 {
 		phase = 24 // in case of early promotion
 	}
 
-	if phase <= 12 || pos.FullMoves() > 16 {
+	if phase <= 6 || pos.FullMoves() > 16 {
 		pos.PieceMap(func(p chess.Piece, sq chess.Square) {
 			mgValue := pestoMGPieceTables[p][sq]
 			egValue := pestoEGPieceTables[p][sq]

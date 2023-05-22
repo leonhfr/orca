@@ -52,6 +52,7 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 	default:
 	}
 
+	hash := pos.Hash()
 	moves, inCheck := pos.PseudoMoves()
 	switch {
 	case len(moves) == 0 && inCheck:
@@ -96,7 +97,7 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 			result.pv = append(current.pv, move)
 		}
 
-		pos.UnmakeMove(move, metadata)
+		pos.UnmakeMove(move, metadata, hash)
 	}
 
 	if validMoves > 0 {

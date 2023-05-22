@@ -146,23 +146,14 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 }
 
 // UnmakeMove unmakes a move and restores the previous position.
-func (pos *Position) UnmakeMove(m Move, meta Metadata) {
-	cr := pos.castlingRights
-	if pos.enPassant != NoSquare {
-		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
-			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
-	}
+func (pos *Position) UnmakeMove(m Move, meta Metadata, hash Hash) {
 	pos.board.makeMove(m)
 	pos.turn = meta.turn()
 	pos.castlingRights = meta.castleRights()
 	pos.enPassant = meta.enPassant()
-	if pos.enPassant != NoSquare {
-		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
-			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
-	}
-	pos.hash ^= xorHashPartialMove(m, cr, pos.castlingRights)
 	pos.halfMoveClock = meta.halfMoveClock()
 	pos.fullMoves = meta.fullMoves()
+	pos.hash = hash
 }
 
 // CountPieces returns the count of knights, bishops, rooks, and queens.
@@ -194,8 +185,8 @@ func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
 	cb(WhiteKing, (pos.board.bbWhite & pos.board.bbKing).scanForward())
 }
 
-// PieceMap executes the callback for each piece on the board that do not have an
-// opponent mirrored piece, passing the piece and its square as arguments.
+// UniquePieceMap executes the callback for each piece on the board that do not
+// have an opponent mirrored piece, passing the piece and its square as arguments.
 // Intended to be used in evaluation functions.
 func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
 	bbBlack, bbWhite := pos.board.bbBlack, pos.board.bbWhite

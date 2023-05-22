@@ -22,8 +22,9 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	default:
 	}
 
+	hash := pos.Hash()
 	alphaOriginal := alpha
-	cached, ok := e.table.get(pos.Hash())
+	cached, ok := e.table.get(hash)
 	if ok && cached.depth >= depth {
 		switch {
 		case cached.nodeType == exact:
@@ -93,7 +94,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 			alpha = current.score
 		}
 
-		pos.UnmakeMove(move, metadata)
+		pos.UnmakeMove(move, metadata, hash)
 
 		if alpha >= beta {
 			break
@@ -120,7 +121,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	if len(result.pv) > 0 {
 		se.best = result.pv[len(result.pv)-1]
 	}
-	e.table.set(pos.Hash(), se)
+	e.table.set(hash, se)
 
 	return result, nil
 }

@@ -13,6 +13,7 @@ func (e *Engine) quiesce(ctx context.Context, pos *chess.Position, alpha, beta i
 	default:
 	}
 
+	hash := pos.Hash()
 	if standPat := evaluate(pos); standPat >= beta {
 		return searchResult{
 			nodes: 1,
@@ -37,7 +38,7 @@ func (e *Engine) quiesce(ctx context.Context, pos *chess.Position, alpha, beta i
 
 		current.score = -current.score
 		nodes += current.nodes
-		pos.UnmakeMove(move, metadata)
+		pos.UnmakeMove(move, metadata, hash)
 
 		if current.score >= beta {
 			return searchResult{
