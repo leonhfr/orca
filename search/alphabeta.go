@@ -46,9 +46,12 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 	}
 
+	result := searchResult{
+		score: -mate,
+	}
+
 	if depth == 0 {
-		result, err := e.quiesce(ctx, pos, -beta, -alpha)
-		return result, err
+		return e.quiesce(ctx, pos, -beta, -alpha)
 	}
 
 	moves, inCheck := pos.PseudoMoves()
@@ -57,11 +60,6 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	oracle(moves, cached.best)
-
-	result := searchResult{
-		nodes: 1,
-		score: -mate,
-	}
 
 	var validMoves int
 	for _, move := range moves {
@@ -96,35 +94,38 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 
 	switch {
 	case validMoves == 0 && inCheck:
-		result = searchResult{
+		mateResult := searchResult{
 			nodes: 1,
 			score: -mate,
 		}
 		e.storeResult(hash, depth, result, exact)
-		return result, nil
+		return mateResult, nil
 	case validMoves == 0:
-		result = searchResult{
+		drawResult := searchResult{
 			nodes: 1,
 			score: draw,
 		}
 		e.storeResult(hash, depth, result, exact)
-		return result, nil
+		return drawResult, nil
 	}
 
-	result.nodes--
 	result.score = incMateDistance(result.score)
-
-	nodeType := exact
-	switch {
-	case result.score <= alphaOriginal:
-		nodeType = upperBound
-	case result.score >= beta:
-		nodeType = lowerBound
-	}
-
+	nodeType := getNodeType(alphaOriginal, beta, result.score)
 	e.storeResult(hash, depth, result, nodeType)
 
 	return result, nil
+}
+
+// getNodeType returns the node type according to the alpha and beta bounds.
+func getNodeType(alpha, beta, score int32) nodeType {
+	switch {
+	case score <= alpha:
+		return upperBound
+	case score >= beta:
+		return lowerBound
+	default:
+		return exact
+	}
 }
 
 // storeResult stores a search result in the transposition table.
