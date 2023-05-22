@@ -142,6 +142,57 @@ func TestSearch(t *testing.T) {
 	}
 }
 
+func TestCachedSearch(t *testing.T) {
+	fen := "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"
+	depth := 5
+
+	tests := []struct {
+		name   string
+		cached bool
+		want   []uci.Output
+	}{
+		{
+			"not cached",
+			false,
+			[]uci.Output{
+				{PV: []chess.Move{0x1cc58da}, Depth: 1, Nodes: 43316, Score: 15, Mate: 0},
+				{PV: []chess.Move{0x1cc17cf, 0x1cc49de}, Depth: 2, Nodes: 61642, Score: 0, Mate: 0},
+				{PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}, Depth: 3, Nodes: 1552441, Score: 3, Mate: 0},
+				{PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc38d2, 0x2c3455e}, Depth: 4, Nodes: 1504186, Score: 1, Mate: 0},
+				{PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915}, Depth: 5, Nodes: 51154871, Score: 0, Mate: 0},
+			},
+		},
+		{
+			"cached",
+			true,
+			[]uci.Output{
+				{PV: []chess.Move{0x1cc58da}, Depth: 1, Nodes: 43316, Score: 15, Mate: 0},
+				{PV: []chess.Move{0x1cc17cf, 0x1cc49de}, Depth: 2, Nodes: 75195, Score: 0, Mate: 0},
+				{PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}, Depth: 3, Nodes: 1663108, Score: 3, Mate: 0},
+				{PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc38d2, 0x2c3455e}, Depth: 4, Nodes: 1343211, Score: 1, Mate: 0},
+				{PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915}, Depth: 5, Nodes: 38982751, Score: 0, Mate: 0},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			engine := New()
+			_ = engine.Init()
+			if !tt.cached {
+				engine.table = noTable{}
+			}
+			pos := unsafeFEN(fen)
+			var outputs []uci.Output
+			output := engine.Search(context.Background(), pos, depth)
+			for o := range output {
+				outputs = append(outputs, o)
+			}
+			assert.Equal(t, tt.want, outputs)
+		})
+	}
+}
+
 func BenchmarkCachedSearch(b *testing.B) {
 	fen := "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"
 	depth := 5

@@ -115,8 +115,10 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	se := searchEntry{
+		hash:     hash,
 		score:    result.score,
 		nodeType: nodeType,
+		depth:    depth,
 	}
 	if len(result.pv) > 0 {
 		se.best = result.pv[len(result.pv)-1]
