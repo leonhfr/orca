@@ -5,7 +5,6 @@ import "github.com/leonhfr/orca/chess"
 var (
 	pestoMGPieceTables = [12][64]int32{}
 	pestoEGPieceTables = [12][64]int32{}
-	pestoGamePhaseInc  = [12]int32{0, 0, 1, 1, 1, 1, 2, 2, 4, 4, 0, 0}
 )
 
 func init() {

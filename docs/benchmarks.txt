@@ -3,74 +3,78 @@ goos: darwin
 goarch: amd64
 pkg: github.com/leonhfr/orca/chess
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkRookBishopMoves/r-magic-12         	512803311	         2.152 ns/op	       0 B/op	       0 allocs/op
-BenchmarkRookBishopMoves/r-slow-12          	 2133470	       559.7 ns/op	       0 B/op	       0 allocs/op
-BenchmarkRookBishopMoves/b-magic-12         	563094501	         2.132 ns/op	       0 B/op	       0 allocs/op
-BenchmarkRookBishopMoves/b-slow-12          	 2211946	       523.6 ns/op	       0 B/op	       0 allocs/op
-BenchmarkBoard_PieceAt/e1-12                	167118010	         6.916 ns/op	       0 B/op	       0 allocs/op
-BenchmarkBoard_PieceAt/e4-12                	173017795	         6.837 ns/op	       0 B/op	       0 allocs/op
-BenchmarkBoard_PieceAt/b7-12                	157269279	         7.309 ns/op	       0 B/op	       0 allocs/op
-BenchmarkBoard_PieceByColor/e1-12           	235326110	         4.840 ns/op	       0 B/op	       0 allocs/op
-BenchmarkBoard_PieceByColor/e4-12           	241280449	         5.167 ns/op	       0 B/op	       0 allocs/op
-BenchmarkBoard_PieceByColor/b7-12           	245166069	         4.789 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPseudoMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1-12         	 4468652	       243.9 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/2r3k1/1q1nbppp/r3p3/3pP3/pPpP4/P1Q2N2/2RN1PPP/2R4K_b_-_b3_0_23-12   	 2685624	       400.2 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B1K2R_w_KQkq_-_1_9-12         	 3170806	       364.4 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1#01-12                	 5058831	       236.1 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/R3K2R_w_KQkq_-_3_10-12         	 3347568	       340.6 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/r1bqkbnr/ppp1pppp/2n5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_-_2_3-12           	 3739782	       342.5 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/8/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_f6_0_4-12          	 3295494	       341.5 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/3N4/8/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_4-12           	 3872025	       307.6 ns/op	     208 B/op	       1 allocs/op
-BenchmarkPseudoMoves/r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1_w_-_-_0_1-12                              	 6449064	       234.3 ns/op	     208 B/op	       1 allocs/op
-BenchmarkLoudMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1-12                     	12207226	        92.48 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/2r3k1/1q1nbppp/r3p3/3pP3/pPpP4/P1Q2N2/2RN1PPP/2R4K_b_-_b3_0_23-12               	 9824790	       147.3 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B1K2R_w_KQkq_-_1_9-12           	 9649838	       107.8 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1#01-12                  	11828997	        89.80 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/R3K2R_w_KQkq_-_3_10-12           	10790286	       104.5 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/r1bqkbnr/ppp1pppp/2n5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_-_2_3-12             	11971549	        95.49 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/8/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_f6_0_4-12            	12077749	        94.08 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/3N4/8/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_4-12             	10453858	       112.2 ns/op	      80 B/op	       1 allocs/op
-BenchmarkLoudMoves/r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1_w_-_-_0_1-12                                	11619488	        99.23 ns/op	      80 B/op	       1 allocs/op
-BenchmarkPosition_MakeMove/e2e4-12                                                                 	24581923	        47.72 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/a4b3-12                                                                 	23247675	        49.48 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/e1g1-12                                                                 	16663534	        64.13 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/g1f3-12                                                                 	26422177	        39.91 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/e1c1-12                                                                 	19204312	        64.71 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/e4d5-12                                                                 	24775796	        45.87 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/e5f6-12                                                                 	21661021	        52.87 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/c6d4-12                                                                 	30021897	        40.24 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPosition_MakeMove/b7a8q-12                                                                	26243449	        43.22 ns/op	       0 B/op	       0 allocs/op
-BenchmarkZobristHash-12                                                                            	15215478	        79.98 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRookBishopMoves/r-magic-12         	511318646	         2.093 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRookBishopMoves/r-slow-12          	 2243095	       503.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRookBishopMoves/b-magic-12         	591612189	         2.042 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRookBishopMoves/b-slow-12          	 2174962	       520.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkBoard_PieceAt/e1-12                	172049514	         6.806 ns/op	       0 B/op	       0 allocs/op
+BenchmarkBoard_PieceAt/e4-12                	174247346	         6.857 ns/op	       0 B/op	       0 allocs/op
+BenchmarkBoard_PieceAt/b7-12                	176964945	         6.810 ns/op	       0 B/op	       0 allocs/op
+BenchmarkBoard_PieceByColor/e1-12           	256763769	         4.737 ns/op	       0 B/op	       0 allocs/op
+BenchmarkBoard_PieceByColor/e4-12           	246899736	         4.836 ns/op	       0 B/op	       0 allocs/op
+BenchmarkBoard_PieceByColor/b7-12           	253608198	         4.709 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPseudoMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1-12         	 4620666	       250.9 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/2r3k1/1q1nbppp/r3p3/3pP3/pPpP4/P1Q2N2/2RN1PPP/2R4K_b_-_b3_0_23-12   	 2914896	       411.2 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B1K2R_w_KQkq_-_1_9-12         	 3028999	       390.5 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1#01-12                	 4789173	       278.9 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/R3K2R_w_KQkq_-_3_10-12         	 3253918	       372.0 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/r1bqkbnr/ppp1pppp/2n5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_-_2_3-12           	 3897158	       314.1 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/8/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_f6_0_4-12          	 3747741	       304.6 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/3N4/8/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_4-12           	 4163325	       304.1 ns/op	     208 B/op	       1 allocs/op
+BenchmarkPseudoMoves/r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1_w_-_-_0_1-12                              	 7155345	       157.1 ns/op	     208 B/op	       1 allocs/op
+BenchmarkLoudMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1-12                     	13503936	        86.79 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/2r3k1/1q1nbppp/r3p3/3pP3/pPpP4/P1Q2N2/2RN1PPP/2R4K_b_-_b3_0_23-12               	 8907280	       133.7 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B1K2R_w_KQkq_-_1_9-12           	10499665	       114.4 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1#01-12                  	12423475	        87.28 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/R3K2R_w_KQkq_-_3_10-12           	10437403	       113.5 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/r1bqkbnr/ppp1pppp/2n5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_-_2_3-12             	11363121	       100.5 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/8/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_f6_0_4-12            	11477223	       102.1 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/r1bqkbnr/ppp1p1pp/2n5/3pPp2/3N4/8/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_4-12             	11030410	       107.7 ns/op	      80 B/op	       1 allocs/op
+BenchmarkLoudMoves/r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1_w_-_-_0_1-12                                	13530366	        88.13 ns/op	      80 B/op	       1 allocs/op
+BenchmarkPosition_MakeMove/e2e4-12                                                                 	26000955	        45.91 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/a4b3-12                                                                 	25926620	        44.31 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/e1g1-12                                                                 	19693611	        60.57 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/g1f3-12                                                                 	30199068	        38.52 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/e1c1-12                                                                 	18450016	        60.99 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/e4d5-12                                                                 	25220256	        45.00 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/e5f6-12                                                                 	24119544	        49.50 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/c6d4-12                                                                 	31508698	        38.14 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPosition_MakeMove/b7a8q-12                                                                	26630686	        41.08 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPieceMap/starting_position-12                                                             	15681424	        74.42 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPieceMap/partial_mirror-12                                                                	14353353	        76.05 ns/op	       0 B/op	       0 allocs/op
+BenchmarkUniquePieceMap/starting_position-12                                                       	58242175	        19.48 ns/op	       0 B/op	       0 allocs/op
+BenchmarkUniquePieceMap/partial_mirror-12                                                          	34267359	        33.99 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZobristHash-12                                                                            	15848397	        75.98 ns/op	       0 B/op	       0 allocs/op
 PASS
-ok  	github.com/leonhfr/orca/chess	55.739s
+ok  	github.com/leonhfr/orca/chess	60.225s
 ?   	github.com/leonhfr/orca/data/books	[no test files]
 ?   	github.com/leonhfr/orca/data/test	[no test files]
 goos: darwin
 goarch: amd64
 pkg: github.com/leonhfr/orca/search
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkAlphaBeta/checkmate-12         	 2884114	       351.5 ns/op	     264 B/op	       3 allocs/op
-BenchmarkAlphaBeta/mate_in_1-12         	  165367	      6953 ns/op	    4040 B/op	      40 allocs/op
-BenchmarkAlphaBeta/mate_in_1#01-12      	   23052	     52117 ns/op	   14328 B/op	      96 allocs/op
-BenchmarkAlphaBeta/mate_in_2-12         	     230	   5188092 ns/op	 1286059 B/op	    9588 allocs/op
-BenchmarkAlphaBeta/horizon_effect-12    	    4401	    275541 ns/op	   89944 B/op	     680 allocs/op
-BenchmarkEvaluate/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1-12         	 6341017	       199.1 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/2r3k1/1q1nbppp/r3p3/3pP3/pPpP4/P1Q2N2/2RN1PPP/2R4K_b_-_b3_0_23-12   	 7550785	       162.7 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B1K2R_w_KQkq_-_1_9-12         	 6506898	       185.3 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1#01-12                	 6340542	       192.1 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/R3K2R_w_KQkq_-_3_10-12         	 6373567	       188.8 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/r1bqkbnr/ppp1pppp/2n5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_-_2_3-12           	 5679499	       203.5 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/r1bqkbnr/ppp1p1pp/2n5/3pPp2/8/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_f6_0_4-12          	 5141064	       211.5 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/r1bqkbnr/ppp1p1pp/2n5/3pPp2/3N4/8/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_4-12           	 6209023	       190.5 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEvaluate/r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1_w_-_-_0_1-12                              	13066801	        90.98 ns/op	       0 B/op	       0 allocs/op
-BenchmarkNegamax/checkmate-12                                                                   	 5294068	       206.8 ns/op	     208 B/op	       1 allocs/op
-BenchmarkNegamax/mate_in_1-12                                                                   	   67707	     19655 ns/op	   11360 B/op	      70 allocs/op
-BenchmarkNegamax/mate_in_1#01-12                                                                	    1188	    913446 ns/op	  280826 B/op	    1489 allocs/op
-BenchmarkNegamax/mate_in_2-12                                                                   	       1	2883480932 ns/op	1171228400 B/op	 5337299 allocs/op
-BenchmarkNegamax/horizon_effect-12                                                              	     213	   5401436 ns/op	 2102257 B/op	   11154 allocs/op
-BenchmarkCachedSearch/not_cached-12                                                             	       5	 228679174 ns/op	54348342 B/op	  338174 allocs/op
-BenchmarkCachedSearch/cached-12                                                                 	       4	 297451013 ns/op	50539476 B/op	  499606 allocs/op
+BenchmarkAlphaBeta/checkmate-12         	 3946983	       291.4 ns/op	     264 B/op	       3 allocs/op
+BenchmarkAlphaBeta/mate_in_1-12         	  109844	     10673 ns/op	    7048 B/op	      71 allocs/op
+BenchmarkAlphaBeta/mate_in_1#01-12      	    2082	    563512 ns/op	  112105 B/op	    1314 allocs/op
+BenchmarkAlphaBeta/mate_in_2-12         	     226	   4931812 ns/op	 1344703 B/op	   10314 allocs/op
+BenchmarkAlphaBeta/horizon_effect-12    	    2313	    496525 ns/op	  152985 B/op	    1578 allocs/op
+BenchmarkEvaluate/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1-12         	32393755	        34.78 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/2r3k1/1q1nbppp/r3p3/3pP3/pPpP4/P1Q2N2/2RN1PPP/2R4K_b_-_b3_0_23-12   	10911760	       106.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B1K2R_w_KQkq_-_1_9-12         	19368302	        61.59 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1#01-12                	33439806	        36.60 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/R3K2R_w_KQkq_-_3_10-12         	16911177	        72.59 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/r1bqkbnr/ppp1pppp/2n5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_-_2_3-12           	17311314	        66.72 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/r1bqkbnr/ppp1p1pp/2n5/3pPp2/8/5N2/PPPP1PPP/RNBQKB1R_w_KQkq_f6_0_4-12          	15425172	        71.03 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/r1bqkbnr/ppp1p1pp/2n5/3pPp2/3N4/8/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_4-12           	14153257	        83.55 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEvaluate/r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1_w_-_-_0_1-12                              	19559960	        63.11 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNegamax/checkmate-12                                                                   	 6616407	       180.1 ns/op	     208 B/op	       1 allocs/op
+BenchmarkNegamax/mate_in_1-12                                                                   	   54332	     19578 ns/op	   11360 B/op	      70 allocs/op
+BenchmarkNegamax/mate_in_1#01-12                                                                	    1256	    846557 ns/op	  280795 B/op	    1485 allocs/op
+BenchmarkNegamax/mate_in_2-12                                                                   	       1	2688617053 ns/op	1162008480 B/op	 5245669 allocs/op
+BenchmarkNegamax/horizon_effect-12                                                              	     237	   5046240 ns/op	 2094295 B/op	   11808 allocs/op
+BenchmarkCachedSearch/not_cached-12                                                             	       1	37081439918 ns/op	5730248760 B/op	71490617 allocs/op
+BenchmarkCachedSearch/cached-12                                                                 	       1	33926368627 ns/op	5679903920 B/op	70868185 allocs/op
 PASS
-ok  	github.com/leonhfr/orca/search	33.558s
+ok  	github.com/leonhfr/orca/search	98.743s
 PASS
-ok  	github.com/leonhfr/orca/uci	0.234s
+ok  	github.com/leonhfr/orca/uci	0.433s

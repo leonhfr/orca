@@ -2,6 +2,7 @@ package chess
 
 import (
 	"fmt"
+	"math/bits"
 	"strings"
 )
 
@@ -77,6 +78,11 @@ func (pos *Position) Hash() Hash {
 // Turn returns the color of the next player to move in this position.
 func (pos Position) Turn() Color {
 	return pos.turn
+}
+
+// FullMoves returns the number of full moves.
+func (pos Position) FullMoves() uint8 {
+	return pos.fullMoves
 }
 
 // MakeMove makes a move.
@@ -159,15 +165,15 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata) {
 	pos.fullMoves = meta.fullMoves()
 }
 
-// InCheck returns whether the current player is in check.
-func (pos *Position) InCheck() bool {
-	return pos.isSquareAttacked(pos.board.kingSquare(pos.turn))
+// CountPieces returns the count of knights, bishops, rooks, and queens.
+func (pos *Position) CountPieces() (int, int, int, int) {
+	return pos.board.bbKnight.ones(), pos.board.bbBishop.ones(), pos.board.bbRook.ones(), pos.board.bbQueen.ones()
 }
 
 // PieceMap executes the callback for each piece on the board, passing the piece
 // and its square as arguments. Intended to be used in evaluation functions.
 func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
-	for p, bb := range [12]bitboard{
+	for p, bb := range [10]bitboard{
 		pos.board.bbBlack & pos.board.bbPawn,
 		pos.board.bbWhite & pos.board.bbPawn,
 		pos.board.bbBlack & pos.board.bbKnight,
@@ -178,13 +184,47 @@ func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
 		pos.board.bbWhite & pos.board.bbRook,
 		pos.board.bbBlack & pos.board.bbQueen,
 		pos.board.bbWhite & pos.board.bbQueen,
-		pos.board.bbBlack & pos.board.bbKing,
-		pos.board.bbWhite & pos.board.bbKing,
 	} {
 		for ; bb > 0; bb = bb.resetLSB() {
 			cb(Piece(p), bb.scanForward())
 		}
 	}
+
+	cb(BlackKing, (pos.board.bbBlack & pos.board.bbKing).scanForward())
+	cb(WhiteKing, (pos.board.bbWhite & pos.board.bbKing).scanForward())
+}
+
+// PieceMap executes the callback for each piece on the board that do not have an
+// opponent mirrored piece, passing the piece and its square as arguments.
+// Intended to be used in evaluation functions.
+func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
+	bbBlack, bbWhite := pos.board.bbBlack, pos.board.bbWhite
+	bbKing := pos.board.bbKing
+	bbQueen := pos.board.bbQueen
+	bbRook := pos.board.bbRook
+	bbBishop := pos.board.bbBishop
+	bbKnight := pos.board.bbKnight
+	bbPawn := pos.board.bbPawn
+
+	for p, bb := range [10]bitboard{
+		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbPawn))) & bbBlack & bbPawn,
+		^bitboard(bits.ReverseBytes64(uint64(bbBlack&bbPawn))) & bbWhite & bbPawn,
+		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbKnight))) & bbBlack & bbKnight,
+		^bitboard(bits.ReverseBytes64(uint64(bbBlack&bbKnight))) & bbWhite & bbKnight,
+		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbBishop))) & bbBlack & bbBishop,
+		^bitboard(bits.ReverseBytes64(uint64(bbBlack&bbBishop))) & bbWhite & bbBishop,
+		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbRook))) & bbBlack & bbRook,
+		^bitboard(bits.ReverseBytes64(uint64(bbBlack&bbRook))) & bbWhite & bbRook,
+		bbBlack & bbQueen,
+		bbWhite & bbQueen,
+	} {
+		for ; bb > 0; bb = bb.resetLSB() {
+			cb(Piece(p), bb.scanForward())
+		}
+	}
+
+	cb(BlackKing, (bbBlack & bbKing).scanForward())
+	cb(WhiteKing, (bbWhite & bbKing).scanForward())
 }
 
 // String implements the Stringer interface.

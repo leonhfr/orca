@@ -12,26 +12,41 @@ import "github.com/leonhfr/orca/chess"
 //
 // Source: https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
 func evaluate(pos *chess.Position) int32 {
-	var mg, eg, phase int32
+	var mg, eg int32
+	player := pos.Turn()
+	knights, bishops, rooks, queens := pos.CountPieces()
+	phase := int32(knights + bishops + 2*rooks + 4*queens)
+	if phase > 24 {
+		phase = 24 // in case of early promotion
+	}
 
-	pos.PieceMap(func(p chess.Piece, sq chess.Square) {
+	if phase <= 12 || pos.FullMoves() > 16 {
+		pos.PieceMap(func(p chess.Piece, sq chess.Square) {
+			mgValue := pestoMGPieceTables[p][sq]
+			egValue := pestoEGPieceTables[p][sq]
+			if p.Color() == player {
+				mg += mgValue
+				eg += egValue
+			} else {
+				mg -= mgValue
+				eg -= egValue
+			}
+		})
+
+		return (phase*mg + (24-phase)*eg) / 24
+	}
+
+	pos.UniquePieceMap(func(p chess.Piece, sq chess.Square) {
 		mgValue := pestoMGPieceTables[p][sq]
 		egValue := pestoEGPieceTables[p][sq]
-
-		if p.Color() == pos.Turn() {
+		if p.Color() == player {
 			mg += mgValue
 			eg += egValue
 		} else {
 			mg -= mgValue
 			eg -= egValue
 		}
-
-		phase += pestoGamePhaseInc[p.Type()]
 	})
-
-	if phase > 24 {
-		phase = 24 // in case of early promotion
-	}
 
 	return (phase*mg + (24-phase)*eg) / 24
 }
