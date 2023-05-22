@@ -29,7 +29,7 @@ jobs:
           version: v1.52
 
       - name: Test
-        run: go test -v ./...
+        run: go test -race -v ./...
 
       - name: Build
         uses: goreleaser/goreleaser-action@v2

@@ -17,6 +17,10 @@ gen:
 test:
 	go test ./...
 
+.PHONY: test-race
+test-race:
+	go test -race ./...
+
 .PHONY: bench
 bench:
 	go test -bench . ./... -benchmem -run=^# | tee ./docs/benchmarks.txt

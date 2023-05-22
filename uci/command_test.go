@@ -65,15 +65,16 @@ func TestCommandIsReady(t *testing.T) {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
 			e := new(mockEngine)
 			e.On("Init").Return(tt.err)
-			w := &strings.Builder{}
-			s := NewState("", "", w)
+
 			want := concatenateResponses(tt.rr)
 			if len(tt.logs) > 0 {
 				want = strings.Join(tt.logs, "\n") + "\n" + want
 			}
+			w := newMockWaitWriter(len(want))
+			s := NewState("", "", w)
 
 			commandIsReady{}.run(context.Background(), e, s)
-			time.Sleep(10 * time.Millisecond)
+			w.Wait()
 
 			e.AssertExpectations(t)
 			assert.Equal(t, want, w.String())

@@ -3,14 +3,11 @@ package search
 import (
 	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/leonhfr/orca/chess"
 )
-
-var wait = 10 * time.Millisecond
 
 func TestNewTable(t *testing.T) {
 	table := newArrayTable(1)
@@ -44,7 +41,6 @@ func TestTableSet(t *testing.T) {
 	defer table.close()
 
 	table.set(hash, want)
-	time.Sleep(wait)
 	entry, ok := table.get(hash)
 
 	require.True(t, ok)
