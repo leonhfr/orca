@@ -115,7 +115,7 @@ func (e *Engine) SetOption(name, value string) error {
 // Cancelling the context stops the search.
 //
 // Implements the uci.Engine interface.
-func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan uci.Output {
+func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int) <-chan uci.Output {
 	_ = e.Init()
 	output := make(chan uci.Output)
 
@@ -138,22 +138,25 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth int) 
 		}
 
 		e.table.inc()
-		e.iterativeSearch(ctx, pos, uint8(maxDepth), output)
+		e.iterativeSearch(ctx, pos, maxDepth, maxNodes, output)
 	}()
 
 	return output
 }
 
 // iterativeSearch performs an iterative search.
-func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth uint8, output chan<- uci.Output) {
-	var nodes uint32
-
+func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- uci.Output) {
 	if maxDepth <= 0 || maxDepth > maxPkgDepth {
 		maxDepth = maxPkgDepth
 	}
 
-	for depth := uint8(1); depth <= maxDepth; depth++ {
-		o, err := e.alphaBeta(ctx, pos, -mate, mate, depth)
+	if maxNodes <= 0 {
+		maxNodes = math.MaxUint32
+	}
+
+	var nodes int
+	for depth := 1; depth <= maxDepth; depth++ {
+		o, err := e.alphaBeta(ctx, pos, -mate, mate, uint8(depth))
 		if err != nil {
 			return
 		}
@@ -163,19 +166,23 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 			pv[len(o.pv)-i-1] = m
 		}
 
-		maxDepth := int(depth)
+		maxDepth := depth
 		if len(pv) > maxDepth {
 			maxDepth = len(pv)
 		}
 
-		nodes += o.nodes
+		nodes += int(o.nodes)
 
 		output <- uci.Output{
 			Depth: maxDepth,
 			Score: int(o.score),
-			Nodes: int(nodes),
+			Nodes: nodes,
 			Mate:  int(mateIn(o.score)),
 			PV:    pv,
+		}
+
+		if nodes >= maxNodes {
+			break
 		}
 	}
 }

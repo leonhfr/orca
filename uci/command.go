@@ -265,9 +265,9 @@ type commandGo struct {
 func (c commandGo) run(ctx context.Context, e Engine, s *State) {
 	s.mu.Lock()
 	start := time.Now()
-	ctx, cancel := searchContext(ctx, s.stop)
+	ctx, cancel := searchContext(ctx, s.stop, c.moveTime)
 
-	outputs := e.Search(ctx, s.position, c.depth)
+	outputs := e.Search(ctx, s.position, c.depth, c.nodes)
 
 	go func() {
 		defer s.mu.Unlock()
@@ -288,8 +288,11 @@ func (c commandGo) run(ctx context.Context, e Engine, s *State) {
 
 // searchContext creates a new context that is cancelled when
 // a struct is emitted on the stop channel.
-func searchContext(ctx context.Context, stop <-chan struct{}) (context.Context, context.CancelFunc) {
-	ctx, cancel := context.WithCancel(ctx)
+func searchContext(ctx context.Context, stop <-chan struct{}, limit time.Duration) (context.Context, context.CancelFunc) {
+	if limit == 0 {
+		limit = time.Hour
+	}
+	ctx, cancel := context.WithTimeout(ctx, limit)
 
 	go func() {
 		select {

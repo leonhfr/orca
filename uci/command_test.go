@@ -187,7 +187,7 @@ func TestCommandGo(t *testing.T) {
 		rr []response
 	}{
 		{
-			commandGo{},
+			commandGo{depth: 32, nodes: 2048},
 			[]Output{output1, output2},
 			[]response{
 				responseOutput{Output: output1, time: 1 * time.Nanosecond},
@@ -205,7 +205,7 @@ func TestCommandGo(t *testing.T) {
 				oc <- o
 			}
 			close(oc)
-			e.On("Search", mock.Anything, mock.Anything, mock.Anything).Return(oc)
+			e.On("Search", mock.Anything, mock.Anything, tt.c.depth, tt.c.nodes).Return(oc)
 
 			expected := concatenateResponses(tt.rr)
 			w := newMockWaitWriter(len(expected))

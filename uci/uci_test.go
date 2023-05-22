@@ -31,6 +31,9 @@ type mockEngine struct {
 	mock.Mock
 }
 
+// compile time check that mockEngine implements Engine.
+var _ Engine = (*mockEngine)(nil)
+
 // Init implements the Engine interface.
 func (me *mockEngine) Init() error {
 	args := me.Called()
@@ -61,8 +64,8 @@ func (me *mockEngine) SetOption(name, value string) error {
 }
 
 // Search implements the Engine interface.
-func (me *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan Output {
-	args := me.Called(ctx, pos, maxDepth)
+func (me *mockEngine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int) <-chan Output {
+	args := me.Called(ctx, pos, maxDepth, maxNodes)
 	return args.Get(0).(chan Output)
 }
 

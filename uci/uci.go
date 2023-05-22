@@ -21,7 +21,7 @@ type Engine interface {
 	SetOption(name, value string) error
 	// Search runs a search on the given position until the given depth.
 	// Cancelling the context stops the search.
-	Search(ctx context.Context, pos *chess.Position, maxDepth int) <-chan Output
+	Search(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int) <-chan Output
 }
 
 // Run runs the program in UCI mode.

@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,6 +10,9 @@ import (
 	"github.com/leonhfr/orca/chess"
 	"github.com/leonhfr/orca/uci"
 )
+
+// compile time check that Engine implements uci.Engine.
+var _ uci.Engine = (*Engine)(nil)
 
 func TestNew(t *testing.T) {
 	e := New()
@@ -94,6 +98,7 @@ func TestSearch(t *testing.T) {
 		name    string
 		fen     string
 		depth   int
+		nodes   int
 		book    bool
 		outputs []uci.Output
 	}{
@@ -103,7 +108,7 @@ func TestSearch(t *testing.T) {
 			depth: 2,
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 304, Score: 21, Mate: 0, PV: []chess.Move{0x2c1235c}},
-				{Depth: 2, Nodes: 579, Score: mate - 1, Mate: 1, PV: []chess.Move{0x2c1836d}},
+				{Depth: 2, Nodes: 789, Score: mate - 1, Mate: 1, PV: []chess.Move{0x2c1836d}},
 			},
 		},
 		{
@@ -122,16 +127,28 @@ func TestSearch(t *testing.T) {
 			book:    true,
 			outputs: []uci.Output{{PV: []chess.Move{0x1cc2b7e}, Depth: 1, Nodes: 1, Score: 1, Mate: 0}},
 		},
+		{
+			name:  "nodes limit",
+			fen:   "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+			nodes: 8192,
+			depth: 5,
+			outputs: []uci.Output{
+				{Depth: 1, Nodes: 1637, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
+				{Depth: 2, Nodes: 6724, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
+				{Depth: 3, Nodes: 110724, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			engine := New()
+			_ = engine.Init()
 			if tt.book {
 				engine.ownBook = true
 			}
 			engine.table = noTable{}
-			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth)
+			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth, tt.nodes)
 			var outputs []uci.Output
 			for o := range output {
 				outputs = append(outputs, o)
@@ -184,7 +201,7 @@ func TestCachedSearch(t *testing.T) {
 			}
 			pos := unsafeFEN(fen)
 			var outputs []uci.Output
-			output := engine.Search(context.Background(), pos, depth)
+			output := engine.Search(context.Background(), pos, depth, math.MaxInt)
 			for o := range output {
 				outputs = append(outputs, o)
 			}
@@ -217,7 +234,7 @@ func BenchmarkCachedSearch(b *testing.B) {
 				pos := unsafeFEN(fen)
 				b.StartTimer()
 
-				output := engine.Search(context.Background(), pos, depth)
+				output := engine.Search(context.Background(), pos, depth, math.MaxInt)
 				for o := range output {
 					_ = o
 				}
