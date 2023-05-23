@@ -130,7 +130,13 @@ func (c commandSetOption) run(_ context.Context, e Engine, s *State) {
 type commandUCINewGame struct{}
 
 // run implements the command interface.
-func (commandUCINewGame) run(_ context.Context, _ Engine, _ *State) {
+func (commandUCINewGame) run(_ context.Context, e Engine, s *State) {
+	go func() {
+		err := e.Init()
+		if err != nil {
+			s.logError(err)
+		}
+	}()
 }
 
 // commandPosition represents a "position" command.

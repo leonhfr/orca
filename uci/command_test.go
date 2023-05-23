@@ -135,6 +135,32 @@ func TestCommandSetOption(t *testing.T) {
 // compile time check that commandUCINewGame implements command.
 var _ command = commandUCINewGame{}
 
+func TestCommandUCINewGame(t *testing.T) {
+	tests := []struct {
+		err  error
+		logs []string
+	}{
+		{fmt.Errorf("ERROR"), []string{"info string ERROR"}},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			e := new(mockEngine)
+			e.On("Init").Return(tt.err)
+
+			want := strings.Join(tt.logs, "\n") + "\n"
+			w := newMockWaitWriter(len(want))
+			s := NewState("", "", w)
+
+			commandUCINewGame{}.run(context.Background(), e, s)
+			w.Wait()
+
+			e.AssertExpectations(t)
+			assert.Equal(t, want, w.String())
+		})
+	}
+}
+
 // compile time check that commandPosition implements command.
 var _ command = commandPosition{}
 
