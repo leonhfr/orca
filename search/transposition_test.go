@@ -9,6 +9,12 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
+// compile time check that noTable implements transpositionTable.
+var _ transpositionTable = noTable{}
+
+// compile time check that arrayTable implements transpositionTable.
+var _ transpositionTable = (*arrayTable)(nil)
+
 func TestNewTable(t *testing.T) {
 	table := newArrayTable(1)
 	defer table.close()

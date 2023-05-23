@@ -16,6 +16,9 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
+// compile time check that commandUCI implements command.
+var _ command = commandUCI{}
+
 func TestCommandUCI(t *testing.T) {
 	name, author := "NAME", "AUTHOR"
 	e := new(mockEngine)
@@ -37,6 +40,9 @@ func TestCommandUCI(t *testing.T) {
 	assert.Equal(t, expected, w.String())
 }
 
+// compile time check that commandDebug implements command.
+var _ command = commandDebug{}
+
 func TestCommandDebug(t *testing.T) {
 	s := NewState("", "", io.Discard)
 
@@ -50,6 +56,9 @@ func TestCommandDebug(t *testing.T) {
 		})
 	}
 }
+
+// compile time check that commandIsReady implements command.
+var _ command = commandIsReady{}
 
 func TestCommandIsReady(t *testing.T) {
 	tests := []struct {
@@ -81,6 +90,9 @@ func TestCommandIsReady(t *testing.T) {
 		})
 	}
 }
+
+// compile time check that commandSetOption implements command.
+var _ command = commandSetOption{}
 
 func TestCommandSetOption(t *testing.T) {
 	type args struct {
@@ -119,6 +131,12 @@ func TestCommandSetOption(t *testing.T) {
 		})
 	}
 }
+
+// compile time check that commandUCINewGame implements command.
+var _ command = commandUCINewGame{}
+
+// compile time check that commandPosition implements command.
+var _ command = commandPosition{}
 
 func TestCommandPosition(t *testing.T) {
 	tests := []struct {
@@ -174,6 +192,9 @@ func TestCommandPosition(t *testing.T) {
 	}
 }
 
+// compile time check that commandGo implements command.
+var _ command = commandGo{}
+
 func TestCommandGo(t *testing.T) {
 	m1 := chess.Move(chess.B1) ^ chess.Move(chess.A3)<<6 ^ chess.Move(chess.NoPiece)<<20
 	m2 := chess.Move(chess.E6) ^ chess.Move(chess.E7)<<6 ^ chess.Move(chess.NoPiece)<<20
@@ -220,6 +241,9 @@ func TestCommandGo(t *testing.T) {
 	}
 }
 
+// compile time check that commandStop implements command.
+var _ command = commandStop{}
+
 func TestCommandStop(t *testing.T) {
 	e := new(mockEngine)
 	s := NewState("", "", io.Discard)
@@ -249,6 +273,9 @@ func TestCommandStop(t *testing.T) {
 
 	assert.True(t, stopCalled)
 }
+
+// compile time check that commandQuit implements command.
+var _ command = commandQuit{}
 
 func TestCommandQuit(t *testing.T) {
 	e := new(mockEngine)

@@ -9,6 +9,9 @@ import (
 	"github.com/leonhfr/orca/uci"
 )
 
+// compile time check that optionInteger implements option.
+var _ option = optionInteger{}
+
 func TestOptionIntegerString(t *testing.T) {
 	assert.Equal(t, tableSizeOption.name, tableSizeOption.String())
 }
@@ -66,6 +69,9 @@ func TestOptionIntegerOptionFunc(t *testing.T) {
 		})
 	}
 }
+
+// compile time check that optionBoolean implements option.
+var _ option = optionBoolean{}
 
 func TestOptionBooleanString(t *testing.T) {
 	assert.Equal(t, ownBookOption.name, ownBookOption.String())
