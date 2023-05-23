@@ -1,5 +1,7 @@
 # orca
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/leonhfr/orca.svg)](https://pkg.go.dev/github.com/leonhfr/orca)
+
 Orca is a UCI-compliant chess engine written in Go that analyzes chess positions and computes the optimal moves.
 
 ## Installation
