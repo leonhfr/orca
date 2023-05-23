@@ -7,9 +7,9 @@ import (
 )
 
 // oracle orders the moves.
-func oracle(moves []chess.Move, best chess.Move) {
+func oracle(moves []chess.Move, done chess.Move) {
 	sort.Slice(moves, func(i, j int) bool {
-		return rank(moves[i], best) > rank(moves[j], best)
+		return rank(moves[i], done) > rank(moves[j], done)
 	})
 }
 
@@ -23,7 +23,6 @@ func loudOracle(moves []chess.Move) {
 // rank ranks the move.
 //
 // Rank is computed according to the following order:
-// 0. Best move, if any;
 // 1. Queen promotions;
 // 2. Knight promotions;
 // 3. King side castle;
@@ -31,11 +30,12 @@ func loudOracle(moves []chess.Move) {
 // 5. Captures according to the MVA-LVA ordering;
 // 6. Quiet moves;
 // 7. Rook promotions;
-// 8. Bishop promotions.
-func rank(m, best chess.Move) int {
+// 8. Bishop promotions;
+// 9. Done move, if any.
+func rank(m, done chess.Move) int {
 	switch {
-	case m == best:
-		return rankBestMove
+	case m == done:
+		return rankDoneMove
 	case m.HasTag(chess.KingSideCastle):
 		return rankKingSideCastle
 	case m.HasTag(chess.QueenSideCastle):
@@ -55,9 +55,9 @@ func rankMvvLva(m chess.Move) int {
 }
 
 const (
-	rankBestMove        = 100 // best move
-	rankQueenSideCastle = 75  // queen side castle rank
-	rankKingSideCastle  = 80  // king side castle rank
+	rankDoneMove        = -100 // done move
+	rankQueenSideCastle = 75   // queen side castle rank
+	rankKingSideCastle  = 80   // king side castle rank
 )
 
 var (

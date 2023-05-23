@@ -24,34 +24,66 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 
 	hash := pos.Hash()
 	alphaOriginal := alpha
-	cached, ok := e.table.get(hash)
-	if ok && cached.depth >= depth {
+	entry, inCache := e.table.get(hash)
+	if inCache && entry.depth >= depth {
 		switch {
-		case cached.nodeType == exact:
+		case entry.nodeType == exact:
 			return searchResult{
 				nodes: 1,
-				score: cached.score,
+				score: entry.score,
 			}, nil
-		case cached.nodeType == lowerBound && cached.score > alpha:
-			alpha = cached.score
-		case cached.nodeType == upperBound && cached.score < beta:
-			beta = cached.score
+		case entry.nodeType == lowerBound && entry.score > alpha:
+			alpha = entry.score
+		case entry.nodeType == upperBound && entry.score < beta:
+			beta = entry.score
 		}
 
 		if alpha >= beta {
 			return searchResult{
 				nodes: 1,
-				score: cached.score,
+				score: entry.score,
 			}, nil
 		}
 	}
 
+	if depth == 0 {
+		return e.quiesce(ctx, pos, -beta, -alpha)
+	}
+
+	var validMoves int
 	result := searchResult{
 		score: -mate,
 	}
 
-	if depth == 0 {
-		return e.quiesce(ctx, pos, -beta, -alpha)
+	if move := entry.best; inCache && move != chess.NoMove {
+		metadata, ok := pos.MakeMove(move)
+		if ok {
+			validMoves++
+			current, err := e.alphaBeta(ctx, pos, -beta, -alpha, depth-1)
+			if err != nil {
+				return searchResult{}, err
+			}
+
+			result.nodes += current.nodes
+			current.score = -current.score
+			if current.score > result.score {
+				result.score = current.score
+				result.pv = append(current.pv, move)
+			}
+
+			if current.score > alpha {
+				alpha = current.score
+			}
+
+			pos.UnmakeMove(move, metadata, hash)
+
+			if alpha >= beta {
+				result.score = incMateDistance(result.score)
+				nodeType := getNodeType(alphaOriginal, beta, result.score)
+				e.storeResult(hash, depth, result, nodeType)
+				return result, nil
+			}
+		}
 	}
 
 	moves, inCheck := pos.PseudoMoves()
@@ -59,9 +91,13 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		depth++
 	}
 
-	oracle(moves, cached.best)
+	if inCache && entry.best != chess.NoMove {
+		oracle(moves, entry.best)
+		moves = moves[:len(moves)-1]
+	} else {
+		oracle(moves, chess.NoMove)
+	}
 
-	var validMoves int
 	for _, move := range moves {
 		metadata, ok := pos.MakeMove(move)
 		if !ok {
