@@ -125,7 +125,7 @@ func TestSearch(t *testing.T) {
 			fen:     "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
 			depth:   2,
 			book:    true,
-			outputs: []uci.Output{{PV: []chess.Move{0x1cc2b7e}, Depth: 1, Nodes: 1, Score: 1, Mate: 0}},
+			outputs: []uci.Output{{PV: []chess.Move{0x1cc2b7e}, Depth: 1, Nodes: 1, Score: 0, Mate: 0}},
 		},
 		{
 			name:  "nodes limit",

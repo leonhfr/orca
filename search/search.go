@@ -129,17 +129,15 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxN
 		defer close(output)
 
 		if e.ownBook {
-			if moves := e.book.Lookup(pos); len(moves) > 0 {
-				if move := weightedRandomMove(moves); move != chess.NoMove {
-					output <- uci.Output{
-						PV:    []chess.Move{move},
-						Depth: 1,
-						Nodes: 1,
-						Score: 1,
-					}
-
-					return
+			moves := e.book.Lookup(pos)
+			if move := weightedRandomMove(moves); move != chess.NoMove {
+				output <- uci.Output{
+					PV:    []chess.Move{move},
+					Depth: 1,
+					Nodes: 1,
 				}
+
+				return
 			}
 		}
 
