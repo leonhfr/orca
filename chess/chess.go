@@ -85,12 +85,13 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 
 	// Castles
 	if !loud {
-		for s := kingSide; s <= queenSide; s++ {
-			data := castles[2*uint8(player)+uint8(s)]
-			if pos.castlingRights.canCastle(player, s) && bbOccupancy&data.bbTravel == 0 {
-				moves = append(moves, newMove(King.color(player), NoPiece, data.s1, data.s2, NoSquare, NoPiece))
-			}
+		if data := castles[2*uint8(player)+uint8(kingSide)]; pos.castlingRights.canCastle(player, kingSide) && bbOccupancy&data.bbTravel == 0 {
+			moves = append(moves, newCastleMove(king, data.s1, data.s2, kingSide))
 		}
+		if data := castles[2*uint8(player)+uint8(queenSide)]; pos.castlingRights.canCastle(player, queenSide) && bbOccupancy&data.bbTravel == 0 {
+			moves = append(moves, newCastleMove(king, data.s1, data.s2, queenSide))
+		}
+
 	}
 
 	// Pawn moves
@@ -105,21 +106,21 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 				s1 := s2 - Square(dest.dir)
 
 				if s2.bitboard()&(bbRank1^bbRank8) == 0 {
-					moves = append(moves, newMove(pawn, NoPiece, s1, s2, NoSquare, NoPiece))
+					moves = append(moves, newPawnMove(pawn, NoPiece, s1, s2, NoSquare, NoPiece))
 					continue
 				}
 
 				if allPromos {
 					moves = append(moves,
-						newMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)),
-						newMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player)),
-						newMove(pawn, NoPiece, s1, s2, NoSquare, Bishop.color(player)),
-						newMove(pawn, NoPiece, s1, s2, NoSquare, Knight.color(player)),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player)),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Bishop.color(player)),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Knight.color(player)),
 					)
 					continue
 				}
 
-				moves = append(moves, newMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)))
+				moves = append(moves, newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)))
 			}
 		}
 	}
@@ -144,21 +145,21 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 			p2 := pos.board.pieceByColor(s2, opponent)
 
 			if s2.bitboard()&(bbRank1^bbRank8) == 0 {
-				moves = append(moves, newMove(pawn, p2, s1, s2, pos.enPassant, NoPiece))
+				moves = append(moves, newPawnMove(pawn, p2, s1, s2, pos.enPassant, NoPiece))
 				continue
 			}
 
 			if allPromos {
 				moves = append(moves,
-					newMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)),
-					newMove(pawn, p2, s1, s2, NoSquare, Rook.color(player)),
-					newMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player)),
-					newMove(pawn, p2, s1, s2, NoSquare, Knight.color(player)),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Rook.color(player)),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player)),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Knight.color(player)),
 				)
 				continue
 			}
 
-			moves = append(moves, newMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)))
+			moves = append(moves, newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)))
 		}
 	}
 
@@ -176,7 +177,7 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 				if s2.bitboard()&bbOpponent > 0 {
 					p2 = pos.board.pieceByColor(s2, opponent)
 				}
-				moves = append(moves, newMove(p1, p2, s1, s2, NoSquare, NoPiece))
+				moves = append(moves, newPieceMove(p1, p2, s1, s2))
 			}
 		}
 	}

@@ -75,6 +75,62 @@ func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 		Move(promo)<<20 ^ Move(tags)
 }
 
+// newCastleMove creates a new castle move.
+func newCastleMove(p1 Piece, s1, s2 Square, s side) Move {
+	var tags MoveTag
+
+	if s == kingSide {
+		tags ^= KingSideCastle
+	} else {
+		tags ^= QueenSideCastle
+	}
+
+	return Move(s1) ^ Move(s2)<<6 ^
+		Move(p1)<<12 ^ Move(NoPiece)<<16 ^
+		Move(NoPiece)<<20 ^ Move(tags)
+}
+
+// newPawnMove creates a new pawn move.
+func newPawnMove(p1, p2 Piece, s1, s2 Square, enPassant Square, promo Piece) Move {
+	var tags MoveTag
+
+	if s2 == enPassant {
+		tags ^= EnPassant
+		tags ^= Capture
+	} else if promo != NoPiece {
+		tags ^= Promotion
+	}
+
+	if p2 != NoPiece {
+		tags ^= Capture
+	}
+
+	if tags == 0 {
+		tags ^= Quiet
+	}
+
+	return Move(s1) ^ Move(s2)<<6 ^
+		Move(p1)<<12 ^ Move(p2)<<16 ^
+		Move(promo)<<20 ^ Move(tags)
+}
+
+// newPieceMove creates a new piece move.
+func newPieceMove(p1, p2 Piece, s1, s2 Square) Move {
+	var tags MoveTag
+
+	if p2 != NoPiece {
+		tags ^= Capture
+	}
+
+	if tags == 0 {
+		tags ^= Quiet
+	}
+
+	return Move(s1) ^ Move(s2)<<6 ^
+		Move(p1)<<12 ^ Move(p2)<<16 ^
+		Move(NoPiece)<<20 ^ Move(tags)
+}
+
 // NewMove creates a new move from a UCI string.
 func NewMove(pos *Position, move string) (Move, error) {
 	if pos == nil {
