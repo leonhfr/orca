@@ -132,6 +132,7 @@ type commandUCINewGame struct{}
 // run implements the command interface.
 func (commandUCINewGame) run(_ context.Context, e Engine, c *Controller) {
 	go func() {
+		c.position = chess.StartingPosition()
 		err := e.Init()
 		if err != nil {
 			c.logError(err)

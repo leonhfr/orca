@@ -136,11 +136,18 @@ func TestCommandSetOption(t *testing.T) {
 var _ command = commandUCINewGame{}
 
 func TestCommandUCINewGame(t *testing.T) {
+	startFEN := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
 	tests := []struct {
 		err  error
+		fen  string
 		logs []string
 	}{
-		{fmt.Errorf("ERROR"), []string{"info string ERROR"}},
+		{
+			err:  fmt.Errorf("ERROR"),
+			fen:  "8/8/8/5K1k/8/8/8/7R b - - 0 1",
+			logs: []string{"info string ERROR"},
+		},
 	}
 
 	for i, tt := range tests {
@@ -151,12 +158,14 @@ func TestCommandUCINewGame(t *testing.T) {
 			want := strings.Join(tt.logs, "\n") + "\n"
 			w := newMockWaitWriter(len(want))
 			c := NewController("", "", w)
+			c.position, _ = chess.NewPosition(tt.fen)
 
 			commandUCINewGame{}.run(context.Background(), e, c)
 			w.Wait()
 
 			e.AssertExpectations(t)
 			assert.Equal(t, want, w.String())
+			assert.Equal(t, startFEN, c.position.String())
 		})
 	}
 }
