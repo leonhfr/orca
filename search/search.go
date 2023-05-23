@@ -151,7 +151,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 	}
 
 	if maxNodes <= 0 {
-		maxNodes = math.MaxUint32
+		maxNodes = math.MaxInt
 	}
 
 	var nodes int
