@@ -1,3 +1,7 @@
+// Package search provides a search engine that implements the uci.Engine interface.
+//
+// Handles alpha-beta minimax search, quiescence search, position evaluation, move ordering,
+// and caching of search results using transposition tables.
 package search
 
 import (
@@ -22,6 +26,8 @@ const (
 )
 
 // Engine represents the search engine.
+//
+// Implements the uci.Engine interface.
 //
 //nolint:govet
 type Engine struct {

@@ -1,3 +1,4 @@
+// Package books exports embedded data from opening books.
 package books
 
 import _ "embed"

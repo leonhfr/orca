@@ -15,6 +15,7 @@ const (
 	polyTurn             Hash = 0xF8D626AAAF278509
 )
 
+// Hash represents a hash of a chess position.
 type Hash uint64
 
 // newZobristHash returns a zobrist hash (uint64).

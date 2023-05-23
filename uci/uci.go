@@ -1,3 +1,7 @@
+// Package uci handles communications between Universal Chess Interface (UCI) commands
+// and a chess engine.
+//
+// Chess engines have to implement the uci.Engine interface.
 package uci
 
 import (
@@ -11,7 +15,7 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-// Controller mediates between Universal Chess Interface commands and a chess Engine.
+// Controller handles communications between UCI commands and a chess engine.
 //
 // Chess engines have to implement the uci.Engine interface.
 //

@@ -1,3 +1,4 @@
+// Package main is the entry point of the engine.
 package main
 
 import (
