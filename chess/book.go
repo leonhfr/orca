@@ -73,8 +73,12 @@ func (b *Book) Lookup(pos *Position) []WeightedMove {
 		s2 = castlingDestination(s1, s2, p1)
 		p2 := pos.board.pieceAt(s2)
 
+		promo := NoPiece
+		if move.promo != NoPieceType {
+			promo = move.promo.color(p1.Color())
+		}
 		weightedMoves = append(weightedMoves, WeightedMove{
-			Move:   newMove(p1, p2, s1, s2, NoSquare, move.promo.color(p1.Color())),
+			Move:   newMove(p1, p2, s1, s2, NoSquare, promo),
 			Weight: move.weight,
 		})
 	}
