@@ -20,11 +20,11 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	e := search.New()
-	s := uci.NewState(
+	e := search.NewEngine()
+	c := uci.NewController(
 		fmt.Sprintf("%s v%s", name, version),
 		author,
 		os.Stdout,
 	)
-	uci.Run(ctx, e, os.Stdin, s)
+	c.Run(ctx, e, os.Stdin)
 }

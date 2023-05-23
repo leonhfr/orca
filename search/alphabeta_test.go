@@ -35,7 +35,7 @@ func TestAlphaBeta(t *testing.T) {
 		},
 	}
 
-	e := New()
+	e := NewEngine()
 	e.table = noTable{}
 	for i, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
@@ -52,7 +52,7 @@ func TestAlphaBeta(t *testing.T) {
 }
 
 func BenchmarkAlphaBeta(b *testing.B) {
-	e := New()
+	e := NewEngine()
 	e.table = noTable{}
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {

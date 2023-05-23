@@ -11,7 +11,7 @@ import (
 // command is the interface implemented by objects that represent
 // UCI commands from the GUI to the Engine.
 type command interface {
-	run(ctx context.Context, e Engine, s *State)
+	run(ctx context.Context, e Engine, c *Controller)
 }
 
 // commandUCI represents a "uci" command.
@@ -28,17 +28,17 @@ type command interface {
 type commandUCI struct{}
 
 // run implements the command interface.
-func (commandUCI) run(_ context.Context, e Engine, s *State) {
-	s.respond(responseID{
-		name:   s.name,
-		author: s.author,
+func (commandUCI) run(_ context.Context, e Engine, c *Controller) {
+	c.respond(responseID{
+		name:   c.name,
+		author: c.author,
 	})
 
 	for _, option := range e.Options() {
-		s.respond(option)
+		c.respond(option)
 	}
 
-	s.respond(responseUCIOK{})
+	c.respond(responseUCIOK{})
 }
 
 // commandDebug represents a "debug" command.
@@ -54,9 +54,9 @@ type commandDebug struct {
 }
 
 // run implements the command interface.
-func (c commandDebug) run(_ context.Context, _ Engine, s *State) {
-	s.debug = c.on
-	s.logDebug("debug set to ", c.on)
+func (cmd commandDebug) run(_ context.Context, _ Engine, s *Controller) {
+	s.debug = cmd.on
+	s.logDebug("debug set to ", cmd.on)
 }
 
 // commandIsReady represents an "isready" command.
@@ -75,13 +75,13 @@ func (c commandDebug) run(_ context.Context, _ Engine, s *State) {
 type commandIsReady struct{}
 
 // run implements the command interface.
-func (commandIsReady) run(_ context.Context, e Engine, s *State) {
+func (commandIsReady) run(_ context.Context, e Engine, c *Controller) {
 	go func() {
 		err := e.Init()
 		if err != nil {
-			s.logError(err)
+			c.logError(err)
 		}
-		s.respond(responseReadyOK{})
+		c.respond(responseReadyOK{})
 	}()
 }
 
@@ -109,9 +109,9 @@ type commandSetOption struct {
 }
 
 // run implements the command interface.
-func (c commandSetOption) run(_ context.Context, e Engine, s *State) {
-	if err := e.SetOption(c.name, c.value); err != nil {
-		s.logError(err)
+func (cmd commandSetOption) run(_ context.Context, e Engine, c *Controller) {
+	if err := e.SetOption(cmd.name, cmd.value); err != nil {
+		c.logError(err)
 	}
 }
 
@@ -130,11 +130,11 @@ func (c commandSetOption) run(_ context.Context, e Engine, s *State) {
 type commandUCINewGame struct{}
 
 // run implements the command interface.
-func (commandUCINewGame) run(_ context.Context, e Engine, s *State) {
+func (commandUCINewGame) run(_ context.Context, e Engine, c *Controller) {
 	go func() {
 		err := e.Init()
 		if err != nil {
-			s.logError(err)
+			c.logError(err)
 		}
 	}()
 }
@@ -157,32 +157,32 @@ type commandPosition struct {
 }
 
 // run implements the command interface.
-func (c commandPosition) run(_ context.Context, _ Engine, s *State) {
-	if c.startPos {
-		s.position = chess.StartingPosition()
-	} else if len(c.fen) > 0 {
-		pos, err := chess.NewPosition(c.fen)
+func (cmd commandPosition) run(_ context.Context, _ Engine, c *Controller) {
+	if cmd.startPos {
+		c.position = chess.StartingPosition()
+	} else if len(cmd.fen) > 0 {
+		pos, err := chess.NewPosition(cmd.fen)
 		if err != nil {
-			s.logError(err)
+			c.logError(err)
 			return
 		}
-		s.position = pos
+		c.position = pos
 	}
 
-	for _, move := range c.moves {
-		m, err := chess.NewMove(s.position, move)
+	for _, move := range cmd.moves {
+		m, err := chess.NewMove(c.position, move)
 		if err != nil {
-			s.logError(err)
+			c.logError(err)
 			return
 		}
 
-		if _, ok := s.position.MakeMove(m); !ok {
-			s.logError(fmt.Errorf("failed to play move %s", move))
+		if _, ok := c.position.MakeMove(m); !ok {
+			c.logError(fmt.Errorf("failed to play move %s", move))
 			return
 		}
 	}
 
-	s.logDebug("position set to FEN ", s.position.String())
+	c.logDebug("position set to FEN ", c.position.String())
 }
 
 // commandGo represents a "go" command.
@@ -268,26 +268,26 @@ type commandGo struct {
 }
 
 // run implements the command interface.
-func (c commandGo) run(ctx context.Context, e Engine, s *State) {
-	s.mu.Lock()
+func (cmd commandGo) run(ctx context.Context, e Engine, c *Controller) {
+	c.mu.Lock()
 	start := time.Now()
-	ctx, cancel := searchContext(ctx, s.stop, c.moveTime)
+	ctx, cancel := searchContext(ctx, c.stop, cmd.moveTime)
 
-	outputs := e.Search(ctx, s.position, c.depth, c.nodes)
+	outputs := e.Search(ctx, c.position, cmd.depth, cmd.nodes)
 
 	go func() {
-		defer s.mu.Unlock()
+		defer c.mu.Unlock()
 		defer cancel()
 
 		var output Output
 		for output = range outputs {
-			s.respond(responseOutput{
+			c.respond(responseOutput{
 				Output: output,
 				time:   time.Since(start),
 			})
 		}
 		if len(output.PV) > 0 {
-			s.respond(responseBestMove{output.PV[0]})
+			c.respond(responseBestMove{output.PV[0]})
 		}
 	}()
 }
@@ -319,9 +319,9 @@ func searchContext(ctx context.Context, stop <-chan struct{}, limit time.Duratio
 type commandStop struct{}
 
 // run implements the command interface.
-func (commandStop) run(_ context.Context, _ Engine, s *State) {
+func (commandStop) run(_ context.Context, _ Engine, c *Controller) {
 	select {
-	case s.stop <- struct{}{}:
+	case c.stop <- struct{}{}:
 	default:
 	}
 }
@@ -332,11 +332,11 @@ func (commandStop) run(_ context.Context, _ Engine, s *State) {
 type commandQuit struct{}
 
 // run implements the command interface.
-func (commandQuit) run(ctx context.Context, e Engine, s *State) {
-	commandStop{}.run(ctx, e, s)
+func (commandQuit) run(ctx context.Context, e Engine, c *Controller) {
+	commandStop{}.run(ctx, e, c)
 
 	e.Close()
 
 	// prevents future searches and ensures all search routines have been shut down
-	s.mu.Lock()
+	c.mu.Lock()
 }

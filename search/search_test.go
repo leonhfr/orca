@@ -15,22 +15,22 @@ import (
 var _ uci.Engine = (*Engine)(nil)
 
 func TestNew(t *testing.T) {
-	e := New()
+	e := NewEngine()
 	assert.Equal(t, 64, e.tableSize)
 }
 
 func TestWithTableSize(t *testing.T) {
-	e := New(WithTableSize(128))
+	e := NewEngine(WithTableSize(128))
 	assert.Equal(t, 128, e.tableSize)
 }
 
 func TestWithOwnBook(t *testing.T) {
-	e := New(WithOwnBook(true))
+	e := NewEngine(WithOwnBook(true))
 	assert.True(t, e.ownBook)
 }
 
 func TestInit(t *testing.T) {
-	engine := New()
+	engine := NewEngine()
 	assert.Equal(t, noTable{}, engine.table)
 
 	err := engine.Init()
@@ -40,7 +40,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestOptions(t *testing.T) {
-	e := New()
+	e := NewEngine()
 	options := e.Options()
 	assert.Equal(t, []uci.Option{
 		{
@@ -85,7 +85,7 @@ func TestSetOption(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := New()
+			e := NewEngine()
 			err := e.SetOption(tt.args.name, tt.args.value)
 			assert.Equal(t, tt.args.tableSize, e.tableSize)
 			assert.Equal(t, tt.args.err, err)
@@ -142,7 +142,7 @@ func TestSearch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			engine := New()
+			engine := NewEngine()
 			_ = engine.Init()
 			if tt.book {
 				engine.ownBook = true
@@ -194,7 +194,7 @@ func TestCachedSearch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			engine := New()
+			engine := NewEngine()
 			_ = engine.Init()
 			if !tt.cached {
 				engine.table = noTable{}
@@ -226,7 +226,7 @@ func BenchmarkCachedSearch(b *testing.B) {
 		b.Run(bb.name, func(b *testing.B) {
 			for n := 0; n < b.N; n++ {
 				b.StopTimer()
-				engine := New()
+				engine := NewEngine()
 				_ = engine.Init()
 				if !bb.cached {
 					engine.table = noTable{}

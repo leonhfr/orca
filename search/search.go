@@ -32,8 +32,8 @@ type Engine struct {
 	table     transpositionTable
 }
 
-// New creates a new search engine.
-func New(options ...func(*Engine)) *Engine {
+// NewEngine creates a new search engine.
+func NewEngine(options ...func(*Engine)) *Engine {
 	e := &Engine{
 		book:  chess.NewBook(),
 		table: noTable{},

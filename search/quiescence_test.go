@@ -39,7 +39,7 @@ func TestQuiescence(t *testing.T) {
 		},
 	}
 
-	e := New()
+	e := NewEngine()
 	e.table = noTable{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

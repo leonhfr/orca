@@ -63,7 +63,7 @@ func TestOptionIntegerOptionFunc(t *testing.T) {
 				assert.Equal(t, tt.want.err, err.Error())
 			}
 
-			e := New()
+			e := NewEngine()
 			fn(e)
 			assert.Equal(t, tt.want.value, e.tableSize)
 		})
@@ -122,7 +122,7 @@ func TestOptionBooleanOptionFunc(t *testing.T) {
 				assert.Equal(t, tt.want.err, err.Error())
 			}
 
-			e := New()
+			e := NewEngine()
 			fn(e)
 			assert.Equal(t, tt.want.value, e.ownBook)
 		})

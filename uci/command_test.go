@@ -26,7 +26,7 @@ func TestCommandUCI(t *testing.T) {
 		testOptions[OptionInteger],
 	})
 	w := &strings.Builder{}
-	s := NewState(name, author, w)
+	c := NewController(name, author, w)
 
 	expected := concatenateResponses([]response{
 		responseID{name, author},
@@ -34,7 +34,7 @@ func TestCommandUCI(t *testing.T) {
 		responseUCIOK{},
 	})
 
-	commandUCI{}.run(context.Background(), e, s)
+	commandUCI{}.run(context.Background(), e, c)
 
 	e.AssertExpectations(t)
 	assert.Equal(t, expected, w.String())
@@ -44,15 +44,15 @@ func TestCommandUCI(t *testing.T) {
 var _ command = commandDebug{}
 
 func TestCommandDebug(t *testing.T) {
-	s := NewState("", "", io.Discard)
+	c := NewController("", "", io.Discard)
 
 	for _, tt := range []bool{true, false} {
 		t.Run(fmt.Sprint(tt), func(t *testing.T) {
 			e := new(mockEngine)
-			commandDebug{on: tt}.run(context.Background(), e, s)
+			commandDebug{on: tt}.run(context.Background(), e, c)
 
 			e.AssertExpectations(t)
-			assert.Equal(t, tt, s.debug)
+			assert.Equal(t, tt, c.debug)
 		})
 	}
 }
@@ -80,9 +80,9 @@ func TestCommandIsReady(t *testing.T) {
 				want = strings.Join(tt.logs, "\n") + "\n" + want
 			}
 			w := newMockWaitWriter(len(want))
-			s := NewState("", "", w)
+			c := NewController("", "", w)
 
-			commandIsReady{}.run(context.Background(), e, s)
+			commandIsReady{}.run(context.Background(), e, c)
 			w.Wait()
 
 			e.AssertExpectations(t)
@@ -122,9 +122,9 @@ func TestCommandSetOption(t *testing.T) {
 			e := new(mockEngine)
 			e.On("SetOption", tt.args.cmd.name, tt.args.cmd.value).Return(tt.args.err)
 			w := &strings.Builder{}
-			s := NewState("", "", w)
+			c := NewController("", "", w)
 
-			commandSetOption{tt.args.cmd.name, tt.args.cmd.value}.run(context.Background(), e, s)
+			commandSetOption{tt.args.cmd.name, tt.args.cmd.value}.run(context.Background(), e, c)
 
 			e.AssertExpectations(t)
 			assert.Equal(t, concatenateStrings(tt.want), w.String())
@@ -150,9 +150,9 @@ func TestCommandUCINewGame(t *testing.T) {
 
 			want := strings.Join(tt.logs, "\n") + "\n"
 			w := newMockWaitWriter(len(want))
-			s := NewState("", "", w)
+			c := NewController("", "", w)
 
-			commandUCINewGame{}.run(context.Background(), e, s)
+			commandUCINewGame{}.run(context.Background(), e, c)
 			w.Wait()
 
 			e.AssertExpectations(t)
@@ -207,12 +207,12 @@ func TestCommandPosition(t *testing.T) {
 		t.Run(tt.want, func(t *testing.T) {
 			e := new(mockEngine)
 			w := &strings.Builder{}
-			s := NewState("", "", w)
+			c := NewController("", "", w)
 
-			tt.c.run(context.Background(), e, s)
+			tt.c.run(context.Background(), e, c)
 
 			e.AssertExpectations(t)
-			assert.Equal(t, tt.want, s.position.String())
+			assert.Equal(t, tt.want, c.position.String())
 			assert.Equal(t, concatenateStrings(tt.r), w.String())
 		})
 	}
@@ -256,9 +256,9 @@ func TestCommandGo(t *testing.T) {
 
 			expected := concatenateResponses(tt.rr)
 			w := newMockWaitWriter(len(expected))
-			s := NewState("", "", w)
+			c := NewController("", "", w)
 
-			tt.c.run(context.Background(), e, s)
+			tt.c.run(context.Background(), e, c)
 
 			w.Wait()
 			e.AssertExpectations(t)
@@ -272,7 +272,7 @@ var _ command = commandStop{}
 
 func TestCommandStop(t *testing.T) {
 	e := new(mockEngine)
-	s := NewState("", "", io.Discard)
+	c := NewController("", "", io.Discard)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -288,13 +288,13 @@ func TestCommandStop(t *testing.T) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-s.stop:
+		case <-c.stop:
 			stopCalled = true
 		}
 	}()
 
 	time.Sleep(10 * time.Millisecond)
-	commandStop{}.run(context.Background(), e, s)
+	commandStop{}.run(context.Background(), e, c)
 	wg.Wait()
 
 	assert.True(t, stopCalled)
@@ -306,7 +306,7 @@ var _ command = commandQuit{}
 func TestCommandQuit(t *testing.T) {
 	e := new(mockEngine)
 	e.On("Close")
-	s := NewState("", "", io.Discard)
+	c := NewController("", "", io.Discard)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -322,13 +322,13 @@ func TestCommandQuit(t *testing.T) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-s.stop:
+		case <-c.stop:
 			stopCalled = true
 		}
 	}()
 
 	time.Sleep(10 * time.Millisecond)
-	commandQuit{}.run(context.Background(), e, s)
+	commandQuit{}.run(context.Background(), e, c)
 	wg.Wait()
 
 	e.AssertExpectations(t)

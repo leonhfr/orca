@@ -3,32 +3,46 @@ package uci
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"github.com/leonhfr/orca/chess"
 )
 
-// Engine is the interface that should be implemented by the search Engine.
-type Engine interface {
-	// Init initializes the search engine.
-	Init() error
-	// Close shuts down the resources used by the search engine.
-	Close()
-	// Options lists the available options.
-	Options() []Option
-	// SeOption sets an option.
-	SetOption(name, value string) error
-	// Search runs a search on the given position until the given depth.
-	// Cancelling the context stops the search.
-	Search(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int) <-chan Output
+// Controller mediates between Universal Chess Interface commands and a chess Engine.
+//
+// Chess engines have to implement the uci.Engine interface.
+//
+//nolint:govet
+type Controller struct {
+	name     string
+	author   string
+	debug    bool
+	position *chess.Position
+	writer   io.Writer
+	mu       sync.Mutex
+	stop     chan struct{}
 }
 
-// Run runs the program in UCI mode.
+// NewController creates a new Controller.
+func NewController(name, author string, writer io.Writer) *Controller {
+	return &Controller{
+		name:     name,
+		author:   author,
+		position: chess.StartingPosition(),
+		writer:   writer,
+		mu:       sync.Mutex{},
+		stop:     make(chan struct{}),
+	}
+}
+
+// Run runs the controller.
 //
 // Run parses command from the reader, executes them with the provided
 // search engine and writes the responses on the writer.
-func Run(ctx context.Context, e Engine, r io.Reader, s *State) {
+func (c *Controller) Run(ctx context.Context, e Engine, r io.Reader) {
 	// graceful shutdown when context canceled
 	// sending EOF to the UCI scanner by closing the pipe
 	pipeR, pipeW := io.Pipe()
@@ -36,41 +50,30 @@ func Run(ctx context.Context, e Engine, r io.Reader, s *State) {
 	go func() { <-ctx.Done(); pipeW.Close() }()
 
 	for scanner := bufio.NewScanner(pipeR); scanner.Scan(); {
-		c := parse(strings.Fields(scanner.Text()))
-		if c == nil {
+		cmd := parse(strings.Fields(scanner.Text()))
+		if cmd == nil {
 			continue
 		}
-		c.run(ctx, e, s)
-		if _, ok := c.(commandQuit); ok {
+		cmd.run(ctx, e, c)
+		if _, ok := cmd.(commandQuit); ok {
 			break
 		}
 	}
 }
 
-// Output holds a search output.
-type Output struct {
-	PV    []chess.Move // Principal variation, best line found.
-	Depth int          // Search depth in plies.
-	Nodes int          // Number of nodes searched.
-	Score int          // Score from the engine's point of view in centipawns.
-	Mate  int          // Number of moves before mate. Positive for the current player to mate, negative for the current player to be mated.
+// logError logs an error to the output.
+func (c *Controller) logError(err error) {
+	fmt.Fprintln(c.writer, "info string", err.Error())
 }
 
-// OptionType represent an option type.
-type OptionType uint8
+// logDebug logs debug info to the output.
+func (c *Controller) logDebug(v ...any) {
+	if c.debug {
+		fmt.Fprintln(c.writer, "info string", fmt.Sprint(v...))
+	}
+}
 
-const (
-	OptionInteger OptionType = iota // OptionInteger represents an integer option.
-	OptionBoolean                   // OptionInteger represents a boolean option.
-)
-
-// Option represents an available option.
-//
-//nolint:govet
-type Option struct {
-	Type    OptionType
-	Name    string
-	Default string
-	Min     string
-	Max     string
+// respond processes responses.
+func (c *Controller) respond(r response) {
+	fmt.Fprintln(c.writer, r.String())
 }
