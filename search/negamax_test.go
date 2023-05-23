@@ -9,11 +9,16 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-var searchTestPositions = [5]struct {
+var searchTestPositions = [6]struct {
 	name  string
 	fen   string
 	depth uint8
 }{
+	{
+		name:  "draw stalemate in 1",
+		fen:   "8/2b2k2/2K5/8/8/8/5n2/8 w - - 0 1",
+		depth: 3,
+	},
 	{
 		name:  "checkmate",
 		fen:   "8/8/8/5K1k/8/8/8/7R b - - 0 1",
@@ -50,6 +55,13 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 	case <-ctx.Done():
 		return searchResult{}, context.Canceled
 	default:
+	}
+
+	if pos.HasInsufficientMaterial() {
+		return searchResult{
+			score: draw,
+			nodes: 1,
+		}, nil
 	}
 
 	hash := pos.Hash()
@@ -108,10 +120,14 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 }
 
 func TestNegamax(t *testing.T) {
-	results := [5]struct {
+	results := [6]struct {
 		output searchResult
 		moves  []string
 	}{
+		{
+			output: searchResult{nodes: 601, score: 0},
+			moves:  []string{"c6c7"},
+		},
 		{
 			output: searchResult{nodes: 1, score: -mate},
 			moves:  []string{},

@@ -9,10 +9,14 @@ import (
 )
 
 func TestAlphaBeta(t *testing.T) {
-	results := [5]struct {
+	results := [6]struct {
 		output searchResult
 		moves  []string
 	}{
+		{
+			output: searchResult{nodes: 3, score: 0},
+			moves:  []string{"c6c7"},
+		},
 		{
 			output: searchResult{nodes: 1, score: -mate},
 			moves:  []string{},

@@ -46,6 +46,13 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 	}
 
+	if pos.HasInsufficientMaterial() {
+		return searchResult{
+			score: draw,
+			nodes: 1,
+		}, nil
+	}
+
 	if depth == 0 {
 		return e.quiesce(ctx, pos, -beta, -alpha)
 	}
