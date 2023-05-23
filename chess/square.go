@@ -50,6 +50,11 @@ func (sq Square) bitboard() bitboard {
 	return 1 << sq
 }
 
+// sameColor checks whether the two squares are of the same color.
+func (sq Square) sameColor(other Square) bool {
+	return (9*uint16(sq^other))&8 == 0
+}
+
 // String implements the Stringer interface.
 //
 // Returns an UCI-compatible representation.

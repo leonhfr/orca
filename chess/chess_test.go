@@ -7,6 +7,61 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestHasInsufficientMaterial(t *testing.T) {
+	tests := []struct {
+		name string
+		fen  string
+		want bool
+	}{
+		{
+			name: "king versus king",
+			fen:  "8/5k2/8/8/6K1/8/8/8 w - - 0 1",
+			want: true,
+		},
+		{
+			name: "king and bishop versus king",
+			fen:  "8/2b2k2/8/8/6K1/8/8/8 w - - 0 1",
+			want: true,
+		},
+		{
+			name: "king and knight versus king",
+			fen:  "8/2n2k2/8/8/6K1/8/8/8 w - - 0 1",
+			want: true,
+		},
+		{
+			name: "king and bishop versus king and bishop with the bishops on the same color",
+			fen:  "8/2b2k2/8/8/3B2K1/8/8/8 w - - 0 1",
+			want: true,
+		},
+		{
+			name: "king and bishop versus king and bishop with the bishops on different colors",
+			fen:  "8/2b2k2/8/8/4B1K1/8/8/8 b - - 0 1",
+			want: false,
+		},
+		{
+			name: "normal position",
+			fen:  startFEN,
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pos := unsafeFEN(tt.fen)
+			got := pos.HasInsufficientMaterial()
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func BenchmarkHasInsufficientMaterial(b *testing.B) {
+	fen := "8/2b2k2/8/8/3B2K1/8/8/8 w - - 0 1"
+	pos := unsafeFEN(fen)
+	for n := 0; n < b.N; n++ {
+		pos.HasInsufficientMaterial()
+	}
+}
+
 func TestPseudoMoves(t *testing.T) {
 	tests := []struct {
 		fen  string

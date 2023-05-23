@@ -3,6 +3,38 @@ package chess
 
 import "math/bits"
 
+// HasInsufficientMaterial returns true if there is insufficient material to achieve a mate.
+//
+// Combinations include:
+//
+//	king versus king
+//	king and bishop versus king
+//	king and knight versus king
+//	king and bishop versus king and bishop with the bishops on the same color
+func (pos *Position) HasInsufficientMaterial() bool {
+	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	pieces := bits.OnesCount64(uint64(bbOccupancy))
+	if pieces > 4 {
+		return false
+	}
+
+	knights := bits.OnesCount64(uint64(pos.board.bbKnight))
+	bishops := bits.OnesCount64(uint64(pos.board.bbBishop))
+
+	if pieces == 2 || pieces == 3 && (knights == 1 || bishops == 1) {
+		return true
+	}
+
+	if bbBlack := pos.board.bbBlack & pos.board.bbBishop; pieces == 4 && bishops == 2 && bits.OnesCount64(uint64(bbBlack)) == 1 {
+		bbWhite := pos.board.bbWhite & pos.board.bbBishop
+		sqBlack := bbBlack.scanForward()
+		sqWhite := bbWhite.scanForward()
+		return sqBlack.sameColor(sqWhite)
+	}
+
+	return false
+}
+
 // PseudoMoves returns the list of pseudo moves.
 //
 // Some moves may be putting the moving player's king in check and therefore be illegal.
