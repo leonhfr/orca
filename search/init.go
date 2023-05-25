@@ -13,10 +13,10 @@ func init() {
 	pestoMGHumanPieceTables, pestoEGHumanPieceTables := pestoHumanPieceTables()
 
 	for p := chess.BlackPawn; p <= chess.WhiteKing; p++ {
-		mgValue := pestoMGPieceValues[p.Type()/2]
-		egValue := pestoEGPieceValues[p.Type()/2]
-		mgHuman := pestoMGHumanPieceTables[p.Type()/2]
-		egHuman := pestoEGHumanPieceTables[p.Type()/2]
+		mgValue := pestoMGPieceValues[p.Type()]
+		egValue := pestoEGPieceValues[p.Type()]
+		mgHuman := pestoMGHumanPieceTables[p.Type()]
+		egHuman := pestoEGHumanPieceTables[p.Type()]
 
 		for i := 0; i < 64; i++ {
 			rank, file := 7-i/8, i%8

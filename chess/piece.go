@@ -32,7 +32,7 @@ type PieceType uint8
 
 const (
 	// Pawn represents a pawn.
-	Pawn PieceType = iota << 1
+	Pawn PieceType = iota
 	// Knight represents a knight.
 	Knight
 	// Bishop represents a bishop.
@@ -53,12 +53,12 @@ const pieceTypeName = "pnbrqk-"
 //
 // Returns an UCI-compatible representation.
 func (pt PieceType) String() string {
-	return pieceTypeName[pt/2 : pt/2+1]
+	return pieceTypeName[pt : pt+1]
 }
 
 // color returns a piece of the passed piece type and color.
 func (pt PieceType) color(c Color) Piece {
-	return Piece(pt) ^ Piece(c)
+	return 2*Piece(pt) ^ Piece(c)
 }
 
 // Piece is a piece type with a color.
@@ -66,31 +66,31 @@ type Piece uint8
 
 const (
 	// BlackPawn represents a black pawn.
-	BlackPawn Piece = Piece(Black) | Piece(Pawn)
+	BlackPawn Piece = iota
 	// WhitePawn represents a white pawn.
-	WhitePawn Piece = Piece(White) | Piece(Pawn)
+	WhitePawn
 	// BlackKnight represents a black knight.
-	BlackKnight Piece = Piece(Black) | Piece(Knight)
+	BlackKnight
 	// WhiteKnight represents a white knight.
-	WhiteKnight Piece = Piece(White) | Piece(Knight)
+	WhiteKnight
 	// BlackBishop represents a black bishop.
-	BlackBishop Piece = Piece(Black) | Piece(Bishop)
+	BlackBishop
 	// WhiteBishop represents a white bishop.
-	WhiteBishop Piece = Piece(White) | Piece(Bishop)
+	WhiteBishop
 	// BlackRook represents a black rook.
-	BlackRook Piece = Piece(Black) | Piece(Rook)
+	BlackRook
 	// WhiteRook represents a white rook.
-	WhiteRook Piece = Piece(White) | Piece(Rook)
+	WhiteRook
 	// BlackQueen represents a black queen.
-	BlackQueen Piece = Piece(Black) | Piece(Queen)
+	BlackQueen
 	// WhiteQueen represents a white queen.
-	WhiteQueen Piece = Piece(White) | Piece(Queen)
+	WhiteQueen
 	// BlackKing represents a black king.
-	BlackKing Piece = Piece(Black) | Piece(King)
+	BlackKing
 	// WhiteKing represents a white king.
-	WhiteKing Piece = Piece(White) | Piece(King)
+	WhiteKing
 	// NoPiece represents an absence of Piece.
-	NoPiece Piece = 12
+	NoPiece
 )
 
 const pieceName = "pPnNbBrRqQkK-"
@@ -109,7 +109,7 @@ func (p Piece) Color() Color {
 
 // Type returns the type of the piece.
 func (p Piece) Type() PieceType {
-	return PieceType(p & ^Piece(1))
+	return PieceType(p >> 1)
 }
 
 var (

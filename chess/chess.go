@@ -208,7 +208,7 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 	}
 
 	// Other pieces
-	for pt := Knight; pt <= Queen; pt += 2 {
+	for pt := Knight; pt <= Queen; pt++ {
 		p1 := pt.color(player)
 		for bbs1 := pos.board.getBitboard(pt, player); bbs1 > 0; bbs1 = bbs1.resetLSB() {
 			s1 := bbs1.scanForward()
