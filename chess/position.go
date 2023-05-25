@@ -114,7 +114,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 
 	if pos.enPassant != NoSquare {
 		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
-			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
+			pos.board.bbColors[White]&pos.board.bbPieces[Pawn], pos.board.bbColors[Black]&pos.board.bbPieces[Pawn])
 	}
 
 	pos.board.makeMove(m)
@@ -128,7 +128,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 	pos.enPassant = moveEnPassant(m)
 	if pos.enPassant != NoSquare {
 		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
-			pos.board.bbWhite&pos.board.bbPawn, pos.board.bbBlack&pos.board.bbPawn)
+			pos.board.bbColors[White]&pos.board.bbPieces[Pawn], pos.board.bbColors[Black]&pos.board.bbPieces[Pawn])
 	}
 	pos.hash ^= xorHashPartialMove(m, cr, pos.castlingRights)
 
@@ -158,44 +158,44 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata, hash Hash) {
 
 // CountPieces returns the count of knights, bishops, rooks, and queens.
 func (pos *Position) CountPieces() (int, int, int, int) {
-	return pos.board.bbKnight.ones(), pos.board.bbBishop.ones(), pos.board.bbRook.ones(), pos.board.bbQueen.ones()
+	return pos.board.bbPieces[Knight].ones(), pos.board.bbPieces[Bishop].ones(), pos.board.bbPieces[Rook].ones(), pos.board.bbPieces[Queen].ones()
 }
 
 // PieceMap executes the callback for each piece on the board, passing the piece
 // and its square as arguments. Intended to be used in evaluation functions.
 func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
 	for p, bb := range [10]bitboard{
-		pos.board.bbBlack & pos.board.bbPawn,
-		pos.board.bbWhite & pos.board.bbPawn,
-		pos.board.bbBlack & pos.board.bbKnight,
-		pos.board.bbWhite & pos.board.bbKnight,
-		pos.board.bbBlack & pos.board.bbBishop,
-		pos.board.bbWhite & pos.board.bbBishop,
-		pos.board.bbBlack & pos.board.bbRook,
-		pos.board.bbWhite & pos.board.bbRook,
-		pos.board.bbBlack & pos.board.bbQueen,
-		pos.board.bbWhite & pos.board.bbQueen,
+		pos.board.bbColors[Black] & pos.board.bbPieces[Pawn],
+		pos.board.bbColors[White] & pos.board.bbPieces[Pawn],
+		pos.board.bbColors[Black] & pos.board.bbPieces[Knight],
+		pos.board.bbColors[White] & pos.board.bbPieces[Knight],
+		pos.board.bbColors[Black] & pos.board.bbPieces[Bishop],
+		pos.board.bbColors[White] & pos.board.bbPieces[Bishop],
+		pos.board.bbColors[Black] & pos.board.bbPieces[Rook],
+		pos.board.bbColors[White] & pos.board.bbPieces[Rook],
+		pos.board.bbColors[Black] & pos.board.bbPieces[Queen],
+		pos.board.bbColors[White] & pos.board.bbPieces[Queen],
 	} {
 		for ; bb > 0; bb = bb.resetLSB() {
 			cb(Piece(p), bb.scanForward())
 		}
 	}
 
-	cb(BlackKing, (pos.board.bbBlack & pos.board.bbKing).scanForward())
-	cb(WhiteKing, (pos.board.bbWhite & pos.board.bbKing).scanForward())
+	cb(BlackKing, (pos.board.bbColors[Black] & pos.board.bbPieces[King]).scanForward())
+	cb(WhiteKing, (pos.board.bbColors[White] & pos.board.bbPieces[King]).scanForward())
 }
 
 // UniquePieceMap executes the callback for each piece on the board that do not
 // have an opponent mirrored piece, passing the piece and its square as arguments.
 // Intended to be used in evaluation functions.
 func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
-	bbBlack, bbWhite := pos.board.bbBlack, pos.board.bbWhite
-	bbKing := pos.board.bbKing
-	bbQueen := pos.board.bbQueen
-	bbRook := pos.board.bbRook
-	bbBishop := pos.board.bbBishop
-	bbKnight := pos.board.bbKnight
-	bbPawn := pos.board.bbPawn
+	bbBlack, bbWhite := pos.board.bbColors[Black], pos.board.bbColors[White]
+	bbKing := pos.board.bbPieces[King]
+	bbQueen := pos.board.bbPieces[Queen]
+	bbRook := pos.board.bbPieces[Rook]
+	bbBishop := pos.board.bbPieces[Bishop]
+	bbKnight := pos.board.bbPieces[Knight]
+	bbPawn := pos.board.bbPieces[Pawn]
 
 	for p, bb := range [10]bitboard{
 		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbPawn))) & bbBlack & bbPawn,

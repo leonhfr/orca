@@ -24,21 +24,21 @@ func (pos *Position) InCheck() (CheckData, bool) {
 //	king and knight versus king
 //	king and bishop versus king and bishop with the bishops on the same color
 func (pos *Position) HasInsufficientMaterial() bool {
-	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 	pieces := bits.OnesCount64(uint64(bbOccupancy))
 	if pieces > 4 {
 		return false
 	}
 
-	knights := bits.OnesCount64(uint64(pos.board.bbKnight))
-	bishops := bits.OnesCount64(uint64(pos.board.bbBishop))
+	knights := bits.OnesCount64(uint64(pos.board.bbPieces[Knight]))
+	bishops := bits.OnesCount64(uint64(pos.board.bbPieces[Bishop]))
 
 	if pieces == 2 || pieces == 3 && (knights == 1 || bishops == 1) {
 		return true
 	}
 
-	if bbBlack := pos.board.bbBlack & pos.board.bbBishop; pieces == 4 && bishops == 2 && bits.OnesCount64(uint64(bbBlack)) == 1 {
-		bbWhite := pos.board.bbWhite & pos.board.bbBishop
+	if bbBlack := pos.board.bbColors[Black] & pos.board.bbPieces[Bishop]; pieces == 4 && bishops == 2 && bits.OnesCount64(uint64(bbBlack)) == 1 {
+		bbWhite := pos.board.bbColors[White] & pos.board.bbPieces[Bishop]
 		sqBlack := bbBlack.scanForward()
 		sqWhite := bbWhite.scanForward()
 		return sqBlack.sameColor(sqWhite)
@@ -96,18 +96,18 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 	player, opponent := pos.turn, pos.turn.other()
 	pawn := WhitePawn
 	king := WhiteKing
-	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
-	bbPlayer, bbOpponent := pos.board.bbWhite, pos.board.bbBlack
+	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
+	bbPlayer, bbOpponent := pos.board.bbColors[White], pos.board.bbColors[Black]
 	upOne, upTwo := north, doubleNorth
 	captureR, captureL := northEast, northWest
 	if pos.turn == Black {
 		pawn = BlackPawn
 		king = BlackKing
-		bbPlayer, bbOpponent = pos.board.bbBlack, pos.board.bbWhite
+		bbPlayer, bbOpponent = bbOpponent, bbPlayer
 		upOne, upTwo = south, doubleSouth
 		captureR, captureL = southEast, southWest
 	}
-	bbPawn := pos.board.bbPawn & bbPlayer
+	bbPawn := pos.board.bbPieces[Pawn] & bbPlayer
 
 	// King moves
 	sqPlayer, sqOpponent := pos.board.kingSquare(player), pos.board.kingSquare(opponent)
@@ -175,7 +175,7 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 
 	bbPawnInterference := bbInterference
 	if pos.enPassant != NoSquare &&
-		(bbInterference&pos.board.bbPawn).scanForward()+Square(upOne) == pos.enPassant {
+		(bbInterference&pos.board.bbPieces[Pawn]).scanForward()+Square(upOne) == pos.enPassant {
 		bbPawnInterference |= bbEnPassant
 	}
 
@@ -210,7 +210,7 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 	// Other pieces
 	for pt := Knight; pt <= Queen; pt++ {
 		p1 := pt.color(player)
-		for bbs1 := pos.board.getBitboard(pt, player); bbs1 > 0; bbs1 = bbs1.resetLSB() {
+		for bbs1 := pos.board.bbPieces[pt] & bbPlayer; bbs1 > 0; bbs1 = bbs1.resetLSB() {
 			s1 := bbs1.scanForward()
 			bbs2 := pieceBitboard(s1, pt, bbOccupancy) & ^bbPlayer & bbInterference
 			if loud {
@@ -234,15 +234,15 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 func (pos *Position) isDiscoveredCheck(m Move) bool {
 	s1, s2 := m.S1(), m.S2()
 	bb := bbFiles[s1] | bbRanks[s1] | bbDiagonals[s1] | bbAntiDiagonals[s1]
-	if bb&pos.board.bbKing&pos.board.getColor(pos.turn) == 0 {
+	if bb&pos.board.bbPieces[King]&pos.board.bbColors[pos.turn] == 0 {
 		return false
 	}
 
 	kingSq := pos.board.kingSquare(pos.turn)
 	bbCaptured := s2.bitboard()
-	bbOpponent := pos.board.getColor(pos.turn.other()) & ^bbCaptured
+	bbOpponent := pos.board.bbColors[pos.turn.other()] & ^bbCaptured
 
-	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 	bbOccupancy &= ^s1.bitboard()
 	bbOccupancy |= bbCaptured
 	if m.HasTag(EnPassant) {
@@ -255,8 +255,8 @@ func (pos *Position) isDiscoveredCheck(m Move) bool {
 	bbRookMoves := bbMagicRookMoves[rookMagics[kingSq].index(bbOccupancy)]
 	bbBishopMoves := bbMagicBishopMoves[bishopMagics[kingSq].index(bbOccupancy)]
 
-	return (pos.board.bbQueen^pos.board.bbRook)&bbRookMoves&bbOpponent > 0 ||
-		(pos.board.bbQueen^pos.board.bbBishop)&bbBishopMoves&bbOpponent > 0
+	return (pos.board.bbPieces[Queen]^pos.board.bbPieces[Rook])&bbRookMoves&bbOpponent > 0 ||
+		(pos.board.bbPieces[Queen]^pos.board.bbPieces[Bishop])&bbBishopMoves&bbOpponent > 0
 }
 
 // isSquareAttacked checks whether the square is attacked by
@@ -267,17 +267,17 @@ func (pos *Position) isSquareAttacked(sq Square) bool {
 
 // attackedByBitboard returns the bitboard of the pieces that attack teh square.
 func (pos *Position) attackedByBitboard(sq Square) bitboard {
-	bbOpponent := pos.board.getColor(pos.turn.other())
-	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	bbOpponent := pos.board.bbColors[pos.turn.other()]
+	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 	bbRookMoves := bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
 	bbBishopMoves := bbMagicBishopMoves[bishopMagics[sq].index(bbOccupancy)]
 
 	var bb bitboard
-	bb |= singlePawnCaptureBitboard(sq, pos.turn) & pos.board.bbPawn
-	bb |= bbKingMoves[sq] & pos.board.bbKing
-	bb |= bbKnightMoves[sq] & pos.board.bbKnight
-	bb |= (pos.board.bbQueen | pos.board.bbRook) & bbRookMoves
-	bb |= (pos.board.bbQueen | pos.board.bbBishop) & bbBishopMoves
+	bb |= singlePawnCaptureBitboard(sq, pos.turn) & pos.board.bbPieces[Pawn]
+	bb |= bbKingMoves[sq] & pos.board.bbPieces[King]
+	bb |= bbKnightMoves[sq] & pos.board.bbPieces[Knight]
+	bb |= (pos.board.bbPieces[Queen] | pos.board.bbPieces[Rook]) & bbRookMoves
+	bb |= (pos.board.bbPieces[Queen] | pos.board.bbPieces[Bishop]) & bbBishopMoves
 	return bb & bbOpponent
 }
 
@@ -293,23 +293,23 @@ func (pos *Position) isCastleLegal(m Move) bool {
 	if m.HasTag(QueenSideCastle) {
 		s = queenSide
 	}
-	bbOpponent := pos.board.getColor(pos.turn.other())
+	bbOpponent := pos.board.bbColors[pos.turn.other()]
 	cc := castleChecks[2*uint8(pos.turn)+uint8(s)]
 
-	if cc.bbPawn&pos.board.bbPawn&bbOpponent > 0 ||
-		cc.bbKnight&pos.board.bbKnight&bbOpponent > 0 ||
-		cc.bbKing&pos.board.bbKing&bbOpponent > 0 {
+	if cc.bbPawn&pos.board.bbPieces[Pawn]&bbOpponent > 0 ||
+		cc.bbKnight&pos.board.bbPieces[Knight]&bbOpponent > 0 ||
+		cc.bbKing&pos.board.bbPieces[King]&bbOpponent > 0 {
 		return false
 	}
 
 	var bbBishopAttacks, bbRookAttacks bitboard
-	bbOccupancy := pos.board.bbWhite ^ pos.board.bbBlack
+	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 	for _, sq := range cc.squares {
 		index := bishopMagics[sq].index(bbOccupancy)
 		bbBishopAttacks |= bbMagicBishopMoves[index]
 	}
 
-	if bb := pos.board.bbBishop | pos.board.bbQueen; bbBishopAttacks&bbOpponent&bb > 0 {
+	if bb := pos.board.bbPieces[Bishop] | pos.board.bbPieces[Queen]; bbBishopAttacks&bbOpponent&bb > 0 {
 		return false
 	}
 
@@ -318,7 +318,7 @@ func (pos *Position) isCastleLegal(m Move) bool {
 		bbRookAttacks |= bbMagicRookMoves[index]
 	}
 
-	return bbRookAttacks&(pos.board.bbRook|pos.board.bbQueen)&bbOpponent == 0
+	return bbRookAttacks&(pos.board.bbPieces[Rook]|pos.board.bbPieces[Queen])&bbOpponent == 0
 }
 
 // bbDir associates a bitboard with a direction.

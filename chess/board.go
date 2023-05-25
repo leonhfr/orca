@@ -4,14 +4,8 @@ import "strings"
 
 // board represents a chess board.
 type board struct {
-	bbKing   bitboard
-	bbQueen  bitboard
-	bbRook   bitboard
-	bbBishop bitboard
-	bbKnight bitboard
-	bbPawn   bitboard
-	bbWhite  bitboard
-	bbBlack  bitboard
+	bbPieces [6]bitboard
+	bbColors [2]bitboard
 }
 
 // newBoard creates a new board.
@@ -19,8 +13,8 @@ func newBoard(m map[Square]Piece) board {
 	b := board{}
 	for sq, p := range m {
 		bb := sq.bitboard()
-		b.xorBitboard(p.Type(), bb)
-		b.xorColor(p.Color(), bb)
+		b.bbPieces[p.Type()] ^= bb
+		b.bbColors[p.Color()] ^= bb
 	}
 	return b
 }
@@ -28,9 +22,9 @@ func newBoard(m map[Square]Piece) board {
 // pieceAt returns the piece, if any, present at the given square.
 func (b board) pieceAt(sq Square) Piece {
 	switch bb := sq.bitboard(); {
-	case b.bbWhite&bb > 0:
+	case b.bbColors[White]&bb > 0:
 		return b.pieceByColor(sq, White)
-	case b.bbBlack&bb > 0:
+	case b.bbColors[Black]&bb > 0:
 		return b.pieceByColor(sq, Black)
 	default:
 		return NoPiece
@@ -40,17 +34,17 @@ func (b board) pieceAt(sq Square) Piece {
 // pieceByColor returns the piece present at the given square.
 func (b board) pieceByColor(sq Square, c Color) Piece {
 	switch bb := sq.bitboard(); {
-	case b.bbPawn&bb > 0:
+	case b.bbPieces[Pawn]&bb > 0:
 		return Pawn.color(c)
-	case b.bbKnight&bb > 0:
+	case b.bbPieces[Knight]&bb > 0:
 		return Knight.color(c)
-	case b.bbBishop&bb > 0:
+	case b.bbPieces[Bishop]&bb > 0:
 		return Bishop.color(c)
-	case b.bbRook&bb > 0:
+	case b.bbPieces[Rook]&bb > 0:
 		return Rook.color(c)
-	case b.bbQueen&bb > 0:
+	case b.bbPieces[Queen]&bb > 0:
 		return Queen.color(c)
-	case b.bbKing&bb > 0:
+	case b.bbPieces[King]&bb > 0:
 		return King.color(c)
 	default:
 		return NoPiece
@@ -60,9 +54,9 @@ func (b board) pieceByColor(sq Square, c Color) Piece {
 // kingSquare returns the king's square.
 func (b *board) kingSquare(c Color) Square {
 	if c == White {
-		return (b.bbWhite & b.bbKing).scanForward()
+		return (b.bbColors[White] & b.bbPieces[King]).scanForward()
 	}
-	return (b.bbBlack & b.bbKing).scanForward()
+	return (b.bbColors[Black] & b.bbPieces[King]).scanForward()
 }
 
 // makeMove makes and unmakes a move on the board.
@@ -75,14 +69,14 @@ func (b *board) makeMove(m Move) {
 	mbb := s1bb ^ s2bb
 
 	if promo := m.Promo(); promo == NoPiece {
-		b.xorBitboard(p1.Type(), mbb)
+		b.bbPieces[p1.Type()] ^= mbb
 	} else {
 		// promotion
-		b.xorBitboard(p1.Type(), s1bb)
-		b.xorBitboard(promo.Type(), s2bb)
+		b.bbPieces[p1.Type()] ^= s1bb
+		b.bbPieces[promo.Type()] ^= s2bb
 	}
 
-	b.xorColor(c, mbb)
+	b.bbColors[c] ^= mbb
 
 	if m.HasTag(Quiet) {
 		return
@@ -90,88 +84,28 @@ func (b *board) makeMove(m Move) {
 
 	switch enPassant := m.HasTag(EnPassant); {
 	case p2 != NoPiece && !enPassant: // capture
-		b.xorBitboard(p2.Type(), s2bb)
-		b.xorColor(p2.Color(), s2bb)
+		b.bbPieces[p2.Type()] ^= s2bb
+		b.bbColors[p2.Color()] ^= s2bb
 	case c == White && enPassant: // white en passant
 		bb := s2.bitboard() >> 8
-		b.bbPawn ^= bb
-		b.bbBlack ^= bb
+		b.bbPieces[Pawn] ^= bb
+		b.bbColors[Black] ^= bb
 	case c == Black && enPassant: // black en passant
 		bb := s2.bitboard() << 8
-		b.bbPawn ^= bb
-		b.bbWhite ^= bb
+		b.bbPieces[Pawn] ^= bb
+		b.bbColors[White] ^= bb
 	case c == White && m.HasTag(KingSideCastle): // white king side castle
-		b.bbRook ^= bbWhiteKingCastle
-		b.bbWhite ^= bbWhiteKingCastle
+		b.bbPieces[Rook] ^= bbWhiteKingCastle
+		b.bbColors[White] ^= bbWhiteKingCastle
 	case c == White && m.HasTag(QueenSideCastle): // white queen side castle
-		b.bbRook ^= bbWhiteQueenCastle
-		b.bbWhite ^= bbWhiteQueenCastle
+		b.bbPieces[Rook] ^= bbWhiteQueenCastle
+		b.bbColors[White] ^= bbWhiteQueenCastle
 	case c == Black && m.HasTag(KingSideCastle): // black king side castle
-		b.bbRook ^= bbBlackKingCastle
-		b.bbBlack ^= bbBlackKingCastle
+		b.bbPieces[Rook] ^= bbBlackKingCastle
+		b.bbColors[Black] ^= bbBlackKingCastle
 	case c == Black && m.HasTag(QueenSideCastle): // black queen side castle
-		b.bbRook ^= bbBlackQueenCastle
-		b.bbBlack ^= bbBlackQueenCastle
-	}
-}
-
-// getBitboard returns the bitboard of the given piece type and color.
-func (b board) getBitboard(pt PieceType, c Color) bitboard {
-	bbColor := b.bbWhite
-	if c == Black {
-		bbColor = b.bbBlack
-	}
-	switch pt {
-	case King:
-		return bbColor & b.bbKing
-	case Queen:
-		return bbColor & b.bbQueen
-	case Rook:
-		return bbColor & b.bbRook
-	case Bishop:
-		return bbColor & b.bbBishop
-	case Knight:
-		return bbColor & b.bbKnight
-	case Pawn:
-		return bbColor & b.bbPawn
-	default:
-		panic("unknown piece")
-	}
-}
-
-// getColor returns the bitboard of the given color.
-func (b board) getColor(c Color) bitboard {
-	if c == White {
-		return b.bbWhite
-	}
-	return b.bbBlack
-}
-
-// xorBitboard performs a xor operation on one of the piece bitboard.
-func (b *board) xorBitboard(pt PieceType, bb bitboard) {
-	switch pt {
-	case King:
-		b.bbKing ^= bb
-	case Queen:
-		b.bbQueen ^= bb
-	case Rook:
-		b.bbRook ^= bb
-	case Bishop:
-		b.bbBishop ^= bb
-	case Knight:
-		b.bbKnight ^= bb
-	case Pawn:
-		b.bbPawn ^= bb
-	}
-}
-
-// xorColor performs a xor operation on one of the color bitboard.
-func (b *board) xorColor(c Color, bb bitboard) {
-	switch c {
-	case White:
-		b.bbWhite ^= bb
-	case Black:
-		b.bbBlack ^= bb
+		b.bbPieces[Rook] ^= bbBlackQueenCastle
+		b.bbColors[Black] ^= bbBlackQueenCastle
 	}
 }
 

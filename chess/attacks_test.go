@@ -47,7 +47,7 @@ func TestPieceBitboard(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.args.pt.String()+" "+tt.args.sq.String(), func(t *testing.T) {
 			pos := unsafeFEN(tt.args.fen)
-			occupancy := pos.board.getColor(White) ^ pos.board.getColor(Black)
+			occupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 			got := pieceBitboard(tt.args.sq, tt.args.pt, occupancy)
 			assert.ElementsMatch(t, tt.want, got.mapping())
 		})
@@ -67,8 +67,8 @@ func TestPawnMoveBitboard(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
-			pawn := pos.board.getBitboard(Pawn, pos.turn)
-			occupancy := pos.board.getColor(White) ^ pos.board.getColor(Black)
+			pawn := pos.board.bbPieces[Pawn] & pos.board.bbColors[pos.turn]
+			occupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 			upOne, upTwo := pawnMoveBitboard(pawn, occupancy, pos.turn)
 			assert.ElementsMatch(t, tt.upOne, upOne.mapping())
 			assert.ElementsMatch(t, tt.upTwo, upTwo.mapping())
@@ -89,7 +89,7 @@ func TestPawnCaptureBitboard(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
-			pawn := pos.board.getBitboard(Pawn, pos.turn)
+			pawn := pos.board.bbPieces[Pawn] & pos.board.bbColors[pos.turn]
 			captureR, captureL := pawnCaptureBitboard(pawn, pos.turn)
 			assert.ElementsMatch(t, tt.captureR, captureR.mapping())
 			assert.ElementsMatch(t, tt.captureL, captureL.mapping())
