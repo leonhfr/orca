@@ -54,7 +54,9 @@ func TestOrderMoves(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			moves, _ := unsafeFEN(tt.fen).PseudoMoves()
+			pos := unsafeFEN(tt.fen)
+			checkData, _ := pos.InCheck()
+			moves := pos.PseudoMoves(checkData)
 			oracle(moves, tt.done)
 
 			assert.Equal(t, tt.want, movesString(moves))

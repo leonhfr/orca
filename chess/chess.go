@@ -3,6 +3,18 @@ package chess
 
 import "math/bits"
 
+// CheckData contains check computations used to speed up moves generation.
+type CheckData bitboard
+
+// InCheck quickly checks whether the current king is in check.
+//
+// Returns CheckData for moves generation and a boolean representing whether
+// the current king is in check.
+func (pos *Position) InCheck() (CheckData, bool) {
+	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn))
+	return CheckData(bbAttackedBy), bbAttackedBy > 0
+}
+
 // HasInsufficientMaterial returns true if there is insufficient material to achieve a mate.
 //
 // Combinations include:
@@ -38,18 +50,17 @@ func (pos *Position) HasInsufficientMaterial() bool {
 // PseudoMoves returns the list of pseudo moves.
 //
 // Some moves may be putting the moving player's king in check and therefore be illegal.
-func (pos *Position) PseudoMoves() ([]Move, bool) {
-	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn))
-	switch bits.OnesCount64(uint64(bbAttackedBy)) {
+func (pos *Position) PseudoMoves(data CheckData) []Move {
+	switch bits.OnesCount64(uint64(data)) {
 	case 0:
-		return pos.pseudoMoves(bbFull, false, false, false), false
+		return pos.pseudoMoves(bbFull, false, false, false)
 	case 1:
-		s1 := bbAttackedBy.scanForward()
+		s1 := bitboard(data).scanForward()
 		s2 := pos.board.kingSquare(pos.turn)
-		bbInterference := bbInBetweens[s1][s2] | bbAttackedBy
-		return pos.pseudoMoves(bbInterference, false, false, false), true
+		bbInterference := bbInBetweens[s1][s2] | bitboard(data)
+		return pos.pseudoMoves(bbInterference, false, false, false)
 	default:
-		return pos.pseudoMoves(bbFull, false, true, false), true
+		return pos.pseudoMoves(bbFull, false, true, false)
 	}
 }
 

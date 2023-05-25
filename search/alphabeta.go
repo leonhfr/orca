@@ -53,6 +53,11 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}, nil
 	}
 
+	checkData, inCheck := pos.InCheck()
+	if inCheck {
+		depth++
+	}
+
 	if depth == 0 {
 		return e.quiesce(ctx, pos, -beta, -alpha)
 	}
@@ -93,11 +98,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 	}
 
-	moves, inCheck := pos.PseudoMoves()
-	if inCheck {
-		depth++
-	}
-
+	moves := pos.PseudoMoves(checkData)
 	if inCache && entry.best != chess.NoMove {
 		oracle(moves, entry.best)
 		moves = moves[:len(moves)-1]

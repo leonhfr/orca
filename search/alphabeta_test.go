@@ -30,11 +30,11 @@ func TestAlphaBeta(t *testing.T) {
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: searchResult{nodes: 15616, score: mate - 3},
+			output: searchResult{nodes: 15544, score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 444, score: 49},
+			output: searchResult{nodes: 469, score: 49},
 			moves:  []string{"f8d8", "e7a3", "d5d4"},
 		},
 	}
