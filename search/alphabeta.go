@@ -67,44 +67,13 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		score: -mate,
 	}
 
-	if move := entry.best; inCache && move != chess.NoMove {
-		metadata, ok := pos.MakeMove(move)
-		if ok {
-			validMoves++
-			current, err := e.alphaBeta(ctx, pos, -beta, -alpha, depth-1)
-			if err != nil {
-				return searchResult{}, err
-			}
-
-			result.nodes += current.nodes
-			current.score = -current.score
-			if current.score > result.score {
-				result.score = current.score
-				result.pv = append(current.pv, move)
-			}
-
-			if current.score > alpha {
-				alpha = current.score
-			}
-
-			pos.UnmakeMove(move, metadata, hash)
-
-			if alpha >= beta {
-				result.score = incMateDistance(result.score)
-				nodeType := getNodeType(alphaOriginal, beta, result.score)
-				e.storeResult(hash, depth, result, nodeType)
-				return result, nil
-			}
-		}
+	best := chess.NoMove
+	if inCache && entry.best != chess.NoMove {
+		best = entry.best
 	}
 
 	moves := pos.PseudoMoves(checkData)
-	if inCache && entry.best != chess.NoMove {
-		oracle(moves, entry.best)
-		moves = moves[:len(moves)-1]
-	} else {
-		oracle(moves, chess.NoMove)
-	}
+	oracle(moves, best)
 
 	for _, move := range moves {
 		metadata, ok := pos.MakeMove(move)

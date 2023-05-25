@@ -12,7 +12,7 @@ func TestOrderMoves(t *testing.T) {
 	tests := []struct {
 		name string
 		fen  string
-		done chess.Move
+		best chess.Move
 		want []string
 	}{
 		{
@@ -37,7 +37,7 @@ func TestOrderMoves(t *testing.T) {
 			},
 		},
 		{
-			"done move",
+			"best move",
 			"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
 			chess.Move(chess.D2) ^
 				chess.Move(chess.D4)<<6 ^
@@ -46,8 +46,8 @@ func TestOrderMoves(t *testing.T) {
 				chess.Move(chess.NoPiece)<<20 ^
 				chess.Move(chess.Quiet),
 			[]string{
-				"g1h1", "g1f2", "c4c5", "f3d4", "b4c5",
-				"f1f2", "d2d4",
+				"d2d4", "g1h1", "g1f2", "c4c5", "f3d4",
+				"b4c5", "f1f2",
 			},
 		},
 	}
@@ -57,7 +57,7 @@ func TestOrderMoves(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			checkData, _ := pos.InCheck()
 			moves := pos.PseudoMoves(checkData)
-			oracle(moves, tt.done)
+			oracle(moves, tt.best)
 
 			assert.Equal(t, tt.want, movesString(moves))
 		})

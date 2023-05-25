@@ -184,10 +184,10 @@ func TestCachedSearch(t *testing.T) {
 			true,
 			[]uci.Output{
 				{Depth: 1, Nodes: 1624, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
-				{Depth: 2, Nodes: 5654, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 101910, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
-				{Depth: 5, Nodes: 264297, Score: 4, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x2c05d5a, 0x2c56d7d, 0x2c03915}},
-				{Depth: 6, Nodes: 3435877, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
+				{Depth: 2, Nodes: 5581, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
+				{Depth: 3, Nodes: 102421, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
+				{Depth: 5, Nodes: 259632, Score: 4, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x2c05d5a, 0x2c56d7d, 0x2c03915}},
+				{Depth: 6, Nodes: 3460024, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
 			},
 		},
 	}
