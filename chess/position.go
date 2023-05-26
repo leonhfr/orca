@@ -11,6 +11,7 @@ type Position struct {
 	board          board
 	hash           Hash
 	turn           Color
+	inCheck        bool // whether current player is in check
 	castlingRights castlingRights
 	enPassant      Square
 	halfMoveClock  uint8
@@ -61,6 +62,8 @@ func NewPosition(fen string) (*Position, error) {
 
 	pos.hash = newZobristHash(pos)
 
+	pos.inCheck = pos.attackedByBitboard(pos.board.kingSquare(pos.turn), pos.turn) > 0
+
 	return pos, nil
 }
 
@@ -83,6 +86,11 @@ func (pos Position) Turn() Color {
 // FullMoves returns the number of full moves.
 func (pos Position) FullMoves() uint8 {
 	return pos.fullMoves
+}
+
+// InCheck quickly checks whether the current king is in check.
+func (pos *Position) InCheck() bool {
+	return pos.inCheck
 }
 
 // MakeMove makes a move.
@@ -108,7 +116,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 		}
 	}
 
-	metadata := newMetadata(pos.turn, pos.castlingRights,
+	metadata := newMetadata(pos.turn, pos.inCheck, pos.castlingRights,
 		pos.halfMoveClock, pos.fullMoves, pos.enPassant)
 	cr := pos.castlingRights
 
@@ -123,6 +131,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 		return NoMetadata, false
 	}
 
+	pos.inCheck = m.HasTag(Check)
 	pos.turn = pos.turn.other()
 	pos.castlingRights = moveCastlingRights(pos.castlingRights, m)
 	pos.enPassant = moveEnPassant(m)
@@ -148,6 +157,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 // UnmakeMove unmakes a move and restores the previous position.
 func (pos *Position) UnmakeMove(m Move, meta Metadata, hash Hash) {
 	pos.board.makeMove(m)
+	pos.inCheck = meta.inCheck()
 	pos.turn = meta.turn()
 	pos.castlingRights = meta.castleRights()
 	pos.enPassant = meta.enPassant()

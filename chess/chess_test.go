@@ -117,8 +117,7 @@ func TestPseudoMoves(t *testing.T) {
 		t.Run(tt.fen, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			var got []string
-			checkData, _ := pos.InCheck()
-			moves := pos.PseudoMoves(checkData)
+			moves := pos.PseudoMoves()
 			for _, move := range moves {
 				got = append(got, move.String())
 			}
@@ -132,8 +131,7 @@ func BenchmarkPseudoMoves(b *testing.B) {
 		pos := unsafeFEN(bb.preFEN)
 		b.Run(bb.preFEN, func(b *testing.B) {
 			for n := 0; n < b.N; n++ {
-				checkData, _ := pos.InCheck()
-				pos.PseudoMoves(checkData)
+				pos.PseudoMoves()
 			}
 		})
 	}

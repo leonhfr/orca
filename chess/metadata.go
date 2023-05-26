@@ -3,11 +3,12 @@ package chess
 // Metadata represents a position's metadata.
 //
 //	32 bits
-//	__ square fullMove halfMove ___ CCCC T
+//	__ square fullMove halfMove __ cccc T C
 //	square      en passant square
 //	fullMove    full moves
 //	halfMove    half move clock
-//	CCCC        castle rights
+//	cccc        castle rights
+//	C           in check
 //	T           turn color
 //	_           unused bit
 type Metadata uint32
@@ -16,22 +17,32 @@ type Metadata uint32
 const NoMetadata Metadata = 0
 
 // newMetadata create a new metadata.
-func newMetadata(c Color, cr castlingRights, halfMoveClock, fullMoves uint8, enPassant Square) Metadata {
-	return Metadata(c) |
-		Metadata(cr)<<1 |
+func newMetadata(c Color, inCheck bool, cr castlingRights, halfMoveClock, fullMoves uint8, enPassant Square) Metadata {
+	var check Metadata
+	if inCheck {
+		check = 1
+	}
+	return Metadata(check) |
+		Metadata(c)<<1 |
+		Metadata(cr)<<2 |
 		Metadata(halfMoveClock)<<8 |
 		Metadata(fullMoves)<<16 |
 		Metadata(enPassant)<<24
 }
 
+// inCheck returns the inCheck value.
+func (m Metadata) inCheck() bool {
+	return m&1 > 0
+}
+
 // turn returns the turn color.
 func (m Metadata) turn() Color {
-	return Color(m & 1)
+	return Color((m >> 1) & 1)
 }
 
 // castleRights returns the castle rights.
 func (m Metadata) castleRights() castlingRights {
-	return castlingRights((m >> 1) & 15)
+	return castlingRights((m >> 2) & 15)
 }
 
 // halfMoveClock returns the half move clock.

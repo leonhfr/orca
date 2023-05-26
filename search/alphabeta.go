@@ -53,7 +53,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}, nil
 	}
 
-	checkData, inCheck := pos.InCheck()
+	inCheck := pos.InCheck()
 	if inCheck {
 		depth++
 	}
@@ -72,7 +72,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		best = entry.best
 	}
 
-	moves := pos.PseudoMoves(checkData)
+	moves := pos.PseudoMoves()
 	oracle(moves, best)
 
 	for _, move := range moves {
