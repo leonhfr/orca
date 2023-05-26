@@ -200,8 +200,8 @@ var perfResults = []perfTest{
 	{
 		"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 		[]int{
-			20, 400, 8902, 197281, 4865609,
-			// 119060324, 3195901860, 84998978956, 2439530234167, 69352859712417
+			20, 400, 8902, 197281, 4865609, 119060324,
+			// 3195901860, 84998978956, 2439530234167, 69352859712417
 		},
 	},
 	{
@@ -248,13 +248,13 @@ var perfResults = []perfTest{
 	},
 }
 
-func TestPerfResults(t *testing.T) {
+func TestPerftResults(t *testing.T) {
 	for _, tt := range perfResults {
 		for depth := 0; depth < len(tt.nodes); depth++ {
 			want := tt.nodes[depth]
-
+			pos := unsafeFEN(tt.fen)
 			t.Run(fmt.Sprintf("%s depth %d", tt.fen, depth), func(t *testing.T) {
-				got := perft(unsafeFEN(tt.fen), depth)
+				got := perft(pos, depth)
 				assert.Equal(t, want, got)
 			})
 		}

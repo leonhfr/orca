@@ -11,7 +11,7 @@ type CheckData bitboard
 // Returns CheckData for moves generation and a boolean representing whether
 // the current king is in check.
 func (pos *Position) InCheck() (CheckData, bool) {
-	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn))
+	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn), pos.turn)
 	return CheckData(bbAttackedBy), bbAttackedBy > 0
 }
 
@@ -120,22 +120,25 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 		if s2.bitboard()&bbOpponent > 0 {
 			p2 = pos.board.pieceByColor(s2, opponent)
 		}
-		moves = append(moves, newMove(king, p2, sqPlayer, s2, NoSquare, NoPiece))
+		moves = append(moves, newPieceMove(king, p2, sqPlayer, s2, false))
 	}
 
 	if onlyKing {
 		return moves
 	}
 
+	bbChecks := pos.attackBitboards(sqOpponent, opponent)
+
 	// Castles
 	if !loud {
 		if data := castles[2*uint8(player)+uint8(kingSide)]; pos.castlingRights.canCastle(player, kingSide) && bbOccupancy&data.bbTravel == 0 {
-			moves = append(moves, newCastleMove(king, data.s1, data.s2, kingSide))
+			check := data.rook2.bitboard()&bbChecks[Rook] > 0
+			moves = append(moves, newCastleMove(king, data.king1, data.king2, kingSide, check))
 		}
 		if data := castles[2*uint8(player)+uint8(queenSide)]; pos.castlingRights.canCastle(player, queenSide) && bbOccupancy&data.bbTravel == 0 {
-			moves = append(moves, newCastleMove(king, data.s1, data.s2, queenSide))
+			check := data.rook2.bitboard()&bbChecks[Rook] > 0
+			moves = append(moves, newCastleMove(king, data.king1, data.king2, queenSide, check))
 		}
-
 	}
 
 	// Pawn moves
@@ -148,23 +151,27 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 			for ; dest.bb > 0; dest.bb = dest.bb.resetLSB() {
 				s2 := dest.bb.scanForward()
 				s1 := s2 - Square(dest.dir)
+				s2bb := s2.bitboard()
 
-				if s2.bitboard()&(bbRank1^bbRank8) == 0 {
-					moves = append(moves, newPawnMove(pawn, NoPiece, s1, s2, NoSquare, NoPiece))
+				if s2bb&(bbRank1^bbRank8) == 0 {
+					check := s2bb&bbChecks[Pawn] > 0
+					moves = append(moves, newPawnMove(pawn, NoPiece, s1, s2, NoSquare, NoPiece, check))
 					continue
 				}
 
 				if allPromos {
+					// only used in perft, no need for check information
 					moves = append(moves,
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)),
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player)),
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Bishop.color(player)),
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Knight.color(player)),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player), false),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player), false),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Bishop.color(player), false),
+						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Knight.color(player), false),
 					)
 					continue
 				}
 
-				moves = append(moves, newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player)))
+				check := s2bb&bbChecks[Queen] > 0
+				moves = append(moves, newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player), check))
 			}
 		}
 	}
@@ -187,23 +194,27 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 			s2 := dest.bb.scanForward()
 			s1 := s2 - Square(dest.dir)
 			p2 := pos.board.pieceByColor(s2, opponent)
+			s2bb := s2.bitboard()
 
-			if s2.bitboard()&(bbRank1^bbRank8) == 0 {
-				moves = append(moves, newPawnMove(pawn, p2, s1, s2, pos.enPassant, NoPiece))
+			if s2bb&(bbRank1^bbRank8) == 0 {
+				check := s2bb&bbChecks[Pawn] > 0
+				moves = append(moves, newPawnMove(pawn, p2, s1, s2, pos.enPassant, NoPiece, check))
 				continue
 			}
 
 			if allPromos {
+				// only used in perft, no need for check information
 				moves = append(moves,
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)),
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Rook.color(player)),
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player)),
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Knight.color(player)),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player), false),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Rook.color(player), false),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player), false),
+					newPawnMove(pawn, p2, s1, s2, NoSquare, Knight.color(player), false),
 				)
 				continue
 			}
 
-			moves = append(moves, newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player)))
+			check := s2bb&bbChecks[Queen] > 0
+			moves = append(moves, newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player), check))
 		}
 	}
 
@@ -221,7 +232,8 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 				if s2.bitboard()&bbOpponent > 0 {
 					p2 = pos.board.pieceByColor(s2, opponent)
 				}
-				moves = append(moves, newPieceMove(p1, p2, s1, s2))
+				check := s2.bitboard()&bbChecks[pt] > 0
+				moves = append(moves, newPieceMove(p1, p2, s1, s2, check))
 			}
 		}
 	}
@@ -262,23 +274,38 @@ func (pos *Position) isDiscoveredCheck(m Move) bool {
 // isSquareAttacked checks whether the square is attacked by
 // an enemy piece.
 func (pos *Position) isSquareAttacked(sq Square) bool {
-	return pos.attackedByBitboard(sq) > 0
+	return pos.attackedByBitboard(sq, pos.turn) > 0
 }
 
-// attackedByBitboard returns the bitboard of the pieces that attack teh square.
-func (pos *Position) attackedByBitboard(sq Square) bitboard {
-	bbOpponent := pos.board.bbColors[pos.turn.other()]
+// attackedByBitboard returns the bitboard of the pieces that attack the square.
+func (pos *Position) attackedByBitboard(sq Square, c Color) bitboard {
+	bbOpponent := pos.board.bbColors[c.other()]
 	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 	bbRookMoves := bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
 	bbBishopMoves := bbMagicBishopMoves[bishopMagics[sq].index(bbOccupancy)]
 
 	var bb bitboard
-	bb |= singlePawnCaptureBitboard(sq, pos.turn) & pos.board.bbPieces[Pawn]
+	bb |= singlePawnCaptureBitboard(sq, c) & pos.board.bbPieces[Pawn]
 	bb |= bbKingMoves[sq] & pos.board.bbPieces[King]
 	bb |= bbKnightMoves[sq] & pos.board.bbPieces[Knight]
 	bb |= (pos.board.bbPieces[Queen] | pos.board.bbPieces[Rook]) & bbRookMoves
 	bb |= (pos.board.bbPieces[Queen] | pos.board.bbPieces[Bishop]) & bbBishopMoves
 	return bb & bbOpponent
+}
+
+// attackBitboards returns the bitboards where pieces would attack the square.
+func (pos *Position) attackBitboards(sq Square, c Color) [5]bitboard {
+	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
+	bbBishopMoves := bbMagicBishopMoves[bishopMagics[sq].index(bbOccupancy)]
+	bbRookMoves := bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
+
+	return [5]bitboard{
+		singlePawnCaptureBitboard(sq, c.other()),
+		bbKnightMoves[sq],
+		bbBishopMoves,
+		bbRookMoves,
+		bbRookMoves | bbBishopMoves,
+	}
 }
 
 // isCastleLegal checks whether the castle move is legal.
@@ -331,17 +358,18 @@ type bbDir struct {
 //
 // indexed by `2*Color+side`.
 var castles = [4]castleData{
-	{1<<F8 | 1<<G8, E8, G8},         // black, king side
-	{1<<B8 | 1<<C8 | 1<<D8, E8, C8}, // black, queen side
-	{1<<F1 | 1<<G1, E1, G1},         // white, king side
-	{1<<B1 | 1<<C1 | 1<<D1, E1, C1}, // white, queen side
+	{1<<F8 | 1<<G8, E8, G8, F8},         // black, king side
+	{1<<B8 | 1<<C8 | 1<<D8, E8, C8, D8}, // black, queen side
+	{1<<F1 | 1<<G1, E1, G1, E1},         // white, king side
+	{1<<B1 | 1<<C1 | 1<<D1, E1, C1, D1}, // white, queen side
 }
 
 // casteData represents a castle's data.
 type castleData struct {
 	bbTravel bitboard // bitboard traveled by the king
-	s1       Square   // king s1
-	s2       Square   // king s2
+	king1    Square   // king s1
+	king2    Square   // king s2
+	rook2    Square   // rook s2
 }
 
 // castleCheck represents a castle's check.
