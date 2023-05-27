@@ -46,13 +46,13 @@ func (pos *Position) PseudoMoves() []Move {
 			s1 := bbAttackedBy.scanForward()
 			s2 := pos.board.kingSquare(pos.turn)
 			bbInterference := bbInBetweens[s1][s2] | bbAttackedBy
-			return pos.pseudoMoves(bbInterference, false, false, false)
+			return pos.pseudoMoves(bbInterference, false, false)
 		}
 
-		return pos.pseudoMoves(bbFull, false, true, false)
+		return pos.pseudoMoves(bbFull, true, false)
 	}
 
-	return pos.pseudoMoves(bbFull, false, false, false)
+	return pos.pseudoMoves(bbFull, false, false)
 }
 
 // LoudMoves returns the list of pseudo loud moves.
@@ -60,7 +60,7 @@ func (pos *Position) PseudoMoves() []Move {
 //
 // Some moves may be putting the moving player's king in check and therefore be illegal.
 func (pos *Position) LoudMoves() []Move {
-	return pos.pseudoMoves(bbFull, false, false, true)
+	return pos.pseudoMoves(bbFull, false, true)
 }
 
 // pseudoMoves returns the pseudo moves depending on some options.
@@ -69,14 +69,11 @@ func (pos *Position) LoudMoves() []Move {
 // Use it when the king is in check so that pieces can either attack the checking piece or
 // interfere in case of an attack by a sliding piece.
 //
-// allPromos adds all promotion moves. Intending to be used in perft tests.
-// Setting it to false only adds queen promotions.
-//
 // onlyKing returns only the king moves, bypassing all others. Use it when the king is
 // in double check.
 //
 // loud returns only moves that capture enemy pieces. Use it in quiescence search.
-func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, loud bool) []Move {
+func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) []Move {
 	size := 50
 	if loud {
 		size = 20
@@ -150,19 +147,12 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 					continue
 				}
 
-				if allPromos {
-					// only used in perft, no need for check information
-					moves = append(moves,
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player), false),
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player), false),
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Bishop.color(player), false),
-						newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Knight.color(player), false),
-					)
-					continue
-				}
-
-				check := s2bb&bbChecks[Queen] > 0
-				moves = append(moves, newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player), check))
+				moves = append(moves,
+					newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Queen.color(player), s2bb&bbChecks[Queen] > 0),
+					newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Rook.color(player), s2bb&bbChecks[Rook] > 0),
+					newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Bishop.color(player), s2bb&bbChecks[Bishop] > 0),
+					newPawnMove(pawn, NoPiece, s1, s2, NoSquare, Knight.color(player), s2bb&bbChecks[Knight] > 0),
+				)
 			}
 		}
 	}
@@ -193,19 +183,12 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, allPromos, onlyKing, l
 				continue
 			}
 
-			if allPromos {
-				// only used in perft, no need for check information
-				moves = append(moves,
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player), false),
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Rook.color(player), false),
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player), false),
-					newPawnMove(pawn, p2, s1, s2, NoSquare, Knight.color(player), false),
-				)
-				continue
-			}
-
-			check := s2bb&bbChecks[Queen] > 0
-			moves = append(moves, newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player), check))
+			moves = append(moves,
+				newPawnMove(pawn, p2, s1, s2, NoSquare, Queen.color(player), s2bb&bbChecks[Queen] > 0),
+				newPawnMove(pawn, p2, s1, s2, NoSquare, Rook.color(player), s2bb&bbChecks[Rook] > 0),
+				newPawnMove(pawn, p2, s1, s2, NoSquare, Bishop.color(player), s2bb&bbChecks[Bishop] > 0),
+				newPawnMove(pawn, p2, s1, s2, NoSquare, Knight.color(player), s2bb&bbChecks[Knight] > 0),
+			)
 		}
 	}
 

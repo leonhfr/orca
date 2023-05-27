@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -146,7 +147,7 @@ func TestNegamax(t *testing.T) {
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 9495, score: 549},
+			output: searchResult{nodes: 9561, score: 549},
 			moves:  []string{"g7b2", "a1b2", "b3b2"},
 		},
 	}
@@ -158,8 +159,8 @@ func TestNegamax(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.NotNil(t, output)
-			assert.Equal(t, want.output.nodes, output.nodes)
-			assert.Equal(t, want.output.score, output.score)
+			assert.Equal(t, want.output.nodes, output.nodes, fmt.Sprintf("want %d, got %d", want.output.nodes, output.nodes))
+			assert.Equal(t, want.output.score, output.score, fmt.Sprintf("want %d, got %d", want.output.score, output.score))
 			assert.Equal(t, want.moves, movesString(output.pv))
 		})
 	}

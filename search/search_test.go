@@ -135,7 +135,7 @@ func TestSearch(t *testing.T) {
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 1624, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
 				{Depth: 2, Nodes: 6690, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 109919, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
+				{Depth: 3, Nodes: 109955, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
 			},
 		},
 	}
@@ -174,9 +174,9 @@ func TestCachedSearch(t *testing.T) {
 			[]uci.Output{
 				{Depth: 1, Nodes: 1624, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
 				{Depth: 2, Nodes: 6690, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 109919, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
-				{Depth: 5, Nodes: 389263, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915}},
-				{Depth: 6, Nodes: 4525184, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
+				{Depth: 3, Nodes: 109955, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
+				{Depth: 5, Nodes: 389335, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915}},
+				{Depth: 6, Nodes: 4531171, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
 			},
 		},
 		{
@@ -187,7 +187,7 @@ func TestCachedSearch(t *testing.T) {
 				{Depth: 2, Nodes: 5581, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
 				{Depth: 3, Nodes: 102421, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
 				{Depth: 5, Nodes: 259632, Score: 4, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x6c05d5a, 0x2c56d7d, 0x2c03915}},
-				{Depth: 6, Nodes: 3459786, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
+				{Depth: 6, Nodes: 3465104, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
 			},
 		},
 	}

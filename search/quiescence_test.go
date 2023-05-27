@@ -27,14 +27,14 @@ func TestQuiescence(t *testing.T) {
 			name:   "horizon effect depth 5",
 			fen:    "5r1k/4Qpq1/4p3/1p1p2P1/2p2P2/1p2P3/3P4/BK6 b - - 0 1",
 			depth:  5,
-			result: searchResult{nodes: 5253, score: 2},
+			result: searchResult{nodes: 5267, score: 2},
 			moves:  []string{"b1c1", "h8g7", "e3d4", "g7f8", "e7f8", "d5d4"},
 		},
 		{
 			name:   "horizon effect depth 6",
 			fen:    "5r1k/4Qpq1/4p3/1p1p2P1/2p2P2/1p2P3/3P4/BK6 b - - 0 1",
 			depth:  6,
-			result: searchResult{nodes: 19896, score: 2},
+			result: searchResult{nodes: 19904, score: 2},
 			moves:  []string{"g7g6", "b1c1", "h8g7", "e3d4", "g7f8", "e7f8", "d5d4"},
 		},
 	}
