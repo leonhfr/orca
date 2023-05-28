@@ -274,7 +274,7 @@ func (pos *Position) attackBitboards(sq Square, c Color) [5]bitboard {
 	bbRookMoves := bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
 
 	return [5]bitboard{
-		singlePawnCaptureBitboard(sq, c.other()),
+		singlePawnCaptureBitboard(sq, c),
 		bbKnightMoves[sq],
 		bbBishopMoves,
 		bbRookMoves,

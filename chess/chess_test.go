@@ -111,6 +111,17 @@ func TestPseudoMoves(t *testing.T) {
 			// illegal moves
 			"g1f1", "g1h1",
 		}},
+		{"8/2p5/3p4/KP5r/1R3P2/6k1/6P1/8 b - - 0 1", []string{
+			"d6d5", "c7c6", "c7c5", "h5h1", "h5h2", "h5h3", "h5h4", "h5b5", "h5c5", "h5d5",
+			"h5e5", "h5f5", "h5g5", "h5h6", "h5h7", "h5h8", "g3f2", "g3g2", "g3h2", "g3h4",
+			"g3g4",
+			// illegal moves
+			"g3f3", "g3h3", "g3f4",
+		}},
+		{"8/2p5/3p4/KP5r/1R3pP1/7k/4P3/8 b - - 0 1", []string{
+			"f4f3", "d6d5", "c7c6", "c7c5", "h5h4", "h5b5", "h5c5", "h5d5", "h5e5", "h5f5",
+			"h5g5", "h5h6", "h5h7", "h5h8", "h3g2", "h3h2", "h3g3", "h3g4", "h3h4",
+		}},
 	}
 
 	for _, tt := range tests {
@@ -185,6 +196,91 @@ func BenchmarkLoudMoves(b *testing.B) {
 			for n := 0; n < b.N; n++ {
 				pos.LoudMoves()
 			}
+		})
+	}
+}
+
+func TestInCheck(t *testing.T) {
+	tests := []struct {
+		name string
+		fen  string
+		want bool
+	}{
+		{
+			"pawn",
+			"8/2p5/3p4/KP5r/1R3pP1/7k/4P3/8 b - - 0 1",
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pos := unsafeFEN(tt.fen)
+			assert.Equal(t, tt.want, pos.inCheck)
+		})
+	}
+}
+
+func TestAttackedByBitboard(t *testing.T) {
+	tests := []struct {
+		name string
+		fen  string
+		sq   Square
+		c    Color
+		want bitboard
+	}{
+		{
+			"pawn color",
+			"8/2p5/3p4/KP5r/1R3p2/4P1k1/6P1/8 w - - 0 1",
+			G3,
+			Black,
+			bbEmpty,
+		},
+		{
+			"pawn color 2",
+			"8/2p5/3p4/KP5r/1R3pP1/7k/4P3/8 b - - 0 1",
+			H3,
+			Black,
+			bbEmpty,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pos := unsafeFEN(tt.fen)
+			got := pos.attackedByBitboard(tt.sq, tt.c)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestAttackBitboards(t *testing.T) {
+	tests := []struct {
+		name string
+		fen  string
+		sq   Square
+		c    Color
+		want [5]bitboard
+	}{
+		{
+			"no check",
+			"8/2p5/3p4/KP5r/1R3p2/6Pk/4P3/8 w - - 0 1",
+			H3, Black,
+			[5]bitboard{
+				16384,
+				275414786112,
+				290499906664153120,
+				551907524736,
+				290500458571677856,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pos := unsafeFEN(tt.fen)
+			got := pos.attackBitboards(tt.sq, tt.c)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -267,7 +363,7 @@ func perft(pos *Position, depth int) int {
 
 	var count int
 	hash := pos.Hash()
-	pseudoMoves := pos.pseudoMoves(bbFull, false, false)
+	pseudoMoves := pos.PseudoMoves()
 	for _, m := range pseudoMoves {
 		if meta, ok := pos.MakeMove(m); ok {
 			count += perft(pos, depth-1)
@@ -280,7 +376,7 @@ func perft(pos *Position, depth int) int {
 func legalMoves(pos *Position) []Move {
 	hash := pos.Hash()
 	var moves []Move
-	pseudoMoves := pos.pseudoMoves(bbFull, false, false)
+	pseudoMoves := pos.PseudoMoves()
 	for _, m := range pseudoMoves {
 		if meta, ok := pos.MakeMove(m); ok {
 			moves = append(moves, m)

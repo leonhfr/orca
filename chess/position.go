@@ -62,7 +62,7 @@ func NewPosition(fen string) (*Position, error) {
 
 	pos.hash = newZobristHash(pos)
 
-	pos.inCheck = pos.attackedByBitboard(pos.board.kingSquare(pos.turn), pos.turn) > 0
+	pos.inCheck = pos.isSquareAttacked(pos.board.kingSquare(pos.turn))
 
 	return pos, nil
 }
