@@ -9,6 +9,10 @@ build:
 run:
 	go run .
 
+.PHONY: perft
+perft:
+	perftree ./perft.sh
+
 .PHONY: gen
 gen:
 	go generate ./...

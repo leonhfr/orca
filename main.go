@@ -18,6 +18,21 @@ var (
 )
 
 func main() {
+	if len(os.Args) > 1 {
+		r, err := perft(os.Args[1:])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Println(r)
+		return
+	}
+
+	run()
+}
+
+func run() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
