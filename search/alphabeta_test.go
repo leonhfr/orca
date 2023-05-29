@@ -26,16 +26,16 @@ func TestAlphaBeta(t *testing.T) {
 			moves:  []string{"f1h1"},
 		},
 		{
-			output: searchResult{nodes: 485, score: mate - 1},
+			output: searchResult{nodes: 483, score: mate - 1},
 			moves:  []string{"f6f2"},
 		},
 		{
-			output: searchResult{nodes: 15544, score: mate - 3},
+			output: searchResult{nodes: 16029, score: mate - 3},
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 469, score: 49},
-			moves:  []string{"f8d8", "e7a3", "d5d4"},
+			output: searchResult{nodes: 308, score: 55},
+			moves:  []string{"h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
 		},
 	}
 

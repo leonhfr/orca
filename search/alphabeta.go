@@ -73,9 +73,12 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	moves := pos.PseudoMoves(checkData)
-	oracle(moves, best)
+	scoreMoves(moves, best)
 
-	for _, move := range moves {
+	for i := 0; i < len(moves); i++ {
+		nextOracle(moves, i)
+		move := moves[i]
+
 		metadata, ok := pos.MakeMove(move)
 		if !ok {
 			continue

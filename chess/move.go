@@ -8,7 +8,7 @@ var (
 )
 
 // MoveTag represents a notable consequence of a move.
-type MoveTag uint32
+type MoveTag uint64
 
 const (
 	// Quiet indicates that the move is a priori quiet.
@@ -32,6 +32,9 @@ const (
 // Move represents a move from one square to another.
 //
 //	32 bits
+//	uint32 with move score
+//
+//	32 bits
 //	xxxxxxxx pppp tttt ffff TTTTTT FFFFFF
 //
 //	xxxxxxxx   move tags
@@ -40,7 +43,7 @@ const (
 //	ffff       from piece
 //	TTTTTT     to square
 //	FFFFFF     from square
-type Move uint32
+type Move uint64
 
 const (
 	// NoMove represents the absence of a move.
@@ -211,6 +214,16 @@ func (m Move) Promo() Piece {
 // HasTag checks whether the move has the given MoveTag.
 func (m Move) HasTag(tag MoveTag) bool {
 	return tag&MoveTag(m) > 0
+}
+
+// Score returns the score of the move.
+func (m Move) Score() uint32 {
+	return uint32(m >> 32)
+}
+
+// WithScore returns a new move with the score set.
+func (m Move) WithScore(score uint32) Move {
+	return (Move(score) << 32) ^ m
 }
 
 // String implements the Stringer interface.

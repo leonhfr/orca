@@ -107,8 +107,8 @@ func TestSearch(t *testing.T) {
 			fen:   "r1b1kb1r/pppp1ppp/2n1pq2/8/3Pn2N/2P3P1/PP1NPP1P/R1BQKB1R b KQkq - 3 6",
 			depth: 2,
 			outputs: []uci.Output{
-				{Depth: 1, Nodes: 38, Score: mate - 1, Mate: 1, PV: []chess.Move{0x6c1836d}},
-				{Depth: 2, Nodes: 523, Score: mate - 1, Mate: 1, PV: []chess.Move{0x6c1836d}},
+				{Depth: 1, Nodes: 37, Score: mate - 1, Mate: 1, PV: []chess.Move{0x13006c1836d}},
+				{Depth: 2, Nodes: 520, Score: mate - 1, Mate: 1, PV: []chess.Move{0x13006c1836d}},
 			},
 		},
 		{
@@ -116,8 +116,8 @@ func TestSearch(t *testing.T) {
 			fen:   "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
 			depth: 2,
 			outputs: []uci.Output{
-				{Depth: 1, Nodes: 30, Score: 38, Mate: 0, PV: []chess.Move{0x2c106a3}},
-				{Depth: 3, Nodes: 211, Score: 2, Mate: 0, PV: []chess.Move{0x2c106a3, 0x4cc9603, 0x1cc2ab9}},
+				{Depth: 1, Nodes: 30, Score: 38, Mate: 0, PV: []chess.Move{0x13502c106a3}},
+				{Depth: 3, Nodes: 214, Score: 2, Mate: 0, PV: []chess.Move{0x13502c106a3, 0x6404cc9603, 0x6401cc2ab9}},
 			},
 		},
 		{
@@ -133,9 +133,9 @@ func TestSearch(t *testing.T) {
 			nodes: 8192,
 			depth: 5,
 			outputs: []uci.Output{
-				{Depth: 1, Nodes: 1624, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
-				{Depth: 2, Nodes: 6690, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 109955, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
+				{Depth: 1, Nodes: 1697, Score: 1, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 6953, Score: 2, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
+				{Depth: 3, Nodes: 109527, Score: 16, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
 			},
 		},
 	}
@@ -172,22 +172,22 @@ func TestCachedSearch(t *testing.T) {
 			"not cached",
 			false,
 			[]uci.Output{
-				{Depth: 1, Nodes: 1624, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
-				{Depth: 2, Nodes: 6690, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 109955, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
-				{Depth: 5, Nodes: 389335, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915}},
-				{Depth: 6, Nodes: 4531409, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
+				{Depth: 1, Nodes: 1697, Score: 1, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 6953, Score: 2, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
+				{Depth: 3, Nodes: 109527, Score: 16, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
+				{Depth: 5, Nodes: 389768, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x13306c14362, 0x14602c47345, 0x14402c58b74, 0x13402c03915}},
+				{Depth: 5, Nodes: 4490632, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14902c50b76, 0x6401cc1610, 0x13d02c3455e, 0x14902c4154e}},
 			},
 		},
 		{
 			"cached",
 			true,
 			[]uci.Output{
-				{Depth: 1, Nodes: 1624, Score: 15, Mate: 0, PV: []chess.Move{0x1cc58da}},
-				{Depth: 2, Nodes: 5581, Score: 0, Mate: 0, PV: []chess.Move{0x1cc17cf, 0x1cc49de}},
-				{Depth: 3, Nodes: 102421, Score: 3, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x1cc521a}},
-				{Depth: 5, Nodes: 259632, Score: 4, Mate: 0, PV: []chess.Move{0x2c25b66, 0x2c50b76, 0x6c05d5a, 0x2c56d7d, 0x2c03915}},
-				{Depth: 6, Nodes: 3465342, Score: 0, Mate: 0, PV: []chess.Move{0x2c25b66, 0x6c14362, 0x2c47345, 0x2c58b74, 0x2c03915, 0x2c9431e}},
+				{Depth: 1, Nodes: 1697, Score: 1, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 5442, Score: 2, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
+				{Depth: 3, Nodes: 106882, Score: 16, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
+				{Depth: 5, Nodes: 265833, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x13306c14362, 0x14602c47345, 0x14402c58b74, 0x13402c03915}},
+				{Depth: 5, Nodes: 3469269, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14902c50b76, 0x6401cc1610, 0x13d02c3455e, 0x14902c4154e}},
 			},
 		},
 	}

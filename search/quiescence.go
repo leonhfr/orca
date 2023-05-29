@@ -24,10 +24,13 @@ func (e *Engine) quiesce(ctx context.Context, pos *chess.Position, alpha, beta i
 	}
 
 	moves := pos.LoudMoves()
-	loudOracle(moves)
+	scoreLoudMoves(moves)
 
 	var nodes uint32
-	for _, move := range moves {
+	for i := 0; i < len(moves); i++ {
+		nextOracle(moves, i)
+		move := moves[i]
+
 		metadata, ok := pos.MakeMove(move)
 		if !ok {
 			continue
