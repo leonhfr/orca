@@ -43,6 +43,9 @@ func TestAlphaBeta(t *testing.T) {
 	e.table = noTable{}
 	for i, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
+			e.killers = newKillerList()
+			e.killers.increaseDepth(int(tt.depth))
+
 			res := results[i]
 			pos := unsafeFEN(tt.fen)
 			output, err := e.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
@@ -60,6 +63,9 @@ func BenchmarkAlphaBeta(b *testing.B) {
 	e.table = noTable{}
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {
+			e.killers = newKillerList()
+			e.killers.increaseDepth(int(bb.depth))
+
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {
 				_, _ = e.alphaBeta(context.Background(), pos, -mate, mate, bb.depth)

@@ -3,9 +3,9 @@ package search
 import "github.com/leonhfr/orca/chess"
 
 // scoreMoves scores the moves.
-func scoreMoves(moves []chess.Move, best chess.Move) {
+func scoreMoves(moves []chess.Move, best chess.Move, killers [2]chess.Move) {
 	for i, move := range moves {
-		moves[i] = move.WithScore(rank(move, best))
+		moves[i] = move.WithScore(rank(move, best, killers))
 	}
 }
 
@@ -36,9 +36,10 @@ func nextOracle(moves []chess.Move, start int) {
 //	 470           king side castle
 //	 460           queen side castle
 //	 300 + [0:70]  capture ordered by mvv-lva
+//	 200           killer moves
 //	 100           quiet moves
 //	   0           bishop and rook promotions
-func rank(m, best chess.Move) uint32 {
+func rank(m, best chess.Move, killers [2]chess.Move) uint32 {
 	switch {
 	case m == best:
 		return rankBestMove
@@ -50,6 +51,8 @@ func rank(m, best chess.Move) uint32 {
 		return promoRank[m.Promo()]
 	case m.HasTag(chess.Capture):
 		return rankCapture + mvvRank[m.P2()] - lvaRank[m.P1()]
+	case killers[0] == m || killers[1] == m:
+		return rankKiller
 	default:
 		return rankQuiet
 	}

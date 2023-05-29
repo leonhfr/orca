@@ -32,6 +32,7 @@ const (
 //nolint:govet
 type Engine struct {
 	book      *chess.Book
+	killers   *killerList
 	once      sync.Once
 	ownBook   bool
 	tableSize int
@@ -41,8 +42,9 @@ type Engine struct {
 // NewEngine creates a new search engine.
 func NewEngine(options ...func(*Engine)) *Engine {
 	e := &Engine{
-		book:  chess.NewBook(),
-		table: noTable{},
+		book:    chess.NewBook(),
+		killers: newKillerList(),
+		table:   noTable{},
 	}
 	for _, o := range availableOptions {
 		o.defaultFunc()(e)
@@ -75,6 +77,7 @@ func (e *Engine) Init() error {
 	e.once.Do(func() {
 		performance := bytes.NewReader(books.Performance)
 		err = e.book.Init(performance)
+		e.killers = newKillerList()
 		e.table = newArrayTable(e.tableSize)
 	})
 	return err
@@ -150,6 +153,8 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxN
 
 // iterativeSearch performs an iterative search.
 func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- uci.Output) {
+	e.killers = newKillerList()
+
 	if maxDepth <= 0 || maxDepth > maxPkgDepth {
 		maxDepth = maxPkgDepth
 	}
@@ -160,6 +165,8 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 
 	var nodes int
 	for depth := 1; depth <= maxDepth; depth++ {
+		e.killers.increaseDepth(depth)
+
 		o, err := e.alphaBeta(ctx, pos, -mate, mate, uint8(depth))
 		if err != nil {
 			return

@@ -23,7 +23,9 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	hash := pos.Hash()
-	alphaOriginal := alpha
+	originalAlpha := alpha
+	originalDepth := depth
+
 	entry, inCache := e.table.get(hash)
 	if inCache && entry.depth >= depth {
 		switch {
@@ -73,7 +75,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	moves := pos.PseudoMoves(checkData)
-	scoreMoves(moves, best)
+	scoreMoves(moves, best, e.killers.get(originalDepth))
 
 	for i := 0; i < len(moves); i++ {
 		nextOracle(moves, i)
@@ -104,6 +106,9 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		pos.UnmakeMove(move, metadata, hash)
 
 		if alpha >= beta {
+			if move.HasTag(chess.Quiet) {
+				e.killers.set(move, originalDepth)
+			}
 			break
 		}
 	}
@@ -126,7 +131,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	result.score = incMateDistance(result.score)
-	nodeType := getNodeType(alphaOriginal, beta, result.score)
+	nodeType := getNodeType(originalAlpha, beta, result.score)
 	e.storeResult(hash, depth, result, nodeType)
 
 	return result, nil
