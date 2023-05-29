@@ -50,9 +50,7 @@ func TestPerft(t *testing.T) {
 		{
 			"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
 			[]int{
-				44, 1486, 62379, 2103487,
-				// TODO: fix perft
-				// 89941194,
+				44, 1486, 62379, 2103487, 89941194,
 			},
 		},
 		{

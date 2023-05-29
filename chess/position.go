@@ -235,7 +235,7 @@ func (pos Position) String() string {
 // moveCastlingRights computes the new castling rights after a move.
 func moveCastlingRights(cr castlingRights, m Move) castlingRights {
 	p1 := m.P1()
-	if pt := p1.Type(); pt != King && pt != Rook {
+	if pt := p1.Type(); pt != King && pt != Rook && !m.HasTag(Capture) {
 		return cr
 	}
 
