@@ -66,8 +66,8 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 	}
 
 	hash := pos.Hash()
-	inCheck := pos.InCheck()
-	moves := pos.PseudoMoves()
+	checkData, inCheck := pos.InCheck()
+	moves := pos.PseudoMoves(checkData)
 	switch {
 	case len(moves) == 0 && inCheck:
 		return searchResult{

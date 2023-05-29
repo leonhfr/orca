@@ -16,6 +16,8 @@ const (
 	// Capture indicates that the move captures a piece.
 	Capture
 	// Check indicates that the move puts the enemy king in check.
+	// Only informative, moves that do not have the tag may put the
+	// enemy king in check.
 	Check
 	// EnPassant indicates that the move captures a piece via en passant.
 	EnPassant

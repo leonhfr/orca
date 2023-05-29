@@ -34,7 +34,7 @@ func TestAlphaBeta(t *testing.T) {
 			moves:  []string{"c1e1", "e2g2", "c6g2"},
 		},
 		{
-			output: searchResult{nodes: 462, score: 49},
+			output: searchResult{nodes: 469, score: 49},
 			moves:  []string{"f8d8", "e7a3", "d5d4"},
 		},
 	}

@@ -23,7 +23,8 @@ func (pos *Position) Perft(depth int) PerftResult {
 	hash := pos.Hash()
 
 	var result PerftResult
-	for _, m := range pos.PseudoMoves() {
+	checkData, _ := pos.InCheck()
+	for _, m := range pos.PseudoMoves(checkData) {
 		if meta, ok := pos.MakeMove(m); ok {
 			nodes := perft(pos, depth-1)
 			result.moves = append(result.moves, perftMove{
@@ -50,7 +51,8 @@ func perft(pos *Position, depth int) int {
 		return 1
 	}
 
-	moves := pos.PseudoMoves()
+	checkData, _ := pos.InCheck()
+	moves := pos.PseudoMoves(checkData)
 
 	if depth == 1 {
 		var nodes int

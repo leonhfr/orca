@@ -110,11 +110,13 @@ func initBBRanks() {
 func initBBDiagonals() {
 	for sq := A1; sq <= H8; sq++ {
 		var bb bitboard
-		for upLeft := sq; upLeft.Rank() != Rank8 && upLeft.File() != FileA; upLeft += 7 {
-			bb |= upLeft.bitboard()
+		// up right
+		for file, rank := int(sq.File()), int(int(sq.Rank())); file <= int(FileH) && rank <= int(Rank8); file, rank = file+1, rank+1 {
+			bb |= newSquare(File(file), Rank(rank)).bitboard()
 		}
-		for downRight := sq; downRight.Rank() != Rank1 && downRight.File() != FileH; downRight -= 7 {
-			bb |= downRight.bitboard()
+		// down left
+		for file, rank := int(sq.File()), int(sq.Rank()); file >= int(FileA) && rank >= int(Rank1); file, rank = file-1, rank-1 {
+			bb |= newSquare(File(file), Rank(rank)).bitboard()
 		}
 		bbDiagonals[sq] = bb
 	}
@@ -124,11 +126,13 @@ func initBBDiagonals() {
 func initBBAntiDiagonals() {
 	for sq := A1; sq <= H8; sq++ {
 		var bb bitboard
-		for upRight := sq; upRight.Rank() != Rank8 && upRight.File() != FileH; upRight += 9 {
-			bb |= upRight.bitboard()
+		// up left
+		for file, rank := int(sq.File()), int(sq.Rank()); file >= int(FileA) && rank <= int(Rank8); file, rank = file-1, rank+1 {
+			bb |= newSquare(File(file), Rank(rank)).bitboard()
 		}
-		for downLeft := sq; downLeft.Rank() != Rank1 && downLeft.File() != FileA; downLeft -= 9 {
-			bb |= downLeft.bitboard()
+		// down right
+		for file, rank := int(sq.File()), int(sq.Rank()); file <= int(FileH) && rank >= int(Rank1); file, rank = file+1, rank-1 {
+			bb |= newSquare(File(file), Rank(rank)).bitboard()
 		}
 		bbAntiDiagonals[sq] = bb
 	}

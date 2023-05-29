@@ -88,11 +88,6 @@ func (pos Position) FullMoves() uint8 {
 	return pos.fullMoves
 }
 
-// InCheck quickly checks whether the current king is in check.
-func (pos *Position) InCheck() bool {
-	return pos.inCheck
-}
-
 // MakeMove makes a move.
 //
 // Checks the legality of the resulting position.
@@ -101,19 +96,8 @@ func (pos *Position) InCheck() bool {
 // The returned metadata can be used to unmake the move and
 // restore the position to the previous state.
 func (pos *Position) MakeMove(m Move) (Metadata, bool) {
-	switch {
-	case m.HasTag(KingSideCastle) || m.HasTag(QueenSideCastle):
-		if !pos.isCastleLegal(m) {
-			return NoMetadata, false
-		}
-	case m.P1() == WhiteKing || m.P1() == BlackKing:
-		if pos.isSquareAttacked(m.S2()) {
-			return NoMetadata, false
-		}
-	default:
-		if pos.isDiscoveredCheck(m) {
-			return NoMetadata, false
-		}
+	if (m.HasTag(KingSideCastle) || m.HasTag(QueenSideCastle)) && !pos.isCastleLegal(m) {
+		return NoMetadata, false
 	}
 
 	metadata := newMetadata(pos.turn, pos.inCheck, pos.castlingRights,

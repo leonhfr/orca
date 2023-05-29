@@ -3,6 +3,15 @@ package chess
 
 import "math/bits"
 
+// CheckData contains check data.
+type CheckData bitboard
+
+// InCheck returns check data and whether the king is in check.
+func (pos *Position) InCheck() (CheckData, bool) {
+	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn), pos.turn)
+	return CheckData(bbAttackedBy), bbAttackedBy > 0
+}
+
 // HasInsufficientMaterial returns true if there is insufficient material to achieve a mate.
 //
 // Combinations include:
@@ -38,21 +47,19 @@ func (pos *Position) HasInsufficientMaterial() bool {
 // PseudoMoves returns the list of pseudo moves.
 //
 // Some moves may be putting the moving player's king in check and therefore be illegal.
-func (pos *Position) PseudoMoves() []Move {
-	if pos.inCheck {
-		bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn), pos.turn)
-
-		if bits.OnesCount64(uint64(bbAttackedBy)) == 1 {
-			s1 := bbAttackedBy.scanForward()
-			s2 := pos.board.kingSquare(pos.turn)
-			bbInterference := bbInBetweens[s1][s2] | bbAttackedBy
-			return pos.pseudoMoves(bbInterference, false, false)
-		}
-
+func (pos *Position) PseudoMoves(data CheckData) []Move {
+	bbAttackedBy := bitboard(data)
+	switch count := bits.OnesCount64(uint64(bbAttackedBy)); {
+	case count > 1:
 		return pos.pseudoMoves(bbFull, true, false)
+	case count == 1:
+		s1 := bbAttackedBy.scanForward()
+		s2 := pos.board.kingSquare(pos.turn)
+		bbInterference := bbInBetweens[s1][s2] | bbAttackedBy
+		return pos.pseudoMoves(bbInterference, false, false)
+	default:
+		return pos.pseudoMoves(bbFull, false, false)
 	}
-
-	return pos.pseudoMoves(bbFull, false, false)
 }
 
 // LoudMoves returns the list of pseudo loud moves.
@@ -98,8 +105,8 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 	bbPawn := pos.board.bbPieces[Pawn] & bbPlayer
 
 	// King moves
-	sqPlayer, sqOpponent := pos.board.kingSquare(player), pos.board.kingSquare(opponent)
-	bbKing := bbKingMoves[sqPlayer] & ^bbKingMoves[sqOpponent] & ^bbPlayer
+	sqKing, sqEnemyKing := pos.board.kingSquare(player), pos.board.kingSquare(opponent)
+	bbKing := bbKingMoves[sqKing] & ^bbKingMoves[sqEnemyKing] & ^bbPlayer
 	if loud {
 		bbKing &= bbOpponent
 	}
@@ -108,14 +115,14 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 		if s2.bitboard()&bbOpponent > 0 {
 			p2 = pos.board.pieceByColor(s2, opponent)
 		}
-		moves = append(moves, newPieceMove(king, p2, sqPlayer, s2, false))
+		moves = append(moves, newPieceMove(king, p2, sqKing, s2, false))
 	}
 
 	if onlyKing {
 		return moves
 	}
 
-	bbChecks := pos.attackBitboards(sqOpponent, opponent)
+	bbChecks := pos.attackBitboards(sqEnemyKing, opponent)
 
 	// Castles
 	if !loud {
@@ -213,36 +220,6 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 	}
 
 	return moves
-}
-
-// isDiscoveredCheck checks whether the moving piece uncovers
-// a check given by an enemy piece.
-func (pos *Position) isDiscoveredCheck(m Move) bool {
-	s1, s2 := m.S1(), m.S2()
-	bb := bbFiles[s1] | bbRanks[s1] | bbDiagonals[s1] | bbAntiDiagonals[s1]
-	if bb&pos.board.bbPieces[King]&pos.board.bbColors[pos.turn] == 0 {
-		return false
-	}
-
-	kingSq := pos.board.kingSquare(pos.turn)
-	bbCaptured := s2.bitboard()
-	bbOpponent := pos.board.bbColors[pos.turn.other()] & ^bbCaptured
-
-	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
-	bbOccupancy &= ^s1.bitboard()
-	bbOccupancy |= bbCaptured
-	if m.HasTag(EnPassant) {
-		if pos.turn == White {
-			bbOccupancy &= ^(bbCaptured >> 8)
-		} else {
-			bbOccupancy &= ^(bbCaptured << 8)
-		}
-	}
-	bbRookMoves := bbMagicRookMoves[rookMagics[kingSq].index(bbOccupancy)]
-	bbBishopMoves := bbMagicBishopMoves[bishopMagics[kingSq].index(bbOccupancy)]
-
-	return (pos.board.bbPieces[Queen]^pos.board.bbPieces[Rook])&bbRookMoves&bbOpponent > 0 ||
-		(pos.board.bbPieces[Queen]^pos.board.bbPieces[Bishop])&bbBishopMoves&bbOpponent > 0
 }
 
 // isSquareAttacked checks whether the square is attacked by
