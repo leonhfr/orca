@@ -151,9 +151,23 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxN
 	return output
 }
 
+// searchInfo contains info on the running search.
+type searchInfo struct {
+	killers *killerList
+	table   transpositionTable
+}
+
+// newSearchInfo returns a new searchInfo.
+func newSearchInfo(table transpositionTable) *searchInfo {
+	return &searchInfo{
+		killers: newKillerList(),
+		table:   table,
+	}
+}
+
 // iterativeSearch performs an iterative search.
 func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- uci.Output) {
-	e.killers = newKillerList()
+	si := newSearchInfo(e.table)
 
 	if maxDepth <= 0 || maxDepth > maxPkgDepth {
 		maxDepth = maxPkgDepth
@@ -165,9 +179,9 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 
 	var nodes int
 	for depth := 1; depth <= maxDepth; depth++ {
-		e.killers.increaseDepth(depth)
+		si.killers.increaseDepth(depth)
 
-		o, err := e.alphaBeta(ctx, pos, -mate, mate, uint8(depth))
+		o, err := si.alphaBeta(ctx, pos, -mate, mate, uint8(depth))
 		if err != nil {
 			return
 		}

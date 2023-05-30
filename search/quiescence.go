@@ -6,7 +6,7 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-func (e *Engine) quiesce(ctx context.Context, pos *chess.Position, alpha, beta int32) (searchResult, error) {
+func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, beta int32) (searchResult, error) {
 	select {
 	case <-ctx.Done():
 		return searchResult{}, context.Canceled
@@ -36,7 +36,7 @@ func (e *Engine) quiesce(ctx context.Context, pos *chess.Position, alpha, beta i
 			continue
 		}
 
-		current, err := e.quiesce(ctx, pos, -beta, -alpha)
+		current, err := si.quiesce(ctx, pos, -beta, -alpha)
 		if err != nil {
 			return searchResult{}, nil
 		}

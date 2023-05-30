@@ -39,16 +39,14 @@ func TestAlphaBeta(t *testing.T) {
 		},
 	}
 
-	e := NewEngine()
-	e.table = noTable{}
 	for i, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
-			e.killers = newKillerList()
-			e.killers.increaseDepth(int(tt.depth))
+			si := newSearchInfo(noTable{})
+			si.killers.increaseDepth(int(tt.depth))
 
 			res := results[i]
 			pos := unsafeFEN(tt.fen)
-			output, err := e.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
+			output, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
 
 			assert.Equal(t, res.output.nodes, output.nodes, fmt.Sprintf("want %d, got %d", res.output.nodes, output.nodes))
 			assert.Equal(t, res.output.score, output.score, fmt.Sprintf("want %d, got %d", res.output.score, output.score))
@@ -59,16 +57,14 @@ func TestAlphaBeta(t *testing.T) {
 }
 
 func BenchmarkAlphaBeta(b *testing.B) {
-	e := NewEngine()
-	e.table = noTable{}
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {
-			e.killers = newKillerList()
-			e.killers.increaseDepth(int(bb.depth))
+			si := newSearchInfo(noTable{})
+			si.killers.increaseDepth(int(bb.depth))
 
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {
-				_, _ = e.alphaBeta(context.Background(), pos, -mate, mate, bb.depth)
+				_, _ = si.alphaBeta(context.Background(), pos, -mate, mate, bb.depth)
 			}
 		})
 	}

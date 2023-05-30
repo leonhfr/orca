@@ -15,7 +15,7 @@ type searchResult struct {
 
 // alphaBeta performs a search using the Negamax algorithm
 // and alpha-beta pruning.
-func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta int32, depth uint8) (searchResult, error) {
+func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta int32, depth uint8) (searchResult, error) {
 	select {
 	case <-ctx.Done():
 		return searchResult{}, context.Canceled
@@ -26,7 +26,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	originalAlpha := alpha
 	originalDepth := depth
 
-	entry, inCache := e.table.get(hash)
+	entry, inCache := si.table.get(hash)
 	if inCache && entry.depth >= depth {
 		switch {
 		case entry.nodeType == exact:
@@ -61,7 +61,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	if depth == 0 {
-		return e.quiesce(ctx, pos, -beta, -alpha)
+		return si.quiesce(ctx, pos, -beta, -alpha)
 	}
 
 	var validMoves int
@@ -75,7 +75,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 	}
 
 	moves := pos.PseudoMoves(checkData)
-	scoreMoves(moves, best, e.killers.get(originalDepth))
+	scoreMoves(moves, best, si.killers.get(originalDepth))
 
 	for i := 0; i < len(moves); i++ {
 		nextOracle(moves, i)
@@ -87,7 +87,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 		}
 		validMoves++
 
-		current, err := e.alphaBeta(ctx, pos, -beta, -alpha, depth-1)
+		current, err := si.alphaBeta(ctx, pos, -beta, -alpha, depth-1)
 		if err != nil {
 			return searchResult{}, err
 		}
@@ -107,7 +107,7 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 
 		if alpha >= beta {
 			if move.HasTag(chess.Quiet) {
-				e.killers.set(move, originalDepth)
+				si.killers.set(move, originalDepth)
 			}
 			break
 		}
@@ -119,20 +119,20 @@ func (e *Engine) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta
 			nodes: 1,
 			score: -mate,
 		}
-		e.storeResult(hash, depth, result, exact)
+		si.storeResult(hash, depth, result, exact)
 		return mateResult, nil
 	case validMoves == 0:
 		drawResult := searchResult{
 			nodes: 1,
 			score: draw,
 		}
-		e.storeResult(hash, depth, result, exact)
+		si.storeResult(hash, depth, result, exact)
 		return drawResult, nil
 	}
 
 	result.score = incMateDistance(result.score)
 	nodeType := getNodeType(originalAlpha, beta, result.score)
-	e.storeResult(hash, depth, result, nodeType)
+	si.storeResult(hash, depth, result, nodeType)
 
 	return result, nil
 }
@@ -150,7 +150,7 @@ func getNodeType(alpha, beta, score int32) nodeType {
 }
 
 // storeResult stores a search result in the transposition table.
-func (e *Engine) storeResult(hash chess.Hash, depth uint8, r searchResult, n nodeType) {
+func (si *searchInfo) storeResult(hash chess.Hash, depth uint8, r searchResult, n nodeType) {
 	se := searchEntry{
 		hash:     hash,
 		score:    r.score,
@@ -160,5 +160,5 @@ func (e *Engine) storeResult(hash chess.Hash, depth uint8, r searchResult, n nod
 	if len(r.pv) > 0 {
 		se.best = r.pv[len(r.pv)-1]
 	}
-	e.table.set(hash, se)
+	si.table.set(hash, se)
 }
