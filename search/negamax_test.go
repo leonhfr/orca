@@ -10,40 +10,108 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-var searchTestPositions = [6]struct {
-	name  string
-	fen   string
-	depth uint8
+type searchTestResult struct {
+	score int32
+	nodes uint32
+	moves []string
+}
+
+var searchTestPositions = []struct {
+	name      string
+	fen       string
+	depth     uint8
+	negamax   searchTestResult
+	alphaBeta searchTestResult
 }{
 	{
 		name:  "draw stalemate in 1",
 		fen:   "8/2b2k2/2K5/8/8/8/5n2/8 w - - 0 1",
 		depth: 3,
+		negamax: searchTestResult{
+			score: 0,
+			nodes: 601,
+			moves: []string{"c6c7"},
+		},
+		alphaBeta: searchTestResult{
+			score: 0,
+			nodes: 3,
+			moves: []string{"c6c7"},
+		},
 	},
 	{
 		name:  "checkmate",
 		fen:   "8/8/8/5K1k/8/8/8/7R b - - 0 1",
 		depth: 1,
+		negamax: searchTestResult{
+			score: -mate,
+			nodes: 1,
+			moves: []string{},
+		},
+		alphaBeta: searchTestResult{
+			score: -mate,
+			nodes: 1,
+			moves: []string{},
+		},
 	},
 	{
 		name:  "mate in 1",
 		fen:   "8/8/8/5K1k/8/8/8/5R2 w - - 0 1",
 		depth: 2,
+		negamax: searchTestResult{
+			score: mate - 1,
+			nodes: 39,
+			moves: []string{"f1h1"},
+		},
+		alphaBeta: searchTestResult{
+			score: mate - 1,
+			nodes: 11,
+			moves: []string{"f1h1"},
+		},
 	},
 	{
 		name:  "mate in 1",
 		fen:   "r1b1kb1r/pppp1ppp/2n1pq2/8/3Pn2N/2P3P1/PP1NPP1P/R1BQKB1R b KQkq - 3 6",
 		depth: 2,
+		negamax: searchTestResult{
+			score: mate - 1,
+			nodes: 1219,
+			moves: []string{"f6f2"},
+		},
+		alphaBeta: searchTestResult{
+			score: mate - 1,
+			nodes: 483,
+			moves: []string{"f6f2"},
+		},
 	},
 	{
 		name:  "mate in 2",
 		fen:   "5rk1/pb2npp1/1pq4p/5p2/5B2/1B6/P2RQ1PP/2r1R2K b - - 0 1",
 		depth: 4,
+		negamax: searchTestResult{
+			score: mate - 3,
+			nodes: 4103853,
+			moves: []string{"c1e1", "e2g2", "c6g2"},
+		},
+		alphaBeta: searchTestResult{
+			score: mate - 3,
+			nodes: 16029,
+			moves: []string{"c1e1", "e2g2", "c6g2"},
+		},
 	},
 	{
 		name:  "horizon effect",
 		fen:   "5r1k/4Qpq1/4p3/1p1p2P1/2p2P2/1p2P3/3P4/BK6 b - - 0 1",
 		depth: 3,
+		negamax: searchTestResult{
+			score: 549,
+			nodes: 9561,
+			moves: []string{"g7b2", "a1b2", "b3b2"},
+		},
+		alphaBeta: searchTestResult{
+			score: 55,
+			nodes: 308,
+			moves: []string{"h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
+		},
 	},
 }
 
@@ -122,45 +190,15 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 }
 
 func TestNegamax(t *testing.T) {
-	results := [6]struct {
-		output searchResult
-		moves  []string
-	}{
-		{
-			output: searchResult{nodes: 601, score: 0},
-			moves:  []string{"c6c7"},
-		},
-		{
-			output: searchResult{nodes: 1, score: -mate},
-			moves:  []string{},
-		},
-		{
-			output: searchResult{nodes: 39, score: mate - 1},
-			moves:  []string{"f1h1"},
-		},
-		{
-			output: searchResult{nodes: 1219, score: mate - 1},
-			moves:  []string{"f6f2"},
-		},
-		{
-			output: searchResult{nodes: 4103853, score: mate - 3},
-			moves:  []string{"c1e1", "e2g2", "c6g2"},
-		},
-		{
-			output: searchResult{nodes: 9561, score: 549},
-			moves:  []string{"g7b2", "a1b2", "b3b2"},
-		},
-	}
-
-	for i, tt := range searchTestPositions {
+	for _, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
-			want := results[i]
 			output, err := negamax(context.Background(), unsafeFEN(tt.fen), tt.depth)
 
+			want := tt.negamax
 			assert.Nil(t, err)
 			assert.NotNil(t, output)
-			assert.Equal(t, want.output.nodes, output.nodes, fmt.Sprintf("want %d, got %d", want.output.nodes, output.nodes))
-			assert.Equal(t, want.output.score, output.score, fmt.Sprintf("want %d, got %d", want.output.score, output.score))
+			assert.Equal(t, want.nodes, output.nodes, fmt.Sprintf("nodes: want %d, got %d", want.nodes, output.nodes))
+			assert.Equal(t, want.score, output.score, fmt.Sprintf("score: want %d, got %d", want.score, output.score))
 			assert.Equal(t, want.moves, movesString(output.pv))
 		})
 	}
