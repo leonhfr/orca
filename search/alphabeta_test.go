@@ -42,11 +42,10 @@ func TestAlphaBeta(t *testing.T) {
 	for i, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
 			si := newSearchInfo(noTable{})
-			si.killers.increaseDepth(int(tt.depth))
 
 			res := results[i]
 			pos := unsafeFEN(tt.fen)
-			output, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
+			output, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth, 0)
 
 			assert.Equal(t, res.output.nodes, output.nodes, fmt.Sprintf("want %d, got %d", res.output.nodes, output.nodes))
 			assert.Equal(t, res.output.score, output.score, fmt.Sprintf("want %d, got %d", res.output.score, output.score))
@@ -60,11 +59,10 @@ func BenchmarkAlphaBeta(b *testing.B) {
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {
 			si := newSearchInfo(noTable{})
-			si.killers.increaseDepth(int(bb.depth))
 
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {
-				_, _ = si.alphaBeta(context.Background(), pos, -mate, mate, bb.depth)
+				_, _ = si.alphaBeta(context.Background(), pos, -mate, mate, bb.depth, 0)
 			}
 		})
 	}

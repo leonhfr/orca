@@ -8,14 +8,6 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-func TestKillerListSetDepth(t *testing.T) {
-	depth := 3
-	kl := newKillerList()
-	assert.Equal(t, 0, len(kl.entries))
-	kl.increaseDepth(depth)
-	assert.Equal(t, depth, len(kl.entries))
-}
-
 func TestKillerListGet(t *testing.T) {
 	A, B := chess.Move(chess.A2), chess.Move(chess.B2)
 	C, D := chess.Move(chess.C2), chess.Move(chess.D2)
@@ -41,7 +33,7 @@ func TestKillerListGet(t *testing.T) {
 		},
 		{
 			"index greater than list length",
-			killerList{entries: [][2]chess.Move{
+			killerList{entries: [maxSearchDepth][2]chess.Move{
 				{A, B}, // 2
 				{C, D}, // 1
 			}},
@@ -49,23 +41,23 @@ func TestKillerListGet(t *testing.T) {
 			[2]chess.Move{},
 		},
 		{
-			"leaf node",
-			killerList{entries: [][2]chess.Move{
+			"index outside bounds",
+			killerList{entries: [maxSearchDepth][2]chess.Move{
 				{A, B}, // 2
 				{C, D}, // 1
 			}},
-			0,
+			maxSearchDepth,
 			[2]chess.Move{},
 		},
 		{
-			"index within list length",
-			killerList{entries: [][2]chess.Move{
+			"index within bounds",
+			killerList{entries: [maxSearchDepth][2]chess.Move{
 				{A, B}, // 3
 				{C, D}, // 2
 				{E, F}, // 1
 			}},
-			3,
-			[2]chess.Move{A, B},
+			2,
+			[2]chess.Move{E, F},
 		},
 	}
 
@@ -90,20 +82,19 @@ func TestKillerListSet(t *testing.T) {
 		name  string
 		depth int
 		args  []args
-		want  [][2]chess.Move
+		want  [maxSearchDepth][2]chess.Move
 	}{
 		{
 			"depth 1",
 			2,
-			[]args{{A, 1}, {B, 1}, {C, 2}, {A, 1}, {D, 2}},
-			[][2]chess.Move{{D, C}, {B, A}},
+			[]args{{A, 1}, {B, 1}, {C, 0}, {A, 1}, {D, 0}},
+			[maxSearchDepth][2]chess.Move{{D, C}, {B, A}},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kl := newKillerList()
-			kl.increaseDepth(tt.depth)
 			for _, args := range tt.args {
 				kl.set(args.move, args.depth)
 			}

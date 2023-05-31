@@ -6,7 +6,7 @@ import "github.com/leonhfr/orca/chess"
 //
 // Killer moves are quiet moves that caused a beta cutoff in a sibling node.
 type killerList struct {
-	entries [][2]chess.Move
+	entries [maxSearchDepth][2]chess.Move
 }
 
 // newKillerList returns a new killerList.
@@ -14,18 +14,9 @@ func newKillerList() *killerList {
 	return &killerList{}
 }
 
-// increaseDepth sets the depth. Intended to be used during iterative deepening.
-func (kl *killerList) increaseDepth(depth int) {
-	add := depth - len(kl.entries)
-	for i := 0; i < add; i++ {
-		kl.entries = append(kl.entries, [2]chess.Move{})
-	}
-}
-
 // get returns the killer moves at this depth.
-func (kl *killerList) get(depth uint8) [2]chess.Move {
-	index := len(kl.entries) - int(depth)
-	if index < 0 || len(kl.entries) <= index {
+func (kl *killerList) get(index uint8) [2]chess.Move {
+	if index >= maxSearchDepth {
 		return [2]chess.Move{}
 	}
 	return kl.entries[index]
@@ -35,9 +26,8 @@ func (kl *killerList) get(depth uint8) [2]chess.Move {
 //
 // If moves are already present, the older ones are pushed out.
 // Guarantees that the moves will be different.
-func (kl *killerList) set(move chess.Move, depth uint8) {
-	index := len(kl.entries) - int(depth)
-	if index < 0 || len(kl.entries) <= index {
+func (kl *killerList) set(move chess.Move, index uint8) {
+	if index >= maxSearchDepth {
 		return
 	}
 

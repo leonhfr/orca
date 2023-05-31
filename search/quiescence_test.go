@@ -43,7 +43,7 @@ func TestQuiescence(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
-			output, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth)
+			output, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth, 0)
 
 			assert.Equal(t, tt.result.nodes, output.nodes, fmt.Sprintf("want %d, got %d", tt.result.nodes, output.nodes))
 			assert.Equal(t, tt.result.score, output.score, fmt.Sprintf("want %d, got %d", tt.result.score, output.score))

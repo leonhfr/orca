@@ -15,7 +15,7 @@ type searchResult struct {
 
 // alphaBeta performs a search using the Negamax algorithm
 // and alpha-beta pruning.
-func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta int32, depth uint8) (searchResult, error) {
+func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta int32, depth, index uint8) (searchResult, error) {
 	select {
 	case <-ctx.Done():
 		return searchResult{}, context.Canceled
@@ -24,7 +24,6 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 	hash := pos.Hash()
 	originalAlpha := alpha
-	originalDepth := depth
 
 	entry, inCache := si.table.get(hash)
 	if inCache && entry.depth >= depth {
@@ -75,7 +74,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	}
 
 	moves := pos.PseudoMoves(checkData)
-	scoreMoves(moves, best, si.killers.get(originalDepth))
+	scoreMoves(moves, best, si.killers.get(index))
 
 	for i := 0; i < len(moves); i++ {
 		nextOracle(moves, i)
@@ -87,7 +86,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		}
 		validMoves++
 
-		current, err := si.alphaBeta(ctx, pos, -beta, -alpha, depth-1)
+		current, err := si.alphaBeta(ctx, pos, -beta, -alpha, depth-1, index+1)
 		if err != nil {
 			return searchResult{}, err
 		}
@@ -107,7 +106,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 		if alpha >= beta {
 			if move.HasTag(chess.Quiet) {
-				si.killers.set(move, originalDepth)
+				si.killers.set(move, index)
 			}
 			break
 		}

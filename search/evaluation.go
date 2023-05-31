@@ -61,7 +61,7 @@ func incMateDistance(score int32) int32 {
 		sign = -1
 	}
 	delta := mate - sign*score
-	if delta <= maxPkgDepth {
+	if delta <= maxSearchDepth {
 		return score - sign
 	}
 	return score

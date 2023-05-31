@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	// maxPkgDepth is the maximum depth at which the package will search.
-	maxPkgDepth = 64
+	// maxSearchDepth is the maximum depth at which the package will search.
+	maxSearchDepth = 64
 	// mate is the score of a checkmate.
 	mate = math.MaxInt32
 	// draw is the score of a draw.
@@ -169,8 +169,8 @@ func newSearchInfo(table transpositionTable) *searchInfo {
 func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- uci.Output) {
 	si := newSearchInfo(e.table)
 
-	if maxDepth <= 0 || maxDepth > maxPkgDepth {
-		maxDepth = maxPkgDepth
+	if maxDepth <= 0 || maxDepth > maxSearchDepth {
+		maxDepth = maxSearchDepth
 	}
 
 	if maxNodes <= 0 {
@@ -179,9 +179,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 
 	var nodes int
 	for depth := 1; depth <= maxDepth; depth++ {
-		si.killers.increaseDepth(depth)
-
-		o, err := si.alphaBeta(ctx, pos, -mate, mate, uint8(depth))
+		o, err := si.alphaBeta(ctx, pos, -mate, mate, uint8(depth), 0)
 		if err != nil {
 			return
 		}
@@ -235,7 +233,7 @@ func weightedRandomMove(moves []chess.WeightedMove) chess.Move {
 func mateIn(score int32) int32 {
 	sign := sign(score)
 	delta := mate - sign*score
-	if delta > maxPkgDepth {
+	if delta > maxSearchDepth {
 		return 0
 	}
 	return sign * (delta/2 + delta%2)
