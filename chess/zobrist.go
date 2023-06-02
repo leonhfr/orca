@@ -36,22 +36,48 @@ func newZobristHash(pos *Position) (hash Hash) {
 	return
 }
 
+// newPawnZobristHash returns a pawn zobrist hash (uint64).
+//
+// Only takes into account pawns and kings positions.
+func newPawnZobristHash(pos *Position) (hash Hash) {
+	for _, p := range [4]Piece{BlackPawn, WhitePawn, BlackKing, WhiteKing} {
+		for bb := pos.board.bbColors[p.Color()] & pos.board.bbPieces[p.Type()]; bb > 0; bb = bb.resetLSB() {
+			sq := bb.scanForward()
+			offset := 64*int(p) + int(sq)
+			hash ^= polyRandom[offset]
+		}
+	}
+	return 0
+}
+
 // xorHashPartialMove updates a position hash incrementally.
 //
 // This function does not account for changes in en passant squares.
-func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
+func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
 	// turn
-	h := polyTurn
+	h = polyTurn
 
 	// piece
 	p1, p2 := m.P1(), m.P2()
 	s1, s2 := m.S1(), m.S2()
 	c := p1.Color()
 
-	h ^= polyRandom[64*int(p1)+int(s1)]
-	if promo := m.Promo(); promo == NoPiece {
+	pawnMove := p1.Type() == Pawn || p1.Type() == King || p2.Type() == Pawn
+
+	hp1 := polyRandom[64*int(p1)+int(s1)]
+	h ^= hp1
+	if pawnMove {
+		ph ^= hp1
+	}
+
+	switch promo := m.Promo(); {
+	case promo == NoPiece && pawnMove:
+		hp2 := polyRandom[64*int(p1)+int(s2)]
+		h ^= hp2
+		ph ^= hp2
+	case promo == NoPiece:
 		h ^= polyRandom[64*int(p1)+int(s2)]
-	} else {
+	default:
 		h ^= polyRandom[64*int(promo)+int(s2)]
 	}
 
@@ -61,7 +87,7 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
 	}
 
 	if m.HasTag(Quiet) {
-		return h
+		return
 	}
 
 	// non quiet moves
@@ -86,7 +112,7 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
 		h ^= polyRandom[64*int(BlackRook)+int(D8)]
 	}
 
-	return h
+	return
 }
 
 // pieceHash returns a hash (uint64)
@@ -98,14 +124,9 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) Hash {
 func pieceHash(pos *Position) (hash Hash) {
 	for p := BlackPawn; p <= WhiteKing; p++ {
 		for bb := pos.board.bbPieces[p.Type()] & pos.board.bbColors[p.Color()]; bb > 0; bb = bb.resetLSB() {
-			switch sq := bb.scanForward(); p.Color() {
-			case White:
-				offset := 64*int(p) + int(sq)
-				hash ^= polyRandom[offset]
-			case Black:
-				offset := 64*int(p) + int(sq)
-				hash ^= polyRandom[offset]
-			}
+			sq := bb.scanForward()
+			offset := 64*int(p) + int(sq)
+			hash ^= polyRandom[offset]
 		}
 	}
 	return

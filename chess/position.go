@@ -10,6 +10,7 @@ import (
 type Position struct {
 	board          board
 	hash           Hash
+	pawnHash       Hash
 	turn           Color
 	inCheck        bool // whether current player is in check
 	castlingRights castlingRights
@@ -61,6 +62,7 @@ func NewPosition(fen string) (*Position, error) {
 	}
 
 	pos.hash = newZobristHash(pos)
+	pos.pawnHash = newPawnZobristHash(pos)
 
 	pos.inCheck = pos.isSquareAttacked(pos.board.kingSquare(pos.turn))
 
@@ -76,6 +78,11 @@ func StartingPosition() *Position {
 // Hash returns the position Zobrist hash.
 func (pos *Position) Hash() Hash {
 	return pos.hash
+}
+
+// PawnHash returns the position pawn Zobrist hash.
+func (pos *Position) PawnHash() Hash {
+	return pos.pawnHash
 }
 
 // Turn returns the color of the next player to move in this position.
@@ -123,7 +130,10 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
 			pos.board.bbColors[White]&pos.board.bbPieces[Pawn], pos.board.bbColors[Black]&pos.board.bbPieces[Pawn])
 	}
-	pos.hash ^= xorHashPartialMove(m, cr, pos.castlingRights)
+
+	partialHash, partialPawnHash := xorHashPartialMove(m, cr, pos.castlingRights)
+	pos.hash ^= partialHash
+	pos.pawnHash ^= partialPawnHash
 
 	if m.P1().Type() == Pawn || m.HasTag(Capture) {
 		pos.halfMoveClock = 0
@@ -139,7 +149,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 }
 
 // UnmakeMove unmakes a move and restores the previous position.
-func (pos *Position) UnmakeMove(m Move, meta Metadata, hash Hash) {
+func (pos *Position) UnmakeMove(m Move, meta Metadata, hash, pawnHash Hash) {
 	pos.board.makeMove(m)
 	pos.inCheck = meta.inCheck()
 	pos.turn = meta.turn()
@@ -148,6 +158,7 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata, hash Hash) {
 	pos.halfMoveClock = meta.halfMoveClock()
 	pos.fullMoves = meta.fullMoves()
 	pos.hash = hash
+	pos.pawnHash = pawnHash
 }
 
 // CountPieces returns the count of knights, bishops, rooks, and queens.

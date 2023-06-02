@@ -23,6 +23,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	}
 
 	hash := pos.Hash()
+	pawnHash := pos.PawnHash()
 	originalAlpha := alpha
 
 	entry, inCache := si.table.get(hash)
@@ -102,7 +103,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 			alpha = current.score
 		}
 
-		pos.UnmakeMove(move, metadata, hash)
+		pos.UnmakeMove(move, metadata, hash, pawnHash)
 
 		if alpha >= beta {
 			if move.HasTag(chess.Quiet) {

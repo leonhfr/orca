@@ -14,6 +14,7 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 	}
 
 	hash := pos.Hash()
+	pawnHash := pos.PawnHash()
 	if standPat := evaluate(pos); standPat >= beta {
 		return searchResult{
 			nodes: 1,
@@ -43,7 +44,7 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 
 		current.score = -current.score
 		nodes += current.nodes
-		pos.UnmakeMove(move, metadata, hash)
+		pos.UnmakeMove(move, metadata, hash, pawnHash)
 
 		if current.score >= beta {
 			return searchResult{
