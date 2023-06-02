@@ -11,7 +11,7 @@ import (
 func TestAlphaBeta(t *testing.T) {
 	for _, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
-			si := newSearchInfo(noTable{})
+			si := newSearchInfo(noTable{}, noPawnTable{})
 
 			res := tt.alphaBeta
 			pos := unsafeFEN(tt.fen)
@@ -28,7 +28,7 @@ func TestAlphaBeta(t *testing.T) {
 func BenchmarkAlphaBeta(b *testing.B) {
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {
-			si := newSearchInfo(noTable{})
+			si := newSearchInfo(noTable{}, noPawnTable{})
 
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {

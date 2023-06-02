@@ -119,7 +119,7 @@ var searchTestPositions = []struct {
 //
 // Negamax is a variant of minimax that relies on the
 // zero-sum property of a two-player game.
-func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResult, error) {
+func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResult, error) {
 	select {
 	case <-ctx.Done():
 		return searchResult{}, context.Canceled
@@ -151,7 +151,7 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 	case depth == 0:
 		return searchResult{
 			nodes: 1,
-			score: evaluate(pos),
+			score: si.evaluate(pos),
 		}, nil
 	}
 
@@ -168,7 +168,7 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 		}
 		validMoves++
 
-		current, err := negamax(ctx, pos, depth-1)
+		current, err := si.negamax(ctx, pos, depth-1)
 		if err != nil {
 			return searchResult{}, err
 		}
@@ -193,7 +193,8 @@ func negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResul
 func TestNegamax(t *testing.T) {
 	for _, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
-			output, err := negamax(context.Background(), unsafeFEN(tt.fen), tt.depth)
+			si := newSearchInfo(noTable{}, noPawnTable{})
+			output, err := si.negamax(context.Background(), unsafeFEN(tt.fen), tt.depth)
 
 			want := tt.negamax
 			assert.Nil(t, err)
@@ -208,9 +209,10 @@ func TestNegamax(t *testing.T) {
 func BenchmarkNegamax(b *testing.B) {
 	for _, bb := range searchTestPositions {
 		b.Run(bb.name, func(b *testing.B) {
+			si := newSearchInfo(noTable{}, noPawnTable{})
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {
-				_, _ = negamax(context.Background(), pos, bb.depth)
+				_, _ = si.negamax(context.Background(), pos, bb.depth)
 			}
 		})
 	}

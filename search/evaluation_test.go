@@ -26,8 +26,9 @@ var testPositions = []struct {
 func TestEvaluate(t *testing.T) {
 	for _, tt := range testPositions {
 		t.Run(tt.fen, func(t *testing.T) {
+			si := newSearchInfo(noTable{}, noPawnTable{})
 			pos := unsafeFEN(tt.fen)
-			assert.Equal(t, tt.score, evaluate(pos))
+			assert.Equal(t, tt.score, si.evaluate(pos))
 		})
 	}
 }
@@ -36,8 +37,9 @@ func BenchmarkEvaluate(b *testing.B) {
 	for _, bb := range testPositions {
 		b.Run(bb.fen, func(b *testing.B) {
 			pos := unsafeFEN(bb.fen)
+			si := newSearchInfo(noTable{}, noPawnTable{})
 			for n := 0; n < b.N; n++ {
-				evaluate(pos)
+				si.evaluate(pos)
 			}
 		})
 	}

@@ -11,8 +11,7 @@ import "github.com/leonhfr/orca/chess"
 // between piece-square tables values for opening and endgame.
 //
 // Source: https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
-func evaluate(pos *chess.Position) int32 {
-	var mg, eg int32
+func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	player := pos.Turn()
 	knights, bishops, rooks, queens := pos.CountPieces()
 	phase := int32(knights + bishops + 2*rooks + 4*queens)
@@ -20,17 +19,7 @@ func evaluate(pos *chess.Position) int32 {
 		phase = 24 // in case of early promotion
 	}
 
-	pos.PawnMap(func(p chess.Piece, sq chess.Square) {
-		mgValue := pestoMGPieceTables[p][sq]
-		egValue := pestoEGPieceTables[p][sq]
-		if p.Color() == player {
-			mg += mgValue
-			eg += egValue
-		} else {
-			mg -= mgValue
-			eg -= egValue
-		}
-	})
+	mg, eg := si.evaluatePawns(pos)
 
 	if phase <= 6 || pos.FullMoves() > 16 {
 		pos.PieceMap(func(p chess.Piece, sq chess.Square) {
@@ -61,6 +50,30 @@ func evaluate(pos *chess.Position) int32 {
 	})
 
 	return (phase*mg + (24-phase)*eg) / 24
+}
+
+func (si *searchInfo) evaluatePawns(pos *chess.Position) (mg, eg int32) {
+	player := pos.Turn()
+	pawnHash := pos.PawnHash()
+
+	if entry, inCache := si.pawnTable.get(pawnHash); inCache {
+		mg += entry.mg
+		eg += entry.eg
+		return
+	}
+
+	pos.PawnMap(func(p chess.Piece, sq chess.Square) {
+		mgValue := pestoMGPieceTables[p][sq]
+		egValue := pestoEGPieceTables[p][sq]
+		if p.Color() == player {
+			mg += mgValue
+			eg += egValue
+		} else {
+			mg -= mgValue
+			eg -= egValue
+		}
+	})
+	return
 }
 
 // incMateDistance increases the distance to the mate by a count of one.

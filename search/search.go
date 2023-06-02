@@ -153,21 +153,23 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxN
 
 // searchInfo contains info on the running search.
 type searchInfo struct {
-	killers *killerList
-	table   transpositionTable
+	killers   *killerList
+	table     transpositionTable
+	pawnTable transpositionPawnTable
 }
 
 // newSearchInfo returns a new searchInfo.
-func newSearchInfo(table transpositionTable) *searchInfo {
+func newSearchInfo(table transpositionTable, pawnTable transpositionPawnTable) *searchInfo {
 	return &searchInfo{
-		killers: newKillerList(),
-		table:   table,
+		killers:   newKillerList(),
+		table:     table,
+		pawnTable: pawnTable,
 	}
 }
 
 // iterativeSearch performs an iterative search.
 func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- uci.Output) {
-	si := newSearchInfo(e.table)
+	si := newSearchInfo(e.table, noPawnTable{})
 
 	if maxDepth <= 0 || maxDepth > maxSearchDepth {
 		maxDepth = maxSearchDepth

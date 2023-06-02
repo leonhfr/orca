@@ -8,8 +8,9 @@ import (
 )
 
 // transpositionTable is the interface that transposition tables should implement.
+//
 // Allows the storing of results of previously performed searches by mapping
-// chess.Hash to tableEntry structs.
+// chess.Hash to searchEntry structs.
 type transpositionTable interface {
 	// inc increases the epoch.
 	inc()

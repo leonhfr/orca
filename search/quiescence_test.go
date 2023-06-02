@@ -39,7 +39,7 @@ func TestQuiescence(t *testing.T) {
 		},
 	}
 
-	si := newSearchInfo(noTable{})
+	si := newSearchInfo(noTable{}, noPawnTable{})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
