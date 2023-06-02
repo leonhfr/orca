@@ -156,11 +156,13 @@ func (pos *Position) CountPieces() (int, int, int, int) {
 }
 
 // PieceMap executes the callback for each piece on the board, passing the piece
-// and its square as arguments. Intended to be used in evaluation functions.
+// and its square as arguments.
+//
+// Does not take pawns into account.
+//
+// Intended to be used in evaluation functions.
 func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
-	for p, bb := range [10]bitboard{
-		pos.board.bbColors[Black] & pos.board.bbPieces[Pawn],
-		pos.board.bbColors[White] & pos.board.bbPieces[Pawn],
+	for p, bb := range [8]bitboard{
 		pos.board.bbColors[Black] & pos.board.bbPieces[Knight],
 		pos.board.bbColors[White] & pos.board.bbPieces[Knight],
 		pos.board.bbColors[Black] & pos.board.bbPieces[Bishop],
@@ -170,8 +172,9 @@ func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
 		pos.board.bbColors[Black] & pos.board.bbPieces[Queen],
 		pos.board.bbColors[White] & pos.board.bbPieces[Queen],
 	} {
+		piece := Piece(p + 2)
 		for ; bb > 0; bb = bb.resetLSB() {
-			cb(Piece(p), bb.scanForward())
+			cb(piece, bb.scanForward())
 		}
 	}
 
@@ -181,6 +184,9 @@ func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
 
 // UniquePieceMap executes the callback for each piece on the board that do not
 // have an opponent mirrored piece, passing the piece and its square as arguments.
+//
+// Does not take pawns into account.
+//
 // Intended to be used in evaluation functions.
 func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
 	bbBlack, bbWhite := pos.board.bbColors[Black], pos.board.bbColors[White]
@@ -189,11 +195,8 @@ func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
 	bbRook := pos.board.bbPieces[Rook]
 	bbBishop := pos.board.bbPieces[Bishop]
 	bbKnight := pos.board.bbPieces[Knight]
-	bbPawn := pos.board.bbPieces[Pawn]
 
-	for p, bb := range [10]bitboard{
-		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbPawn))) & bbBlack & bbPawn,
-		^bitboard(bits.ReverseBytes64(uint64(bbBlack&bbPawn))) & bbWhite & bbPawn,
+	for p, bb := range [8]bitboard{
 		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbKnight))) & bbBlack & bbKnight,
 		^bitboard(bits.ReverseBytes64(uint64(bbBlack&bbKnight))) & bbWhite & bbKnight,
 		^bitboard(bits.ReverseBytes64(uint64(bbWhite&bbBishop))) & bbBlack & bbBishop,
@@ -203,8 +206,9 @@ func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
 		bbBlack & bbQueen,
 		bbWhite & bbQueen,
 	} {
+		piece := Piece(p + 2)
 		for ; bb > 0; bb = bb.resetLSB() {
-			cb(Piece(p), bb.scanForward())
+			cb(piece, bb.scanForward())
 		}
 	}
 
