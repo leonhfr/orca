@@ -62,7 +62,8 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (mg, eg int32) {
 		return
 	}
 
-	pos.PawnMap(func(p chess.Piece, sq chess.Square) {
+	// TODO: evaluation
+	pos.PawnMap(func(p chess.Piece, sq chess.Square, properties chess.PawnProperty) {
 		mgValue := pestoMGPieceTables[p][sq]
 		egValue := pestoEGPieceTables[p][sq]
 		if p.Color() == player {
