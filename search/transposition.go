@@ -51,6 +51,8 @@ const (
 )
 
 // noTable does not store anything at all.
+//
+// Implements the transpositionTable interface.
 type noTable struct{}
 
 func (noTable) inc()                                 {}                              // implements transpositionTable.

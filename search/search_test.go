@@ -148,6 +148,7 @@ func TestSearch(t *testing.T) {
 				engine.ownBook = true
 			}
 			engine.table = noTable{}
+			engine.pawnTable = noPawnTable{}
 			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth, tt.nodes)
 			var outputs []uci.Output
 			for o := range output {
@@ -198,6 +199,7 @@ func TestCachedSearch(t *testing.T) {
 			_ = engine.Init()
 			if !tt.cached {
 				engine.table = noTable{}
+				engine.pawnTable = noPawnTable{}
 			}
 			pos := unsafeFEN(fen)
 			var outputs []uci.Output
@@ -230,6 +232,7 @@ func BenchmarkCachedSearch(b *testing.B) {
 				_ = engine.Init()
 				if !bb.cached {
 					engine.table = noTable{}
+					engine.pawnTable = noPawnTable{}
 				}
 				pos := unsafeFEN(fen)
 				b.StartTimer()

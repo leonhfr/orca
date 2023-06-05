@@ -52,16 +52,16 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	return (phase*mg + (24-phase)*eg) / 24
 }
 
-func (si *searchInfo) evaluatePawns(pos *chess.Position) (mg, eg int32) {
+// evaluatePawns evaluate the pawn structure.
+func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
 	player := pos.Turn()
 	pawnHash := pos.PawnHash()
 
 	if entry, inCache := si.pawnTable.get(pawnHash); inCache {
-		mg += entry.mg
-		eg += entry.eg
-		return
+		return entry.mg, entry.eg
 	}
 
+	var mg, eg int32
 	// TODO: evaluation
 	pos.PawnMap(func(p chess.Piece, sq chess.Square, properties chess.PawnProperty) {
 		mgValue := pestoMGPieceTables[p][sq]
@@ -74,7 +74,14 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (mg, eg int32) {
 			eg -= egValue
 		}
 	})
-	return
+
+	si.pawnTable.set(pawnHash, pawnEntry{
+		hash: pawnHash,
+		mg:   mg,
+		eg:   eg,
+	})
+
+	return mg, eg
 }
 
 // incMateDistance increases the distance to the mate by a count of one.

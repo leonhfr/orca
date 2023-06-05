@@ -37,14 +37,16 @@ type Engine struct {
 	ownBook   bool
 	tableSize int
 	table     transpositionTable
+	pawnTable transpositionPawnTable
 }
 
 // NewEngine creates a new search engine.
 func NewEngine(options ...func(*Engine)) *Engine {
 	e := &Engine{
-		book:    chess.NewBook(),
-		killers: newKillerList(),
-		table:   noTable{},
+		book:      chess.NewBook(),
+		killers:   newKillerList(),
+		table:     noTable{},
+		pawnTable: noPawnTable{},
 	}
 	for _, o := range availableOptions {
 		o.defaultFunc()(e)
@@ -89,6 +91,7 @@ func (e *Engine) Init() error {
 func (e *Engine) Close() {
 	_ = e.Init()
 	e.table.close()
+	e.pawnTable.close()
 }
 
 // Options lists the available options.
@@ -169,7 +172,7 @@ func newSearchInfo(table transpositionTable, pawnTable transpositionPawnTable) *
 
 // iterativeSearch performs an iterative search.
 func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- uci.Output) {
-	si := newSearchInfo(e.table, noPawnTable{})
+	si := newSearchInfo(e.table, e.pawnTable)
 
 	if maxDepth <= 0 || maxDepth > maxSearchDepth {
 		maxDepth = maxSearchDepth
