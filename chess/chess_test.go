@@ -201,27 +201,6 @@ func BenchmarkLoudMoves(b *testing.B) {
 	}
 }
 
-func TestInCheck(t *testing.T) {
-	tests := []struct {
-		name string
-		fen  string
-		want bool
-	}{
-		{
-			"pawn",
-			"8/2p5/3p4/KP5r/1R3pP1/7k/4P3/8 b - - 0 1",
-			false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			pos := unsafeFEN(tt.fen)
-			assert.Equal(t, tt.want, pos.inCheck)
-		})
-	}
-}
-
 func TestAttackedByBitboard(t *testing.T) {
 	tests := []struct {
 		name string
