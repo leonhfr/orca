@@ -20,6 +20,9 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	}
 
 	mg, eg := si.evaluatePawns(pos)
+	if player == chess.Black {
+		mg, eg = -mg, -eg
+	}
 
 	if phase <= 6 || pos.FullMoves() > 16 {
 		pos.PieceMap(func(p chess.Piece, sq chess.Square) {
@@ -53,8 +56,9 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 }
 
 // evaluatePawns evaluate the pawn structure.
+//
+// Always returns the evaluation from White's point of view.
 func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
-	player := pos.Turn()
 	pawnHash := pos.PawnHash()
 
 	if entry, inCache := si.pawnTable.get(pawnHash); inCache {
@@ -66,7 +70,7 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
 	pos.PawnMap(func(p chess.Piece, sq chess.Square, properties chess.PawnProperty) {
 		mgValue := pestoMGPieceTables[p][sq]
 		egValue := pestoEGPieceTables[p][sq]
-		if p.Color() == player {
+		if p.Color() == chess.White {
 			mg += mgValue
 			eg += egValue
 		} else {
