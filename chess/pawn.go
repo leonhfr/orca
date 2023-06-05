@@ -15,26 +15,32 @@ const (
 	Isolani
 	// HalfIsolani represents a pawn isolated on only one adjacent file.
 	HalfIsolani
+	// Passed represents a passed pawn.
+	Passed
 )
 
 // PawnMap executes the callback for each pawn on the board.
 // Intended to be used in evaluation functions.
 func (pos *Position) PawnMap(cb func(p Piece, sq Square, properties PawnProperty)) {
 	for c := Black; c <= White; c++ {
-		bbOwnPawn := pos.board.bbColors[c] & pos.board.bbPieces[Pawn]
+		bbPlayerPawn := pos.board.bbColors[c] & pos.board.bbPieces[Pawn]
+		bbOpponentPawn := pos.board.bbColors[c.other()] & pos.board.bbPieces[Pawn]
+		bbOpponentFrontSpans := bbOpponentPawn.frontSpans(c.other())
 
-		bbPawnsBehindOwn := bbOwnPawn & bbOwnPawn.rearSpans(c)
-		bbPawnsInFrontOwn := bbOwnPawn & bbOwnPawn.frontSpans(c)
+		bbPawnsBehindOwn := bbPlayerPawn & bbPlayerPawn.rearSpans(c)
+		bbPawnsInFrontOwn := bbPlayerPawn & bbPlayerPawn.frontSpans(c)
 		bbDoubled := bbPawnsBehindOwn | bbPawnsInFrontOwn
 
-		bbNoNeighborOnEastFile := bbOwnPawn.noNeighborOnEastFile()
-		bbNoNeighborOnWestFile := bbOwnPawn.noNeighborOnWestFile()
+		bbNoNeighborOnEastFile := bbPlayerPawn.noNeighborOnEastFile()
+		bbNoNeighborOnWestFile := bbPlayerPawn.noNeighborOnWestFile()
 
 		bbIsolanis := bbNoNeighborOnEastFile & bbNoNeighborOnWestFile
 		bbHalfIsolanis := bbNoNeighborOnEastFile ^ bbNoNeighborOnWestFile
 
-		for pawn := Pawn.color(c); bbOwnPawn > 0; bbOwnPawn = bbOwnPawn.resetLSB() {
-			sq := bbOwnPawn.scanForward()
+		bbPassed := passedPawns(bbPlayerPawn, bbOpponentFrontSpans)
+
+		for pawn := Pawn.color(c); bbPlayerPawn > 0; bbPlayerPawn = bbPlayerPawn.resetLSB() {
+			sq := bbPlayerPawn.scanForward()
 			bb := sq.bitboard()
 			var properties PawnProperty
 
@@ -48,9 +54,19 @@ func (pos *Position) PawnMap(cb func(p Piece, sq Square, properties PawnProperty
 				properties ^= HalfIsolani
 			}
 
+			if bb&bbPassed > 0 {
+				properties ^= Passed
+			}
+
 			cb(pawn, sq, properties)
 		}
 	}
+}
+
+func passedPawns(bbPlayerPawn, bbOpponentFrontSpans bitboard) bitboard {
+	bbAllFrontSpans := bbOpponentFrontSpans
+	bbAllFrontSpans |= bbAllFrontSpans.eastOne() | bbAllFrontSpans.westOne()
+	return bbPlayerPawn & ^bbAllFrontSpans
 }
 
 func (b bitboard) noNeighborOnEastFile() bitboard {
