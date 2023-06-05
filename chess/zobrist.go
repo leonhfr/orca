@@ -47,7 +47,7 @@ func newPawnZobristHash(pos *Position) (hash Hash) {
 			hash ^= polyRandom[offset]
 		}
 	}
-	return 0
+	return
 }
 
 // xorHashPartialMove updates a position hash incrementally.
@@ -93,11 +93,19 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
 	// non quiet moves
 	switch enPassant := m.HasTag(EnPassant); {
 	case p2 != NoPiece && !enPassant:
-		h ^= polyRandom[64*int(p2)+int(s2)]
+		hp2 := polyRandom[64*int(p2)+int(s2)]
+		h ^= hp2
+		if pawnMove {
+			ph ^= hp2
+		}
 	case c == White && enPassant:
-		h ^= polyRandom[64*int(BlackPawn)+int(s2-8)]
+		hep := polyRandom[64*int(BlackPawn)+int(s2-8)]
+		h ^= hep
+		ph ^= hep
 	case c == Black && enPassant:
-		h ^= polyRandom[64*int(WhitePawn)+int(s2+8)]
+		hep := polyRandom[64*int(WhitePawn)+int(s2+8)]
+		h ^= hep
+		ph ^= hep
 	case c == White && m.HasTag(KingSideCastle):
 		h ^= polyRandom[64*int(WhiteRook)+int(H1)]
 		h ^= polyRandom[64*int(WhiteRook)+int(F1)]
