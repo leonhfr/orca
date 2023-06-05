@@ -81,6 +81,7 @@ func (e *Engine) Init() error {
 		err = e.book.Init(performance)
 		e.killers = newKillerList()
 		e.table = newArrayTable(e.tableSize)
+		e.pawnTable = newArrayPawnTable(8)
 	})
 	return err
 }

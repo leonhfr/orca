@@ -2,10 +2,13 @@ package search
 
 import (
 	"context"
+	"fmt"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/leonhfr/orca/chess"
 	"github.com/leonhfr/orca/uci"
@@ -207,7 +210,18 @@ func TestCachedSearch(t *testing.T) {
 			for o := range output {
 				outputs = append(outputs, o)
 			}
-			assert.Equal(t, tt.want, outputs)
+
+			require.Equal(t, len(tt.want), len(outputs))
+			for i, o := range outputs {
+				var wantMoves, gotMoves []string
+				for _, m := range tt.want[i].PV {
+					wantMoves = append(wantMoves, m.String())
+				}
+				for _, m := range o.PV {
+					gotMoves = append(gotMoves, m.String())
+				}
+				assert.Equal(t, tt.want[i], o, fmt.Sprintf("want moves %s, got %s", strings.Join(wantMoves, ", "), strings.Join(gotMoves, ", ")))
+			}
 		})
 	}
 }
