@@ -14,6 +14,7 @@ var zobristTests = []struct {
 	hash     Hash
 	pawnHash Hash
 }{
+	// Variation 1
 	{
 		"starting position",
 		"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -63,6 +64,7 @@ var zobristTests = []struct {
 		0x00fdd303c946bdd9,
 		0xac5343bab48469f1,
 	},
+	// Variation 2
 	{
 		"position after a2a4 b7b5 h2h4 b5b4 c2c4",
 		"rnbqkbnr/p1pppppp/8/8/PpP4P/8/1P1PPPP1/RNBQKBNR b KQkq c3 0 3",
@@ -83,6 +85,57 @@ var zobristTests = []struct {
 		NoMove,
 		0x5c3f9b829b279560,
 		0x44479b90d26da46f,
+	},
+	// Variation 3
+	{
+		"edge cases",
+		"rnbqkbnr/ppp1pppp/8/8/2B1P3/3p1N2/PPPP1PPP/RNBQK2R w KQkq - 0 1",
+		newMove(WhiteKing, NoPiece, E1, G1, NoSquare, NoPiece),
+		0xc1d8a7be522690d4,
+		0xae9b4272b8c05c8e,
+	},
+	{
+		"edge cases after e1g1",
+		"rnbqkbnr/ppp1pppp/8/8/2B1P3/3p1N2/PPPP1PPP/RNBQ1RK1 b kq - 0 1",
+		newMove(BlackPawn, WhitePawn, D3, C2, NoSquare, NoPiece),
+		0xbfaddc8a2ed54bc4,
+		0xf3190569a888ae18,
+	},
+	{
+		"edge cases after e1g1 d3c2",
+		"rnbqkbnr/ppp1pppp/8/8/2B1P3/5N2/PPpP1PPP/RNBQ1RK1 w kq - 0 1",
+		newMove(WhiteQueen, NoPiece, D1, E2, NoSquare, NoPiece),
+		0x76d0c8a9800cf271,
+		0xc2b237e0a97692a4,
+	},
+	{
+		"edge cases after e1g1 d3c2 d1e2",
+		"rnbqkbnr/ppp1pppp/8/8/2B1P3/5N2/PPpPQPPP/RNB2RK1 b kq - 0 1",
+		newMove(BlackPawn, WhiteKnight, C2, B1, NoSquare, BlackQueen),
+		0xe0d6478bce48a9f5,
+		0xc2b237e0a97692a4,
+	},
+	{
+		"edge cases after e1g1 d3c2 d1e2 c2b1",
+		"rnbqkbnr/ppp1pppp/8/8/2B1P3/5N2/PP1PQPPP/RqB2RK1 w kq - 0 1",
+		NoMove,
+		0xee91778b335c5907,
+		0x54b7e2104b285114,
+	},
+	// From panics
+	{
+		"panic 1",
+		"r1b1kb1r/pppp1ppp/2n1p3/8/3P3P/2P5/PP1BPP1P/R2QKB1R b KQkq - 0 8",
+		newMove(BlackKnight, WhitePawn, C6, D4, NoSquare, NoPiece),
+		0x9fa15cde880e1a00,
+		0x8595253885ed0948,
+	},
+	{
+		"panic 1 after c6d4",
+		"r1b1kb1r/pppp1ppp/4p3/8/3n3P/2P5/PP1BPP1P/R2QKB1R w KQkq - 0 8",
+		NoMove,
+		0x51fcf072716c211c,
+		0x9cb5e575c2cb72f5,
 	},
 }
 

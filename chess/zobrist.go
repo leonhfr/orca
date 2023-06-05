@@ -62,7 +62,7 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
 	s1, s2 := m.S1(), m.S2()
 	c := p1.Color()
 
-	pawnMove := p1.Type() == Pawn || p1.Type() == King || p2.Type() == Pawn
+	pawnMove := p1.Type() == Pawn || p1.Type() == King
 
 	hp1 := polyRandom[64*int(p1)+int(s1)]
 	h ^= hp1
@@ -71,14 +71,14 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
 	}
 
 	switch promo := m.Promo(); {
-	case promo == NoPiece && pawnMove:
+	case promo != NoPiece:
+		h ^= polyRandom[64*int(promo)+int(s2)]
+	case pawnMove:
 		hp2 := polyRandom[64*int(p1)+int(s2)]
 		h ^= hp2
 		ph ^= hp2
-	case promo == NoPiece:
-		h ^= polyRandom[64*int(p1)+int(s2)]
 	default:
-		h ^= polyRandom[64*int(promo)+int(s2)]
+		h ^= polyRandom[64*int(p1)+int(s2)]
 	}
 
 	// castling rights
@@ -95,7 +95,7 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
 	case p2 != NoPiece && !enPassant:
 		hp2 := polyRandom[64*int(p2)+int(s2)]
 		h ^= hp2
-		if pawnMove {
+		if p2.Type() == Pawn {
 			ph ^= hp2
 		}
 	case c == White && enPassant:
