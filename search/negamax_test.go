@@ -29,12 +29,12 @@ var searchTestPositions = []struct {
 		depth: 3,
 		negamax: searchTestResult{
 			score: 0,
-			nodes: 601,
+			nodes: 718,
 			moves: []string{"c6c7"},
 		},
 		alphaBeta: searchTestResult{
 			score: 0,
-			nodes: 3,
+			nodes: 60,
 			moves: []string{"c6c7"},
 		},
 	},
@@ -59,12 +59,12 @@ var searchTestPositions = []struct {
 		depth: 2,
 		negamax: searchTestResult{
 			score: mate - 1,
-			nodes: 39,
+			nodes: 54,
 			moves: []string{"f1h1"},
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 1,
-			nodes: 11,
+			nodes: 43,
 			moves: []string{"f1h1"},
 		},
 	},
@@ -74,12 +74,12 @@ var searchTestPositions = []struct {
 		depth: 2,
 		negamax: searchTestResult{
 			score: mate - 1,
-			nodes: 1219,
+			nodes: 1265,
 			moves: []string{"f6f2"},
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 1,
-			nodes: 480,
+			nodes: 1024,
 			moves: []string{"f6f2"},
 		},
 	},
@@ -89,12 +89,12 @@ var searchTestPositions = []struct {
 		depth: 4,
 		negamax: searchTestResult{
 			score: mate - 3,
-			nodes: 4103853,
+			nodes: 4195950,
 			moves: []string{"c1e1", "e2g2", "c6g2"},
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 3,
-			nodes: 16091,
+			nodes: 35978,
 			moves: []string{"c1e1", "e2g2", "c6g2"},
 		},
 	},
@@ -104,12 +104,12 @@ var searchTestPositions = []struct {
 		depth: 3,
 		negamax: searchTestResult{
 			score: 575,
-			nodes: 9561,
+			nodes: 10065,
 			moves: []string{"g7b2", "a1b2", "b3b2"},
 		},
 		alphaBeta: searchTestResult{
 			score: 42,
-			nodes: 294,
+			nodes: 1471,
 			moves: []string{"h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
 		},
 	},
@@ -126,8 +126,9 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 	default:
 	}
 
+	si.nodes++
+
 	if pos.HasInsufficientMaterial() {
-		si.nodes++
 		return searchResult{
 			score: draw,
 		}, nil
@@ -139,23 +140,19 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 	moves := pos.PseudoMoves(checkData)
 	switch {
 	case len(moves) == 0 && inCheck:
-		si.nodes++
 		return searchResult{
 			score: -mate,
 		}, nil
 	case len(moves) == 0:
-		si.nodes++
 		return searchResult{
 			score: draw,
 		}, nil
 	case depth == 0:
-		si.nodes++
 		return searchResult{
 			score: si.evaluate(pos),
 		}, nil
 	}
 
-	si.nodes++
 	result := searchResult{
 		score: -mate,
 	}
@@ -183,9 +180,9 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 	}
 
 	if validMoves > 0 {
-		si.nodes--
 		result.score = incMateDistance(result.score)
 	}
+
 	return result, nil
 }
 

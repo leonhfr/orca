@@ -13,10 +13,11 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 	default:
 	}
 
+	si.nodes++
+
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 	if standPat := si.evaluate(pos); standPat >= beta {
-		si.nodes++
 		return beta, nil
 	} else if alpha < standPat {
 		alpha = standPat

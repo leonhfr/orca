@@ -21,6 +21,8 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	default:
 	}
 
+	si.nodes++
+
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 	originalAlpha := alpha
@@ -29,7 +31,6 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	if inCache && entry.depth >= depth {
 		switch {
 		case entry.nodeType == exact:
-			si.nodes++
 			return searchResult{
 				score: entry.score,
 			}, nil
@@ -40,7 +41,6 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		}
 
 		if alpha >= beta {
-			si.nodes++
 			return searchResult{
 				score: entry.score,
 			}, nil
@@ -48,7 +48,6 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	}
 
 	if pos.HasInsufficientMaterial() {
-		si.nodes++
 		return searchResult{
 			score: draw,
 		}, nil
@@ -114,14 +113,12 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 	switch {
 	case validMoves == 0 && inCheck:
-		si.nodes++
 		mateResult := searchResult{
 			score: -mate,
 		}
 		si.storeResult(hash, depth, mateResult, exact)
 		return mateResult, nil
 	case validMoves == 0:
-		si.nodes++
 		drawResult := searchResult{
 			score: draw,
 		}
