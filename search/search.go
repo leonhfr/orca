@@ -160,6 +160,7 @@ type searchInfo struct {
 	killers   *killerList
 	table     transpositionTable
 	pawnTable transpositionPawnTable
+	nodes     uint32
 }
 
 // newSearchInfo returns a new searchInfo.
@@ -183,7 +184,6 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 		maxNodes = math.MaxInt
 	}
 
-	var nodes int
 	for depth := 1; depth <= maxDepth; depth++ {
 		o, err := si.alphaBeta(ctx, pos, -mate, mate, uint8(depth), 0)
 		if err != nil {
@@ -200,7 +200,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 			maxDepth = len(pv)
 		}
 
-		nodes += int(o.nodes)
+		nodes := int(si.nodes)
 
 		output <- uci.Output{
 			Depth: maxDepth,

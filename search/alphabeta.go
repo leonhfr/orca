@@ -10,7 +10,6 @@ import (
 type searchResult struct {
 	pv    []chess.Move
 	score int32
-	nodes uint32
 }
 
 // alphaBeta performs a search using the Negamax algorithm
@@ -30,8 +29,8 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	if inCache && entry.depth >= depth {
 		switch {
 		case entry.nodeType == exact:
+			si.nodes++
 			return searchResult{
-				nodes: 1,
 				score: entry.score,
 			}, nil
 		case entry.nodeType == lowerBound && entry.score > alpha:
@@ -41,17 +40,17 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		}
 
 		if alpha >= beta {
+			si.nodes++
 			return searchResult{
-				nodes: 1,
 				score: entry.score,
 			}, nil
 		}
 	}
 
 	if pos.HasInsufficientMaterial() {
+		si.nodes++
 		return searchResult{
 			score: draw,
-			nodes: 1,
 		}, nil
 	}
 
@@ -61,7 +60,8 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	}
 
 	if depth == 0 {
-		return si.quiesce(ctx, pos, -beta, -alpha)
+		score, err := si.quiesce(ctx, pos, -beta, -alpha)
+		return searchResult{score: score}, err
 	}
 
 	var validMoves int
@@ -92,7 +92,6 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 			return searchResult{}, err
 		}
 
-		result.nodes += current.nodes
 		current.score = -current.score
 		if current.score > result.score {
 			result.score = current.score
@@ -115,15 +114,15 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 	switch {
 	case validMoves == 0 && inCheck:
+		si.nodes++
 		mateResult := searchResult{
-			nodes: 1,
 			score: -mate,
 		}
 		si.storeResult(hash, depth, mateResult, exact)
 		return mateResult, nil
 	case validMoves == 0:
+		si.nodes++
 		drawResult := searchResult{
-			nodes: 1,
 			score: draw,
 		}
 		si.storeResult(hash, depth, drawResult, exact)

@@ -127,9 +127,9 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 	}
 
 	if pos.HasInsufficientMaterial() {
+		si.nodes++
 		return searchResult{
 			score: draw,
-			nodes: 1,
 		}, nil
 	}
 
@@ -139,24 +139,24 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 	moves := pos.PseudoMoves(checkData)
 	switch {
 	case len(moves) == 0 && inCheck:
+		si.nodes++
 		return searchResult{
-			nodes: 1,
 			score: -mate,
 		}, nil
 	case len(moves) == 0:
+		si.nodes++
 		return searchResult{
-			nodes: 1,
 			score: draw,
 		}, nil
 	case depth == 0:
+		si.nodes++
 		return searchResult{
-			nodes: 1,
 			score: si.evaluate(pos),
 		}, nil
 	}
 
+	si.nodes++
 	result := searchResult{
-		nodes: 1,
 		score: -mate,
 	}
 
@@ -173,7 +173,6 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 			return searchResult{}, err
 		}
 
-		result.nodes += current.nodes
 		current.score = -current.score
 		if current.score > result.score {
 			result.score = current.score
@@ -184,7 +183,7 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 	}
 
 	if validMoves > 0 {
-		result.nodes--
+		si.nodes--
 		result.score = incMateDistance(result.score)
 	}
 	return result, nil
@@ -199,7 +198,7 @@ func TestNegamax(t *testing.T) {
 			want := tt.negamax
 			assert.Nil(t, err)
 			assert.NotNil(t, output)
-			assert.Equal(t, want.nodes, output.nodes, fmt.Sprintf("nodes: want %d, got %d", want.nodes, output.nodes))
+			assert.Equal(t, want.nodes, si.nodes, fmt.Sprintf("nodes: want %d, got %d", want.nodes, si.nodes))
 			assert.Equal(t, want.score, output.score, fmt.Sprintf("score: want %d, got %d", want.score, output.score))
 			assert.Equal(t, want.moves, movesString(output.pv))
 		})

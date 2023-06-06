@@ -6,20 +6,18 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, beta int32) (searchResult, error) {
+func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, beta int32) (int32, error) {
 	select {
 	case <-ctx.Done():
-		return searchResult{}, context.Canceled
+		return 0, context.Canceled
 	default:
 	}
 
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 	if standPat := si.evaluate(pos); standPat >= beta {
-		return searchResult{
-			nodes: 1,
-			score: beta,
-		}, nil
+		si.nodes++
+		return beta, nil
 	} else if alpha < standPat {
 		alpha = standPat
 	}
@@ -27,7 +25,6 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 	moves := pos.LoudMoves()
 	scoreLoudMoves(moves)
 
-	var nodes uint32
 	for i := 0; i < len(moves); i++ {
 		nextOracle(moves, i)
 		move := moves[i]
@@ -37,27 +34,20 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 			continue
 		}
 
-		current, err := si.quiesce(ctx, pos, -beta, -alpha)
+		score, err := si.quiesce(ctx, pos, -beta, -alpha)
 		if err != nil {
-			return searchResult{}, nil
+			return 0, nil
 		}
 
-		current.score = -current.score
-		nodes += current.nodes
+		score = -score
 		pos.UnmakeMove(move, metadata, hash, pawnHash)
 
-		if current.score >= beta {
-			return searchResult{
-				nodes: nodes,
-				score: beta,
-			}, nil
-		} else if current.score > alpha {
-			alpha = current.score
+		if score >= beta {
+			return beta, nil
+		} else if score > alpha {
+			alpha = score
 		}
 	}
 
-	return searchResult{
-		nodes: nodes,
-		score: alpha,
-	}, nil
+	return alpha, nil
 }

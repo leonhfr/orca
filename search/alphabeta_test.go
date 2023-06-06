@@ -17,7 +17,7 @@ func TestAlphaBeta(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			output, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth, 0)
 
-			assert.Equal(t, res.nodes, output.nodes, fmt.Sprintf("want %d, got %d", res.nodes, output.nodes))
+			assert.Equal(t, res.nodes, si.nodes, fmt.Sprintf("want %d, got %d", res.nodes, si.nodes))
 			assert.Equal(t, res.score, output.score, fmt.Sprintf("want %d, got %d", res.score, output.score))
 			assert.Equal(t, res.moves, movesString(output.pv))
 			assert.Nil(t, err)
