@@ -25,6 +25,7 @@ func (pp PawnProperty) HasProperty(p PawnProperty) bool {
 }
 
 // PawnMap executes the callback for each pawn on the board.
+//
 // Intended to be used in evaluation functions.
 func (pos *Position) PawnMap(cb func(p Piece, sq Square, properties PawnProperty)) {
 	for c := Black; c <= White; c++ {

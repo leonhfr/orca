@@ -12,31 +12,11 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	}
 
 	mg, eg := si.evaluatePawns(pos)
-	if player == chess.Black {
-		mg, eg = -mg, -eg
-	}
-	mg += tempo
 
-	if phase <= 6 || pos.FullMoves() > 16 {
-		pos.PieceMap(func(p chess.Piece, sq chess.Square) {
-			mgValue := pestoMGPieceSquareTable[p][sq]
-			egValue := pestoEGPieceSquareTable[p][sq]
-			if p.Color() == player {
-				mg += mgValue
-				eg += egValue
-			} else {
-				mg -= mgValue
-				eg -= egValue
-			}
-		})
-
-		return (phase*mg + (24-phase)*eg) / 24
-	}
-
-	pos.UniquePieceMap(func(p chess.Piece, sq chess.Square) {
+	pos.PieceMap(func(p chess.Piece, sq chess.Square) {
 		mgValue := pestoMGPieceSquareTable[p][sq]
 		egValue := pestoEGPieceSquareTable[p][sq]
-		if p.Color() == player {
+		if p.Color() == chess.White {
 			mg += mgValue
 			eg += egValue
 		} else {
@@ -44,6 +24,23 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 			eg -= egValue
 		}
 	})
+
+	pos.KingMap(func(p chess.Piece, sq chess.Square, shieldDefects int) {
+		mgValue := pestoMGPieceSquareTable[p][sq]
+		egValue := pestoEGPieceSquareTable[p][sq]
+		if p.Color() == chess.White {
+			mg += mgValue
+			eg += egValue
+		} else {
+			mg -= mgValue
+			eg -= egValue
+		}
+	})
+
+	if player == chess.Black {
+		mg, eg = -mg, -eg
+	}
+	mg += tempo
 
 	return (phase*mg + (24-phase)*eg) / 24
 }

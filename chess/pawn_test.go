@@ -13,14 +13,14 @@ type pawnCallbackArgs struct {
 }
 
 var pawnPieceMapTests = []struct {
-	name      string
-	fen       string
-	allPieces map[Square]pawnCallbackArgs
+	name   string
+	fen    string
+	pieces map[Square]pawnCallbackArgs
 }{
 	{
 		name: "starting position",
 		fen:  startFEN,
-		allPieces: map[Square]pawnCallbackArgs{
+		pieces: map[Square]pawnCallbackArgs{
 			A7: {BlackPawn, HalfIsolani}, B7: {BlackPawn, NoPawnProperty},
 			C7: {BlackPawn, NoPawnProperty}, D7: {BlackPawn, NoPawnProperty},
 			E7: {BlackPawn, NoPawnProperty}, F7: {BlackPawn, NoPawnProperty},
@@ -34,7 +34,7 @@ var pawnPieceMapTests = []struct {
 	{
 		name: "half-isolani, isolani, doubled",
 		fen:  "4k3/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/4K3 w - - 0 1",
-		allPieces: map[Square]pawnCallbackArgs{
+		pieces: map[Square]pawnCallbackArgs{
 			A7: {BlackPawn, Isolani}, C7: {BlackPawn, HalfIsolani},
 			D6: {BlackPawn, HalfIsolani}, G7: {BlackPawn, HalfIsolani},
 			H6: {BlackPawn, HalfIsolani},
@@ -46,7 +46,7 @@ var pawnPieceMapTests = []struct {
 	{
 		name: "passed",
 		fen:  "4k3/8/7p/1P2Pp1P/2Pp1PP1/8/8/4K3 w - - 0 1",
-		allPieces: map[Square]pawnCallbackArgs{
+		pieces: map[Square]pawnCallbackArgs{
 			D4: {BlackPawn, Isolani ^ Passed}, F5: {BlackPawn, Isolani},
 			H6: {BlackPawn, Isolani},
 			B5: {WhitePawn, HalfIsolani ^ Passed}, C4: {WhitePawn, HalfIsolani ^ Passed},
@@ -63,10 +63,10 @@ func TestPawnMap(t *testing.T) {
 			var pieces int
 			pos.PawnMap(func(p Piece, sq Square, properties PawnProperty) {
 				pieces++
-				assert.Equal(t, tt.allPieces[sq].p, p, fmt.Sprintf("%v:%v", sq.String(), p.String()))
-				assert.Equal(t, tt.allPieces[sq].pp, properties, fmt.Sprintf("%v:%v", sq.String(), properties))
+				assert.Equal(t, tt.pieces[sq].p, p, fmt.Sprintf("%v:%v", sq.String(), p.String()))
+				assert.Equal(t, tt.pieces[sq].pp, properties, fmt.Sprintf("%v:%v", sq.String(), properties))
 			})
-			assert.Equal(t, len(tt.allPieces), pieces)
+			assert.Equal(t, len(tt.pieces), pieces)
 		})
 	}
 }

@@ -92,30 +92,28 @@ var pieceMapTests = []struct {
 		name: "starting position",
 		fen:  startFEN,
 		uniquePieces: map[Square]Piece{
-			E1: WhiteKing, E8: BlackKing,
 			D1: WhiteQueen, D8: BlackQueen,
 		},
 		allPieces: map[Square]Piece{
 			A8: BlackRook, B8: BlackKnight, C8: BlackBishop, D8: BlackQueen,
-			E8: BlackKing, F8: BlackBishop, G8: BlackKnight, H8: BlackRook,
+			F8: BlackBishop, G8: BlackKnight, H8: BlackRook,
 			A1: WhiteRook, B1: WhiteKnight, C1: WhiteBishop, D1: WhiteQueen,
-			E1: WhiteKing, F1: WhiteBishop, G1: WhiteKnight, H1: WhiteRook,
+			F1: WhiteBishop, G1: WhiteKnight, H1: WhiteRook,
 		},
 	},
 	{
 		name: "partial mirror",
 		fen:  "r1bq1rk1/pppp1ppp/2nb1n2/1B2p3/4P3/P1NP1N2/1PP2PPP/R1BQK2R w KQ - 0 1",
 		uniquePieces: map[Square]Piece{
-			E1: WhiteKing, G8: BlackKing,
 			D1: WhiteQueen, D8: BlackQueen,
 			H1: WhiteRook, F8: BlackRook,
 			B5: WhiteBishop, D6: BlackBishop,
 		},
 		allPieces: map[Square]Piece{
 			A8: BlackRook, C6: BlackKnight, C8: BlackBishop, D8: BlackQueen,
-			G8: BlackKing, D6: BlackBishop, F6: BlackKnight, F8: BlackRook,
+			D6: BlackBishop, F6: BlackKnight, F8: BlackRook,
 			A1: WhiteRook, C3: WhiteKnight, C1: WhiteBishop, D1: WhiteQueen,
-			E1: WhiteKing, B5: WhiteBishop, F3: WhiteKnight, H1: WhiteRook,
+			B5: WhiteBishop, F3: WhiteKnight, H1: WhiteRook,
 		},
 	},
 }

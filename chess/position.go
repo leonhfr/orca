@@ -183,9 +183,6 @@ func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
 			cb(piece, bb.scanForward())
 		}
 	}
-
-	cb(BlackKing, (pos.board.bbColors[Black] & pos.board.bbPieces[King]).scanForward())
-	cb(WhiteKing, (pos.board.bbColors[White] & pos.board.bbPieces[King]).scanForward())
 }
 
 // UniquePieceMap executes the callback for each piece on the board that do not
@@ -196,7 +193,6 @@ func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
 // Intended to be used in evaluation functions.
 func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
 	bbBlack, bbWhite := pos.board.bbColors[Black], pos.board.bbColors[White]
-	bbKing := pos.board.bbPieces[King]
 	bbQueen := pos.board.bbPieces[Queen]
 	bbRook := pos.board.bbPieces[Rook]
 	bbBishop := pos.board.bbPieces[Bishop]
@@ -217,9 +213,6 @@ func (pos *Position) UniquePieceMap(cb func(p Piece, sq Square)) {
 			cb(piece, bb.scanForward())
 		}
 	}
-
-	cb(BlackKing, (bbBlack & bbKing).scanForward())
-	cb(WhiteKing, (bbWhite & bbKing).scanForward())
 }
 
 // String implements the Stringer interface.
