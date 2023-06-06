@@ -3,12 +3,6 @@ builds:
     goos:
       - linux
       - darwin
-archives:
-  - replacements:
-      darwin: MacOS
-      linux: Linux
-      amd64: 64-bit
-      386: 32-bit
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
 snapshot:

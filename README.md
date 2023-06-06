@@ -8,6 +8,7 @@ Orca is a UCI-compliant chess engine written in Go that analyzes chess positions
 
 Several installation methods are available:
 
+- find the most recent [stable release](https://github.com/leonhfr/orca/releases).
 - using the `go` toolchain:
 
 ```sh
