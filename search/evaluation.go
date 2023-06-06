@@ -16,6 +16,7 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	pos.PieceMap(func(p chess.Piece, sq chess.Square) {
 		mgValue := pestoMGPieceSquareTable[p][sq]
 		egValue := pestoEGPieceSquareTable[p][sq]
+
 		if p.Color() == chess.White {
 			mg += mgValue
 			eg += egValue
@@ -28,6 +29,10 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	pos.KingMap(func(p chess.Piece, sq chess.Square, shieldDefects int) {
 		mgValue := pestoMGPieceSquareTable[p][sq]
 		egValue := pestoEGPieceSquareTable[p][sq]
+
+		mgValue += shieldDefectsPenaltyMG[shieldDefects]
+		egValue += shieldDefectsPenaltyEG[shieldDefects]
+
 		if p.Color() == chess.White {
 			mg += mgValue
 			eg += egValue
@@ -108,6 +113,8 @@ var (
 	isolaniPenaltyEG        = [8]int32{-5, -3, -3, -3, -3, -3, -3, -5}   // End game penalty for isolated pawns. Indexed by file.
 	passedBonusMG           = [2][64]int32{}                             // Middle game bonus for passed pawns. Indexed by square and color.
 	passedBonusEG           = [2][64]int32{}                             // End game bonus for passed pawns. Indexed by square and color.
+	shieldDefectsPenaltyMG  = [4]int32{0, -10, -20, -30}                 // Middle game penalty for shield defects.
+	shieldDefectsPenaltyEG  = [4]int32{0, 0, 0, 0}                       // End game penalty for shield defects.
 )
 
 // incMateDistance increases the distance to the mate by a count of one.
