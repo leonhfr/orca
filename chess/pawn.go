@@ -3,8 +3,8 @@ package chess
 // PawnProperty represents different pawn properties.
 type PawnProperty uint8
 
-// NoProperty represents the absence of properties.
-const NoProperty PawnProperty = 0
+// NoPawnProperty represents the absence of properties.
+const NoPawnProperty PawnProperty = 0
 
 const (
 	// Doubled represents a doubled pawn.

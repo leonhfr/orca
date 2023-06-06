@@ -45,12 +45,8 @@ const (
 //	FFFFFF     from square
 type Move uint64
 
-const (
-	// NoMove represents the absence of a move.
-	NoMove Move = iota
-	// NullMove represents a null move.
-	NullMove
-)
+// NoMove represents the absence of a move.
+const NoMove Move = 0
 
 // newMove creates a new move.
 func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
@@ -230,6 +226,10 @@ func (m Move) WithScore(score uint32) Move {
 //
 // Returns an UCI-compatible representation.
 func (m Move) String() string {
+	if m == NoMove {
+		return "null"
+	}
+
 	base := m.S1().String() + m.S2().String()
 	if promo := m.Promo(); promo != NoPiece {
 		base += promo.Type().String()

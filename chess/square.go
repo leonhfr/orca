@@ -37,12 +37,12 @@ func uciSquare(uci string) (Square, error) {
 
 // File returns the square's file.
 func (sq Square) File() File {
-	return File(sq % 8)
+	return File(sq & 7)
 }
 
 // Rank returns the square's rank.
 func (sq Square) Rank() Rank {
-	return Rank(sq / 8)
+	return Rank(sq & 56 >> 3)
 }
 
 // bitboard returns the square's bitboard.
