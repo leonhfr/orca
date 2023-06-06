@@ -11,9 +11,8 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 	case <-ctx.Done():
 		return 0, context.Canceled
 	default:
+		si.nodes++
 	}
-
-	si.nodes++
 
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()

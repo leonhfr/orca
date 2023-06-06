@@ -5,7 +5,14 @@ import "github.com/leonhfr/orca/chess"
 // scoreMoves scores the moves.
 func scoreMoves(moves []chess.Move, best chess.Move, killers [2]chess.Move) {
 	for i, move := range moves {
-		moves[i] = move.WithScore(rank(move, best, killers))
+		moves[i] = move.WithScore(score(move, best, killers))
+	}
+}
+
+// quickScoreMoves quickly scores the moves.
+func quickScoreMoves(moves []chess.Move) {
+	for i, move := range moves {
+		moves[i] = move.WithScore(quickScore(move))
 	}
 }
 
@@ -25,11 +32,11 @@ func nextOracle(moves []chess.Move, start int) {
 	}
 }
 
-// rank ranks the move.
+// score ranks the move.
 //
 // Rank is computed according to the following order:
 //
-//	rank           move
+//	score           move
 //	 500           best move
 //	 490           queen promotion
 //	 480           knight promotion
@@ -39,7 +46,7 @@ func nextOracle(moves []chess.Move, start int) {
 //	 200           killer moves
 //	 100           quiet moves
 //	   0           bishop and rook promotions
-func rank(m, best chess.Move, killers [2]chess.Move) uint32 {
+func score(m, best chess.Move, killers [2]chess.Move) uint32 {
 	switch {
 	case m == best:
 		return rankBestMove
@@ -53,6 +60,22 @@ func rank(m, best chess.Move, killers [2]chess.Move) uint32 {
 		return rankCapture + mvvRank[m.P2()] - lvaRank[m.P1()]
 	case killers[0] == m || killers[1] == m:
 		return rankKiller
+	default:
+		return rankQuiet
+	}
+}
+
+// quickScore scores the move without the best and killer moves.
+func quickScore(m chess.Move) uint32 {
+	switch {
+	case m.HasTag(chess.KingSideCastle):
+		return rankKingSideCastle
+	case m.HasTag(chess.QueenSideCastle):
+		return rankQueenSideCastle
+	case m.HasTag(chess.Promotion):
+		return promoRank[m.Promo()]
+	case m.HasTag(chess.Capture):
+		return rankCapture + mvvRank[m.P2()] - lvaRank[m.P1()]
 	default:
 		return rankQuiet
 	}

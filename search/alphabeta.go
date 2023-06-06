@@ -13,9 +13,8 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	case <-ctx.Done():
 		return 0, context.Canceled
 	default:
+		si.nodes++
 	}
-
-	si.nodes++
 
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()

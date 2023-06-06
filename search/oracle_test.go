@@ -40,7 +40,7 @@ func TestScoreMoves(t *testing.T) {
 			scoreMoves(moves, tt.best, tt.killers)
 
 			for i, move := range moves {
-				assert.Equal(t, rank(original[i], tt.best, tt.killers), move.Score())
+				assert.Equal(t, score(original[i], tt.best, tt.killers), move.Score())
 			}
 		})
 	}
