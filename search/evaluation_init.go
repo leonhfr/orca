@@ -2,12 +2,63 @@ package search
 
 import "github.com/leonhfr/orca/chess"
 
-var (
-	pestoMGPieceTables = [12][64]int32{}
-	pestoEGPieceTables = [12][64]int32{}
-)
-
 func init() {
+	initPassedPawn()
+	initPesto()
+}
+
+func initPassedPawn() {
+	passedPawnMGHumanPieceTable, passedPawnEGHumanPieceTable := passedPawnHumanPieceTables()
+
+	for c := chess.Black; c <= chess.White; c++ {
+		for i := 0; i < 64; i++ {
+			rank, file := 7-i/8, i%8
+			if c == chess.Black {
+				rank = i / 8
+			}
+
+			passedBonusMG[c][i] = passedPawnMGHumanPieceTable[rank][file]
+			passedBonusEG[c][i] = passedPawnEGHumanPieceTable[rank][file]
+		}
+	}
+}
+
+func passedPawnHumanPieceTables() ([8][8]int32, [8][8]int32) {
+	var (
+		passedPawnMGHumanPieceTable = [8][8]int32{
+			{0, 0, 0, 0, 0, 0, 0, 0},
+			{15, 15, 15, 15, 15, 15, 15, 15},
+			{12, 12, 12, 12, 12, 12, 12, 12},
+			{9, 9, 9, 9, 9, 9, 9, 9},
+			{6, 6, 6, 6, 6, 6, 6, 6},
+			{3, 3, 3, 3, 3, 3, 3, 3},
+			{0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0},
+		}
+
+		passedPawnEGHumanPieceTable = [8][8]int32{
+			{0, 0, 0, 0, 0, 0, 0, 0},
+			{25, 25, 25, 25, 25, 25, 25, 25},
+			{20, 20, 20, 20, 20, 20, 20, 20},
+			{15, 15, 15, 15, 15, 15, 15, 15},
+			{10, 10, 10, 10, 10, 10, 10, 10},
+			{5, 5, 5, 5, 5, 5, 5, 5},
+			{0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0},
+		}
+	)
+
+	return passedPawnMGHumanPieceTable, passedPawnEGHumanPieceTable
+}
+
+// initializes the square tables used in the
+// PeSTO (Piece-Square Tables Only) evaluation function by Ronald Friedrich.
+//
+// It performs a tapered evaluation to interpolate by current game stage
+// between piece-square tables values for opening and endgame.
+//
+// Source: https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
+func initPesto() {
 	pestoMGPieceValues := [6]int32{82, 337, 365, 477, 1025, 0}
 	pestoEGPieceValues := [6]int32{94, 281, 297, 512, 936, 0}
 	pestoMGHumanPieceTables, pestoEGHumanPieceTables := pestoHumanPieceTables()
@@ -24,8 +75,8 @@ func init() {
 				rank = i / 8
 			}
 
-			pestoMGPieceTables[p][i] = mgValue + mgHuman[rank][file]
-			pestoEGPieceTables[p][i] = egValue + egHuman[rank][file]
+			pestoMGPieceSquareTable[p][i] = mgValue + mgHuman[rank][file]
+			pestoEGPieceSquareTable[p][i] = egValue + egHuman[rank][file]
 		}
 	}
 }

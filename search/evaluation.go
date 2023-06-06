@@ -3,14 +3,6 @@ package search
 import "github.com/leonhfr/orca/chess"
 
 // evaluate returns the score of a position.
-//
-// The function implements the PeSTO (Piece-Square Tables Only)
-// evaluation function by Ronald Friedrich.
-//
-// It performs a tapered evaluation to interpolate by current game stage
-// between piece-square tables values for opening and endgame.
-//
-// Source: https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
 func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	player := pos.Turn()
 	knights, bishops, rooks, queens := pos.CountPieces()
@@ -23,11 +15,12 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	if player == chess.Black {
 		mg, eg = -mg, -eg
 	}
+	mg += tempo
 
 	if phase <= 6 || pos.FullMoves() > 16 {
 		pos.PieceMap(func(p chess.Piece, sq chess.Square) {
-			mgValue := pestoMGPieceTables[p][sq]
-			egValue := pestoEGPieceTables[p][sq]
+			mgValue := pestoMGPieceSquareTable[p][sq]
+			egValue := pestoEGPieceSquareTable[p][sq]
 			if p.Color() == player {
 				mg += mgValue
 				eg += egValue
@@ -41,8 +34,8 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	}
 
 	pos.UniquePieceMap(func(p chess.Piece, sq chess.Square) {
-		mgValue := pestoMGPieceTables[p][sq]
-		egValue := pestoEGPieceTables[p][sq]
+		mgValue := pestoMGPieceSquareTable[p][sq]
+		egValue := pestoEGPieceSquareTable[p][sq]
 		if p.Color() == player {
 			mg += mgValue
 			eg += egValue
@@ -66,11 +59,28 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
 	}
 
 	var mg, eg int32
-	// TODO: evaluation
 	pos.PawnMap(func(p chess.Piece, sq chess.Square, properties chess.PawnProperty) {
-		mgValue := pestoMGPieceTables[p][sq]
-		egValue := pestoEGPieceTables[p][sq]
-		if p.Color() == chess.White {
+		color, file := p.Color(), sq.File()
+
+		mgValue := pestoMGPieceSquareTable[p][sq]
+		egValue := pestoEGPieceSquareTable[p][sq]
+
+		if properties.HasProperty(chess.Doubled) {
+			mgValue += doubledPenaltyMG[file]
+			egValue += doubledPenaltyEG[file]
+		}
+
+		if properties.HasProperty(chess.Isolani) {
+			mgValue += isolaniPenaltyMG[file]
+			egValue += isolaniPenaltyEG[file]
+		}
+
+		if properties.HasProperty(chess.Passed) {
+			mgValue += passedBonusMG[color][sq]
+			egValue += passedBonusEG[color][sq]
+		}
+
+		if color == chess.White {
 			mg += mgValue
 			eg += egValue
 		} else {
@@ -87,6 +97,21 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
 
 	return mg, eg
 }
+
+// tempo is a bonus for the player having the right to move.
+// Only applied for middle game.
+const tempo = 6
+
+var (
+	pestoMGPieceSquareTable = [12][64]int32{}                            // Middle game piece square table. Includes material advantage. Indexed by square and piece.
+	pestoEGPieceSquareTable = [12][64]int32{}                            // End game piece square table. Includes material advantage. Indexed by square and piece.
+	doubledPenaltyMG        = [8]int32{-10, -6, -6, -6, -6, -6, -6, -10} // Middle game penalty for double pawns. Indexed by file.
+	doubledPenaltyEG        = [8]int32{-5, -3, -3, -3, -3, -3, -3, -5}   // End game penalty for double pawns. Indexed by file.
+	isolaniPenaltyMG        = [8]int32{-10, -6, -6, -6, -6, -6, -6, -10} // Middle game penalty for isolated pawns. Indexed by file.
+	isolaniPenaltyEG        = [8]int32{-5, -3, -3, -3, -3, -3, -3, -5}   // End game penalty for isolated pawns. Indexed by file.
+	passedBonusMG           = [2][64]int32{}                             // Middle game bonus for passed pawns. Indexed by square and color.
+	passedBonusEG           = [2][64]int32{}                             // End game bonus for passed pawns. Indexed by square and color.
+)
 
 // incMateDistance increases the distance to the mate by a count of one.
 //

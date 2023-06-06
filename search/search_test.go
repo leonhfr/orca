@@ -111,7 +111,7 @@ func TestSearch(t *testing.T) {
 			depth: 2,
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 37, Score: mate - 1, Mate: 1, PV: []chess.Move{0x13006c1836d}},
-				{Depth: 2, Nodes: 520, Score: mate - 1, Mate: 1, PV: []chess.Move{0x13006c1836d}},
+				{Depth: 2, Nodes: 519, Score: mate - 1, Mate: 1, PV: []chess.Move{0x13006c1836d}},
 			},
 		},
 		{
@@ -119,8 +119,8 @@ func TestSearch(t *testing.T) {
 			fen:   "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 3",
 			depth: 2,
 			outputs: []uci.Output{
-				{Depth: 1, Nodes: 30, Score: 38, Mate: 0, PV: []chess.Move{0x13502c106a3}},
-				{Depth: 3, Nodes: 214, Score: 2, Mate: 0, PV: []chess.Move{0x13502c106a3, 0x6404cc9603, 0x6401cc2ab9}},
+				{Depth: 1, Nodes: 40, Score: 20, Mate: 0, PV: []chess.Move{0x13502c106a3}},
+				{Depth: 2, Nodes: 225, Score: 0, Mate: 0, PV: []chess.Move{0x13502c106a3, 429526882060}},
 			},
 		},
 		{
@@ -136,9 +136,9 @@ func TestSearch(t *testing.T) {
 			nodes: 8192,
 			depth: 5,
 			outputs: []uci.Output{
-				{Depth: 1, Nodes: 1697, Score: 1, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 6953, Score: 2, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
-				{Depth: 3, Nodes: 109527, Score: 16, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
+				{Depth: 1, Nodes: 1544, Score: 7, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 6299, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
+				{Depth: 3, Nodes: 107635, Score: 18, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
 			},
 		},
 	}
@@ -176,22 +176,22 @@ func TestCachedSearch(t *testing.T) {
 			"not cached",
 			false,
 			[]uci.Output{
-				{Depth: 1, Nodes: 1697, Score: 1, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 6953, Score: 2, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
-				{Depth: 3, Nodes: 109527, Score: 16, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
-				{Depth: 5, Nodes: 389768, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x13306c14362, 0x14602c47345, 0x14402c58b74, 0x13402c03915}},
-				{Depth: 5, Nodes: 4490632, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14902c50b76, 0x6401cc1610, 0x13d02c3455e, 0x14902c4154e}},
+				{Depth: 1, Nodes: 1544, Score: 7, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 6299, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
+				{Depth: 3, Nodes: 107635, Score: 18, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
+				{Depth: 5, Nodes: 385521, Score: 3, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x13306c14362, 0x14602c47345, 0x14402c58b74, 0x13402c03915}},
+				{Depth: 5, Nodes: 4429345, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14902c50b76, 0x6401cc30d2, 0x6401cc0a71, 0x6401cc15cf}},
 			},
 		},
 		{
 			"cached",
 			true,
 			[]uci.Output{
-				{Depth: 1, Nodes: 1697, Score: 1, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 5442, Score: 2, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
-				{Depth: 3, Nodes: 106882, Score: 16, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
-				{Depth: 5, Nodes: 265833, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x13306c14362, 0x14602c47345, 0x14402c58b74, 0x13402c03915}},
-				{Depth: 5, Nodes: 3469269, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14902c50b76, 0x6401cc1610, 0x13d02c3455e, 0x14902c4154e}},
+				{Depth: 1, Nodes: 1544, Score: 7, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 4850, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x13e02c328ed}},
+				{Depth: 3, Nodes: 104997, Score: 18, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14402c58b74, 0x6401cc38d2}},
+				{Depth: 5, Nodes: 258755, Score: 3, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x13306c14362, 0x14602c47345, 0x14402c58b74, 0x13402c03915}},
+				{Depth: 5, Nodes: 3420680, Score: 0, Mate: 0, PV: []chess.Move{0x13d02c25b66, 0x14902c50b76, 0x6401cc30d2, 0x6401cc0a71, 0x6401cc15cf}},
 			},
 		},
 	}
