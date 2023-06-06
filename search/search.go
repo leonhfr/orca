@@ -190,10 +190,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 			return
 		}
 
-		pv := make([]chess.Move, len(o.pv))
-		for i, m := range o.pv {
-			pv[len(o.pv)-i-1] = m
-		}
+		pv := e.table.principalVariation(pos)
 
 		maxDepth := depth
 		if len(pv) > maxDepth {

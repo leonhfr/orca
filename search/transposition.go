@@ -21,6 +21,8 @@ type transpositionTable interface {
 	// If an entry already exists, it is replaced.
 	// The addition is not guaranteed.
 	set(key chess.Hash, entry searchEntry)
+	// principalVariation recovers the principal variation from the transposition table.
+	principalVariation(pos *chess.Position) []chess.Move
 	// close initiates a graceful shutdown of the transposition table.
 	close()
 }
@@ -55,10 +57,11 @@ const (
 // Implements the transpositionTable interface.
 type noTable struct{}
 
-func (noTable) inc()                                 {}                              // implements transpositionTable.
-func (noTable) get(_ chess.Hash) (searchEntry, bool) { return searchEntry{}, false } // implements transpositionTable.
-func (noTable) set(_ chess.Hash, _ searchEntry)      {}                              // implements transpositionTable.
-func (noTable) close()                               {}                              // implements transpositionTable.
+func (noTable) inc()                                              {}                              // implements transpositionTable.
+func (noTable) get(_ chess.Hash) (searchEntry, bool)              { return searchEntry{}, false } // implements transpositionTable.
+func (noTable) set(_ chess.Hash, _ searchEntry)                   {}                              // implements transpositionTable.
+func (noTable) principalVariation(_ *chess.Position) []chess.Move { return nil }                  // implements transpositionTable.
+func (noTable) close()                                            {}                              // implements transpositionTable.
 
 // arrayTable uses an array as backend.
 //
@@ -101,6 +104,48 @@ func (ar *arrayTable) set(key chess.Hash, entry searchEntry) {
 	if entry.quality() >= cached.quality() {
 		ar.table[index] = entry
 	}
+}
+
+// Implements the transpositionTable interface.
+func (ar *arrayTable) principalVariation(pos *chess.Position) []chess.Move {
+	type unmakeMove struct {
+		move     chess.Move
+		meta     chess.Metadata
+		hash     chess.Hash
+		pawnHash chess.Hash
+	}
+
+	pv := make([]chess.Move, 0, 10)
+	unmakeMoveStack := make([]unmakeMove, 0, 10)
+
+	for hash := pos.Hash(); ; hash = pos.Hash() {
+		entry, inCache := ar.get(hash)
+		if !inCache {
+			break
+		}
+
+		pawnHash := pos.PawnHash()
+		meta, ok := pos.MakeMove(entry.best)
+		if !ok {
+			break
+		}
+
+		pv = append(pv, entry.best)
+		unmakeMoveStack = append(unmakeMoveStack, unmakeMove{
+			move:     entry.best,
+			meta:     meta,
+			hash:     hash,
+			pawnHash: pawnHash,
+		})
+	}
+
+	length := len(unmakeMoveStack)
+	for i := 0; i < length; i++ {
+		um := unmakeMoveStack[length-i-1]
+		pos.UnmakeMove(um.move, um.meta, um.hash, um.pawnHash)
+	}
+
+	return pv
 }
 
 // Implements the transpositionTable interface.

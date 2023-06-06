@@ -150,7 +150,7 @@ func TestSearch(t *testing.T) {
 			if tt.book {
 				engine.ownBook = true
 			}
-			engine.table = noTable{}
+			engine.table = newHashMapTable()
 			engine.pawnTable = noPawnTable{}
 			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth, tt.nodes)
 			var outputs []uci.Output
@@ -201,7 +201,7 @@ func TestCachedSearch(t *testing.T) {
 			engine := NewEngine()
 			_ = engine.Init()
 			if !tt.cached {
-				engine.table = noTable{}
+				engine.table = newHashMapTable()
 				engine.pawnTable = noPawnTable{}
 			}
 			pos := unsafeFEN(fen)
