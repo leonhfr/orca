@@ -79,7 +79,7 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 1,
-			nodes: 482,
+			nodes: 480,
 			moves: []string{"f6f2"},
 		},
 	},
@@ -94,7 +94,7 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 3,
-			nodes: 16332,
+			nodes: 16091,
 			moves: []string{"c1e1", "e2g2", "c6g2"},
 		},
 	},
@@ -103,13 +103,13 @@ var searchTestPositions = []struct {
 		fen:   "5r1k/4Qpq1/4p3/1p1p2P1/2p2P2/1p2P3/3P4/BK6 b - - 0 1",
 		depth: 3,
 		negamax: searchTestResult{
-			score: 555,
+			score: 575,
 			nodes: 9561,
 			moves: []string{"g7b2", "a1b2", "b3b2"},
 		},
 		alphaBeta: searchTestResult{
-			score: 26,
-			nodes: 307,
+			score: 42,
+			nodes: 294,
 			moves: []string{"h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
 		},
 	},

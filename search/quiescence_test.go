@@ -20,22 +20,22 @@ func TestQuiescence(t *testing.T) {
 			name:   "horizon effect depth 4",
 			fen:    "5r1k/4Qpq1/4p3/1p1p2P1/2p2P2/1p2P3/3P4/BK6 b - - 0 1",
 			depth:  4,
-			result: searchResult{nodes: 925, score: 26},
+			result: searchResult{nodes: 950, score: 42},
 			moves:  []string{"b1a1", "h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
 		},
 		{
 			name:   "horizon effect depth 5",
 			fen:    "5r1k/4Qpq1/4p3/1p1p2P1/2p2P2/1p2P3/3P4/BK6 b - - 0 1",
 			depth:  5,
-			result: searchResult{nodes: 3401, score: 3},
-			moves:  []string{"h7g6", "b1a1", "h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
+			result: searchResult{nodes: 6967, score: 1},
+			moves:  []string{"b1c1", "h8g7", "e3d4", "g7f8", "e7f8", "d5d4"},
 		},
 		{
 			name:   "horizon effect depth 6",
 			fen:    "5r1k/4Qpq1/4p3/1p1p2P1/2p2P2/1p2P3/3P4/BK6 b - - 0 1",
 			depth:  6,
-			result: searchResult{nodes: 14369, score: 2},
-			moves:  []string{"a1b1", "h7g6", "b1a1", "h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
+			result: searchResult{nodes: 10262, score: 0},
+			moves:  []string{"a1b1", "f8a8", "f4f5", "c4d3", "d2d3", "h8g8", "b1a1", "g7a1"},
 		},
 	}
 

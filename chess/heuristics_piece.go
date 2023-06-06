@@ -14,13 +14,28 @@ func (pos *Position) CountPieces() (int, int, int, int) {
 // Does not take pawns or kings into account.
 //
 // Intended to be used in evaluation functions.
-func (pos *Position) PieceMap(cb func(p Piece, sq Square)) {
+func (pos *Position) PieceMap(cb func(p Piece, sq Square, mobility int)) {
+	bbOccupancy := pos.board.bbColors[Black] | pos.board.bbColors[White]
+
 	for p := BlackKnight; p <= WhiteQueen; p++ {
-		bbPiece := pos.board.bbColors[p.Color()] & pos.board.bbPieces[p.Type()]
+		c := p.Color()
+		pt := p.Type()
+		bbPiece := pos.board.bbColors[c] & pos.board.bbPieces[pt]
+
 		for ; bbPiece > 0; bbPiece = bbPiece.resetLSB() {
 			sq := bbPiece.scanForward()
 
-			cb(p, sq)
+			mobility := pieceMobility(sq, pt, pos.board.bbColors[c], bbOccupancy)
+
+			cb(p, sq, mobility)
 		}
 	}
+}
+
+// pieceMobility computes the mobility of the piece.
+//
+// May include illegal moves.
+func pieceMobility(sq Square, pt PieceType, bbPlayer, bbOccupancy bitboard) int {
+	bb := pieceBitboard(sq, pt, bbOccupancy) & ^bbPlayer
+	return bb.ones()
 }
