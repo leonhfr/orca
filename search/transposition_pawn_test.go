@@ -45,7 +45,7 @@ func TestPawnTableSet(t *testing.T) {
 	table := newArrayPawnTable(1)
 	defer table.close()
 
-	table.set(hash, want)
+	table.set(hash, want.mg, want.eg)
 
 	entry, ok := table.get(hash)
 

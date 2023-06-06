@@ -49,7 +49,7 @@ func TestTableSet(t *testing.T) {
 	table := newArrayTable(1)
 	defer table.close()
 
-	table.set(hash, want)
+	table.set(hash, want.best, want.score, want.nodeType, want.depth)
 	entry, ok := table.get(hash)
 
 	require.True(t, ok)
@@ -82,8 +82,14 @@ func (hm *hashMapTable) get(_ chess.Hash) (searchEntry, bool) {
 }
 
 // Implements the transpositionTable interface.
-func (hm *hashMapTable) set(key chess.Hash, entry searchEntry) {
-	hm.table[key] = entry
+func (hm *hashMapTable) set(key chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8) {
+	hm.table[key] = searchEntry{
+		hash:     key,
+		best:     best,
+		score:    score,
+		nodeType: nt,
+		depth:    depth,
+	}
 }
 
 // Implements the transpositionTable interface.

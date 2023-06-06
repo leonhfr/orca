@@ -99,16 +99,16 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 	switch {
 	case validMoves == 0 && inCheck:
-		si.storeResult(hash, depth, -mate, best, exact)
+		si.table.set(hash, best, -mate, exact, depth)
 		return -mate, nil
 	case validMoves == 0:
-		si.storeResult(hash, depth, draw, best, exact)
+		si.table.set(hash, best, draw, exact, depth)
 		return draw, nil
 	}
 
 	score = incMateDistance(score)
 	nodeType := getNodeType(originalAlpha, beta, score)
-	si.storeResult(hash, depth, score, best, nodeType)
+	si.table.set(hash, best, score, nodeType, depth)
 
 	return score, nil
 }
@@ -123,16 +123,4 @@ func getNodeType(alpha, beta, score int32) nodeType {
 	default:
 		return exact
 	}
-}
-
-// storeResult stores a search result in the transposition table.
-func (si *searchInfo) storeResult(hash chess.Hash, depth uint8, score int32, best chess.Move, n nodeType) {
-	se := searchEntry{
-		best:     best,
-		hash:     hash,
-		score:    score,
-		nodeType: n,
-		depth:    depth,
-	}
-	si.table.set(hash, se)
 }

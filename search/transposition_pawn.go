@@ -16,7 +16,7 @@ type transpositionPawnTable interface {
 	get(key chess.Hash) (pawnEntry, bool)
 	// set adds an entry to the table for the given hash.
 	// If an entry already exists, it is replaced.
-	set(key chess.Hash, entry pawnEntry)
+	set(key chess.Hash, mg, eg int32)
 	// close initiates a graceful shutdown of the pawn transposition table.
 	close()
 }
@@ -32,7 +32,7 @@ type pawnEntry struct {
 type noPawnTable struct{}
 
 func (noPawnTable) get(_ chess.Hash) (pawnEntry, bool) { return pawnEntry{}, false } // implements transpositionPawnTable.
-func (noPawnTable) set(_ chess.Hash, _ pawnEntry)      {}                            // implements transpositionPawnTable.
+func (noPawnTable) set(_ chess.Hash, _, _ int32)       {}                            // implements transpositionPawnTable.
 func (noPawnTable) close()                             {}                            // implements transpositionPawnTable.
 
 // arrayPawnTable uses an array as backend.
@@ -63,9 +63,9 @@ func (ar *arrayPawnTable) get(key chess.Hash) (pawnEntry, bool) {
 }
 
 // Implements the transpositionPawnTable interface.
-func (ar *arrayPawnTable) set(key chess.Hash, entry pawnEntry) {
+func (ar *arrayPawnTable) set(key chess.Hash, mg, eg int32) {
 	index := ar.hash(key)
-	ar.table[index] = entry
+	ar.table[index] = pawnEntry{key, mg, eg}
 }
 
 // Implements the transpositionPawnTable interface.

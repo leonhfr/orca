@@ -95,11 +95,7 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
 		}
 	})
 
-	si.pawnTable.set(pawnHash, pawnEntry{
-		hash: pawnHash,
-		mg:   mg,
-		eg:   eg,
-	})
+	si.pawnTable.set(pawnHash, mg, eg)
 
 	return mg, eg
 }

@@ -20,7 +20,7 @@ type transpositionTable interface {
 	// set adds an entry to the table for the given hash.
 	// If an entry already exists, it is replaced.
 	// The addition is not guaranteed.
-	set(key chess.Hash, entry searchEntry)
+	set(key chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8)
 	// principalVariation recovers the principal variation from the transposition table.
 	principalVariation(pos *chess.Position) []chess.Move
 	// close initiates a graceful shutdown of the transposition table.
@@ -30,11 +30,11 @@ type transpositionTable interface {
 // searchEntry holds a search result entry.
 // Only essential information is retained.
 type searchEntry struct {
-	best     chess.Move
 	hash     chess.Hash
+	best     chess.Move
 	score    int32
-	depth    uint8
 	nodeType nodeType
+	depth    uint8
 	epoch    uint8
 }
 
@@ -57,11 +57,11 @@ const (
 // Implements the transpositionTable interface.
 type noTable struct{}
 
-func (noTable) inc()                                              {}                              // implements transpositionTable.
-func (noTable) get(_ chess.Hash) (searchEntry, bool)              { return searchEntry{}, false } // implements transpositionTable.
-func (noTable) set(_ chess.Hash, _ searchEntry)                   {}                              // implements transpositionTable.
-func (noTable) principalVariation(_ *chess.Position) []chess.Move { return nil }                  // implements transpositionTable.
-func (noTable) close()                                            {}                              // implements transpositionTable.
+func (noTable) inc()                                                         {}                              // implements transpositionTable.
+func (noTable) get(_ chess.Hash) (searchEntry, bool)                         { return searchEntry{}, false } // implements transpositionTable.
+func (noTable) set(_ chess.Hash, _ chess.Move, _ int32, _ nodeType, _ uint8) {}                              // implements transpositionTable.
+func (noTable) principalVariation(_ *chess.Position) []chess.Move            { return nil }                  // implements transpositionTable.
+func (noTable) close()                                                       {}                              // implements transpositionTable.
 
 // arrayTable uses an array as backend.
 //
@@ -97,10 +97,17 @@ func (ar *arrayTable) get(key chess.Hash) (searchEntry, bool) {
 }
 
 // Implements the transpositionTable interface.
-func (ar *arrayTable) set(key chess.Hash, entry searchEntry) {
+func (ar *arrayTable) set(key chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8) {
 	index := ar.hash(key)
 	cached := ar.table[index]
-	entry.epoch = ar.epoch
+	entry := searchEntry{
+		hash:     key,
+		best:     best,
+		score:    score,
+		nodeType: nt,
+		depth:    depth,
+		epoch:    ar.epoch,
+	}
 	if entry.quality() >= cached.quality() {
 		ar.table[index] = entry
 	}
