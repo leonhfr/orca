@@ -185,7 +185,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 	}
 
 	for depth := 1; depth <= maxDepth; depth++ {
-		o, err := si.alphaBeta(ctx, pos, -mate, mate, uint8(depth), 0)
+		score, err := si.alphaBeta(ctx, pos, -mate, mate, uint8(depth), 0)
 		if err != nil {
 			return
 		}
@@ -201,9 +201,9 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 
 		output <- uci.Output{
 			Depth: maxDepth,
-			Score: int(o.score),
+			Score: int(score),
 			Nodes: nodes,
-			Mate:  int(mateIn(o.score)),
+			Mate:  int(mateIn(score)),
 			PV:    pv,
 		}
 

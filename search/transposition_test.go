@@ -64,8 +64,8 @@ type hashMapTable struct {
 }
 
 // newHashMapTable returns a new HashMapTable.
-//
-// Takes the desired table size in Megabytes as argument.
+// Does not return any cached entries, but permits to collect the principal variation.
+// Use in tests only.
 func newHashMapTable() *hashMapTable {
 	return &hashMapTable{
 		table: make(map[chess.Hash]searchEntry),

@@ -6,18 +6,12 @@ import (
 	"github.com/leonhfr/orca/chess"
 )
 
-// searchResult contains a search result.
-type searchResult struct {
-	pv    []chess.Move
-	score int32
-}
-
 // alphaBeta performs a search using the Negamax algorithm
 // and alpha-beta pruning.
-func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta int32, depth, index uint8) (searchResult, error) {
+func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha, beta int32, depth, index uint8) (int32, error) {
 	select {
 	case <-ctx.Done():
-		return searchResult{}, context.Canceled
+		return 0, context.Canceled
 	default:
 	}
 
@@ -31,9 +25,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	if inCache && entry.depth >= depth {
 		switch {
 		case entry.nodeType == exact:
-			return searchResult{
-				score: entry.score,
-			}, nil
+			return entry.score, nil
 		case entry.nodeType == lowerBound && entry.score > alpha:
 			alpha = entry.score
 		case entry.nodeType == upperBound && entry.score < beta:
@@ -41,16 +33,12 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		}
 
 		if alpha >= beta {
-			return searchResult{
-				score: entry.score,
-			}, nil
+			return entry.score, nil
 		}
 	}
 
 	if pos.HasInsufficientMaterial() {
-		return searchResult{
-			score: draw,
-		}, nil
+		return draw, nil
 	}
 
 	checkData, inCheck := pos.InCheck()
@@ -60,13 +48,11 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 	if depth == 0 {
 		score, err := si.quiesce(ctx, pos, -beta, -alpha)
-		return searchResult{score: score}, err
+		return score, err
 	}
 
 	var validMoves int
-	result := searchResult{
-		score: -mate,
-	}
+	var score int32 = -mate
 
 	best := chess.NoMove
 	if inCache && entry.best != chess.NoMove {
@@ -88,17 +74,17 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 		current, err := si.alphaBeta(ctx, pos, -beta, -alpha, depth-1, index+1)
 		if err != nil {
-			return searchResult{}, err
+			return 0, err
 		}
 
-		current.score = -current.score
-		if current.score > result.score {
-			result.score = current.score
-			result.pv = append(current.pv, move)
+		current = -current
+		if current > score {
+			score = current
+			best = move
 		}
 
-		if current.score > alpha {
-			alpha = current.score
+		if current > alpha {
+			alpha = current
 		}
 
 		pos.UnmakeMove(move, metadata, hash, pawnHash)
@@ -113,24 +99,18 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 
 	switch {
 	case validMoves == 0 && inCheck:
-		mateResult := searchResult{
-			score: -mate,
-		}
-		si.storeResult(hash, depth, mateResult, exact)
-		return mateResult, nil
+		si.storeResult(hash, depth, -mate, best, exact)
+		return -mate, nil
 	case validMoves == 0:
-		drawResult := searchResult{
-			score: draw,
-		}
-		si.storeResult(hash, depth, drawResult, exact)
-		return drawResult, nil
+		si.storeResult(hash, depth, draw, best, exact)
+		return draw, nil
 	}
 
-	result.score = incMateDistance(result.score)
-	nodeType := getNodeType(originalAlpha, beta, result.score)
-	si.storeResult(hash, depth, result, nodeType)
+	score = incMateDistance(score)
+	nodeType := getNodeType(originalAlpha, beta, score)
+	si.storeResult(hash, depth, score, best, nodeType)
 
-	return result, nil
+	return score, nil
 }
 
 // getNodeType returns the node type according to the alpha and beta bounds.
@@ -146,15 +126,13 @@ func getNodeType(alpha, beta, score int32) nodeType {
 }
 
 // storeResult stores a search result in the transposition table.
-func (si *searchInfo) storeResult(hash chess.Hash, depth uint8, r searchResult, n nodeType) {
+func (si *searchInfo) storeResult(hash chess.Hash, depth uint8, score int32, best chess.Move, n nodeType) {
 	se := searchEntry{
+		best:     best,
 		hash:     hash,
-		score:    r.score,
+		score:    score,
 		nodeType: n,
 		depth:    depth,
-	}
-	if len(r.pv) > 0 {
-		se.best = r.pv[len(r.pv)-1]
 	}
 	si.table.set(hash, se)
 }

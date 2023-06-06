@@ -30,7 +30,6 @@ var searchTestPositions = []struct {
 		negamax: searchTestResult{
 			score: 0,
 			nodes: 718,
-			moves: []string{"c6c7"},
 		},
 		alphaBeta: searchTestResult{
 			score: 0,
@@ -45,7 +44,6 @@ var searchTestPositions = []struct {
 		negamax: searchTestResult{
 			score: -mate,
 			nodes: 1,
-			moves: []string{},
 		},
 		alphaBeta: searchTestResult{
 			score: -mate,
@@ -60,7 +58,6 @@ var searchTestPositions = []struct {
 		negamax: searchTestResult{
 			score: mate - 1,
 			nodes: 54,
-			moves: []string{"f1h1"},
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 1,
@@ -75,7 +72,6 @@ var searchTestPositions = []struct {
 		negamax: searchTestResult{
 			score: mate - 1,
 			nodes: 1265,
-			moves: []string{"f6f2"},
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 1,
@@ -90,12 +86,11 @@ var searchTestPositions = []struct {
 		negamax: searchTestResult{
 			score: mate - 3,
 			nodes: 4195950,
-			moves: []string{"c1e1", "e2g2", "c6g2"},
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 3,
 			nodes: 35978,
-			moves: []string{"c1e1", "e2g2", "c6g2"},
+			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 	},
 	{
@@ -105,12 +100,11 @@ var searchTestPositions = []struct {
 		negamax: searchTestResult{
 			score: 575,
 			nodes: 10065,
-			moves: []string{"g7b2", "a1b2", "b3b2"},
 		},
 		alphaBeta: searchTestResult{
 			score: 42,
 			nodes: 1471,
-			moves: []string{"h8h7", "a1b2", "g7f8", "e7f8", "b3b2"},
+			moves: []string{"b3b2", "e7f8", "g7f8", "a1b2", "h8h7"},
 		},
 	},
 }
@@ -119,19 +113,17 @@ var searchTestPositions = []struct {
 //
 // Negamax is a variant of minimax that relies on the
 // zero-sum property of a two-player game.
-func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth uint8) (searchResult, error) {
+func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth uint8) (int32, error) {
 	select {
 	case <-ctx.Done():
-		return searchResult{}, context.Canceled
+		return 0, context.Canceled
 	default:
 	}
 
 	si.nodes++
 
 	if pos.HasInsufficientMaterial() {
-		return searchResult{
-			score: draw,
-		}, nil
+		return draw, nil
 	}
 
 	hash := pos.Hash()
@@ -140,22 +132,14 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 	moves := pos.PseudoMoves(checkData)
 	switch {
 	case len(moves) == 0 && inCheck:
-		return searchResult{
-			score: -mate,
-		}, nil
+		return -mate, nil
 	case len(moves) == 0:
-		return searchResult{
-			score: draw,
-		}, nil
+		return draw, nil
 	case depth == 0:
-		return searchResult{
-			score: si.evaluate(pos),
-		}, nil
+		return si.evaluate(pos), nil
 	}
 
-	result := searchResult{
-		score: -mate,
-	}
+	var score int32 = -mate
 
 	var validMoves int
 	for _, move := range moves {
@@ -167,37 +151,35 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 
 		current, err := si.negamax(ctx, pos, depth-1)
 		if err != nil {
-			return searchResult{}, err
+			return 0, err
 		}
 
-		current.score = -current.score
-		if current.score > result.score {
-			result.score = current.score
-			result.pv = append(current.pv, move)
+		current = -current
+		if current > score {
+			score = current
 		}
 
 		pos.UnmakeMove(move, metadata, hash, pawnHash)
 	}
 
 	if validMoves > 0 {
-		result.score = incMateDistance(result.score)
+		score = incMateDistance(score)
 	}
 
-	return result, nil
+	return score, nil
 }
 
 func TestNegamax(t *testing.T) {
 	for _, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
 			si := newSearchInfo(noTable{}, noPawnTable{})
-			output, err := si.negamax(context.Background(), unsafeFEN(tt.fen), tt.depth)
+			score, err := si.negamax(context.Background(), unsafeFEN(tt.fen), tt.depth)
 
 			want := tt.negamax
 			assert.Nil(t, err)
-			assert.NotNil(t, output)
+			assert.NotNil(t, score)
 			assert.Equal(t, want.nodes, si.nodes, fmt.Sprintf("nodes: want %d, got %d", want.nodes, si.nodes))
-			assert.Equal(t, want.score, output.score, fmt.Sprintf("score: want %d, got %d", want.score, output.score))
-			assert.Equal(t, want.moves, movesString(output.pv))
+			assert.Equal(t, want.score, score, fmt.Sprintf("score: want %d, got %d", want.score, score))
 		})
 	}
 }
