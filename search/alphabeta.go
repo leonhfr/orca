@@ -119,14 +119,14 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 			nodes: 1,
 			score: -mate,
 		}
-		si.storeResult(hash, depth, result, exact)
+		si.storeResult(hash, depth, mateResult, exact)
 		return mateResult, nil
 	case validMoves == 0:
 		drawResult := searchResult{
 			nodes: 1,
 			score: draw,
 		}
-		si.storeResult(hash, depth, result, exact)
+		si.storeResult(hash, depth, drawResult, exact)
 		return drawResult, nil
 	}
 
