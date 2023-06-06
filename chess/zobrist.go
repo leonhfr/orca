@@ -40,7 +40,7 @@ func newZobristHash(pos *Position) (hash Hash) {
 //
 // Only takes into account pawns and kings positions.
 func newPawnZobristHash(pos *Position) (hash Hash) {
-	for _, p := range [4]Piece{BlackPawn, WhitePawn, BlackKing, WhiteKing} {
+	for _, p := range [4]Piece{BlackPawn, WhitePawn} {
 		for bb := pos.board.bbColors[p.Color()] & pos.board.bbPieces[p.Type()]; bb > 0; bb = bb.resetLSB() {
 			sq := bb.scanForward()
 			offset := 64*int(p) + int(sq)
@@ -60,20 +60,19 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
 	// piece
 	p1, p2 := m.P1(), m.P2()
 	s1, s2 := m.S1(), m.S2()
+	pt1 := p1.Type()
 	c := p1.Color()
-
-	pawnMove := p1.Type() == Pawn || p1.Type() == King
 
 	hp1 := polyRandom[64*int(p1)+int(s1)]
 	h ^= hp1
-	if pawnMove {
+	if pt1 == Pawn {
 		ph ^= hp1
 	}
 
 	switch promo := m.Promo(); {
 	case promo != NoPiece:
 		h ^= polyRandom[64*int(promo)+int(s2)]
-	case pawnMove:
+	case pt1 == Pawn:
 		hp2 := polyRandom[64*int(p1)+int(s2)]
 		h ^= hp2
 		ph ^= hp2
