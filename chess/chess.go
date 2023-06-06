@@ -1,8 +1,6 @@
 // Package chess provides types and functions to handle chess positions.
 package chess
 
-import "math/bits"
-
 // CheckData contains check data.
 type CheckData bitboard
 
@@ -22,19 +20,19 @@ func (pos *Position) InCheck() (CheckData, bool) {
 //	king and bishop versus king and bishop with the bishops on the same color
 func (pos *Position) HasInsufficientMaterial() bool {
 	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
-	pieces := bits.OnesCount64(uint64(bbOccupancy))
+	pieces := bbOccupancy.ones()
 	if pieces > 4 {
 		return false
 	}
 
-	knights := bits.OnesCount64(uint64(pos.board.bbPieces[Knight]))
-	bishops := bits.OnesCount64(uint64(pos.board.bbPieces[Bishop]))
+	knights := pos.board.bbPieces[Knight].ones()
+	bishops := pos.board.bbPieces[Bishop].ones()
 
 	if pieces == 2 || pieces == 3 && (knights == 1 || bishops == 1) {
 		return true
 	}
 
-	if bbBlack := pos.board.bbColors[Black] & pos.board.bbPieces[Bishop]; pieces == 4 && bishops == 2 && bits.OnesCount64(uint64(bbBlack)) == 1 {
+	if bbBlack := pos.board.bbColors[Black] & pos.board.bbPieces[Bishop]; pieces == 4 && bishops == 2 && bbBlack.ones() == 1 {
 		bbWhite := pos.board.bbColors[White] & pos.board.bbPieces[Bishop]
 		sqBlack := bbBlack.scanForward()
 		sqWhite := bbWhite.scanForward()
@@ -49,7 +47,7 @@ func (pos *Position) HasInsufficientMaterial() bool {
 // Some moves may be putting the moving player's king in check and therefore be illegal.
 func (pos *Position) PseudoMoves(data CheckData) []Move {
 	bbAttackedBy := bitboard(data)
-	switch count := bits.OnesCount64(uint64(bbAttackedBy)); {
+	switch count := bbAttackedBy.ones(); {
 	case count > 1:
 		return pos.pseudoMoves(bbFull, true, false)
 	case count == 1:

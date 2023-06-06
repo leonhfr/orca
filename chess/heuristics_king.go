@@ -1,7 +1,5 @@
 package chess
 
-import "math/bits"
-
 // KingMap executes the callback for both kings on the board.
 //
 // Intended to be used in evaluation functions.
@@ -15,7 +13,7 @@ func (pos *Position) KingMap(cb func(p Piece, sq Square, shieldDefects int)) {
 		for _, psm := range pawnShieldMasks[c] {
 			if psm[0]&bb > 0 {
 				bbPawns := psm[1] & pos.board.bbColors[c] & pos.board.bbPieces[Pawn]
-				pawnCount := bits.OnesCount64(uint64(bbPawns))
+				pawnCount := bbPawns.ones()
 
 				if pawnCount > pawnShieldCount {
 					pawnCount = pawnShieldCount
