@@ -185,7 +185,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 	}
 
 	for depth := 1; depth <= maxDepth; depth++ {
-		score, err := si.alphaBeta(ctx, pos, -mate, mate, uint8(depth), 0)
+		score, err := si.principalVariation(ctx, pos, -mate, mate, uint8(depth), 0)
 		if err != nil {
 			return
 		}

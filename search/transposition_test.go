@@ -106,7 +106,7 @@ func (hm *hashMapTable) principalVariation(pos *chess.Position) []chess.Move {
 
 	for hash := pos.Hash(); ; hash = pos.Hash() {
 		entry, inCache := hm.table[hash]
-		if !inCache {
+		if !inCache || entry.best == chess.NoMove {
 			break
 		}
 

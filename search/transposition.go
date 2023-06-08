@@ -127,7 +127,7 @@ func (ar *arrayTable) principalVariation(pos *chess.Position) []chess.Move {
 
 	for hash := pos.Hash(); ; hash = pos.Hash() {
 		entry, inCache := ar.get(hash)
-		if !inCache {
+		if !inCache || entry.best == chess.NoMove {
 			break
 		}
 

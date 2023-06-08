@@ -17,7 +17,6 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
-	originalAlpha := alpha
 
 	entry, inCache := si.table.get(hash)
 	if inCache && entry.depth >= depth {
@@ -36,6 +35,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 	}
 
 	if pos.HasInsufficientMaterial() {
+		si.table.set(hash, chess.NoMove, draw, exact, depth)
 		return draw, nil
 	}
 
@@ -49,14 +49,11 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 	}
 
 	var validMoves int
-
-	best := chess.NoMove
-	if inCache && entry.best != chess.NoMove {
-		best = entry.best
-	}
+	var best chess.Move
+	nt := upperBound
 
 	moves := pos.PseudoMoves(checkData)
-	scoreMoves(moves, best, si.killers.get(index))
+	scoreMoves(moves, entry.best, si.killers.get(index))
 
 	for i, searchPv := 0, true; i < len(moves); i++ {
 		nextOracle(moves, i)
@@ -111,6 +108,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 		if score > alpha {
 			alpha = score
 			best = move
+			nt = exact
 			searchPv = false
 		}
 	}
@@ -125,7 +123,6 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 	}
 
 	alpha = incMateDistance(alpha)
-	nt := getNodeType(originalAlpha, beta, alpha)
 	si.table.set(hash, best, alpha, nt, depth)
 
 	return alpha, nil
