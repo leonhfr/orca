@@ -37,10 +37,10 @@ func TestScoreMoves(t *testing.T) {
 			original := pos.PseudoMoves(checkData)
 
 			moves := pos.PseudoMoves(checkData)
-			scoreMoves(moves, tt.best, tt.killers)
+			scoreMoves(pos, moves, tt.best, tt.killers)
 
 			for i, move := range moves {
-				assert.Equal(t, score(original[i], tt.best, tt.killers), move.Score())
+				assert.Equal(t, score(pos, original[i], tt.best, tt.killers), move.Score())
 			}
 		})
 	}
@@ -73,7 +73,7 @@ func TestOrderMoves(t *testing.T) {
 			},
 			[]string{
 				"b7c8q", "b7a8q", "b7c8n", "b7a8n", "e1g1",
-				"e1c1", "h4d8", "a5b6", "h4h7", "h4h5",
+				"e1c1", "a5b6", "h4d8", "h4h7", "h4h5",
 				"e1f2", "e1d1", "e1f1", "a1b1", "a1c1",
 				"a1d1", "a1a2", "a1a3", "a1a4", "h1f1",
 				"h1g1", "h1h2", "h1h3", "h4f2", "h4h2",
@@ -100,7 +100,7 @@ func TestOrderMoves(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			checkData, _ := pos.InCheck()
 			moves := pos.PseudoMoves(checkData)
-			scoreMoves(moves, tt.best, tt.killers)
+			scoreMoves(pos, moves, tt.best, tt.killers)
 
 			var sorted []chess.Move
 			for i := 0; i < len(moves); i++ {

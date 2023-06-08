@@ -53,7 +53,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 	nt := upperBound
 
 	moves := pos.PseudoMoves(checkData)
-	scoreMoves(moves, entry.best, si.killers.get(index))
+	scoreMoves(pos, moves, entry.best, si.killers.get(index))
 
 	for i, searchPv := 0, true; i < len(moves); i++ {
 		nextOracle(moves, i)

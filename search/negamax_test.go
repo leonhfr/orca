@@ -104,12 +104,12 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 1,
-			nodes: 1024,
+			nodes: 1142,
 			moves: []string{"f6f2"},
 		},
 		principalVariation: searchTestResult{
 			score: mate - 1,
-			nodes: 249,
+			nodes: 247,
 			moves: []string{"f6f2"},
 		},
 		zeroWindow: searchTestResult{
@@ -127,17 +127,17 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 3,
-			nodes: 35978,
+			nodes: 37071,
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 		principalVariation: searchTestResult{
 			score: mate - 3,
-			nodes: 31753,
+			nodes: 30999,
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 		zeroWindow: searchTestResult{
 			score: mate,
-			nodes: 2757,
+			nodes: 2542,
 		},
 	},
 	{
@@ -150,17 +150,17 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: 42,
-			nodes: 1471,
-			moves: []string{"b3b2", "e7f8", "g7f8", "a1b2", "h8h7"},
+			nodes: 2254,
+			moves: []string{"b3b2", "a1b2", "c4c3"},
 		},
 		principalVariation: searchTestResult{
 			score: 42,
-			nodes: 2296,
-			moves: []string{"b3b2", "e7f8", "g7f8", "a1b2", "h8h7"},
+			nodes: 2908,
+			moves: []string{"b3b2", "a1b2", "c4c3"},
 		},
 		zeroWindow: searchTestResult{
 			score: mate - 1,
-			nodes: 593,
+			nodes: 812,
 		},
 	},
 }

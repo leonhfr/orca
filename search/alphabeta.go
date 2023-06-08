@@ -58,7 +58,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	}
 
 	moves := pos.PseudoMoves(checkData)
-	scoreMoves(moves, best, si.killers.get(index))
+	scoreMoves(pos, moves, best, si.killers.get(index))
 
 	for i := 0; i < len(moves); i++ {
 		nextOracle(moves, i)

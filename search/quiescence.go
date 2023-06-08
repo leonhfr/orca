@@ -23,7 +23,7 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 	}
 
 	moves := pos.LoudMoves()
-	scoreLoudMoves(moves)
+	scoreLoudMoves(pos, moves)
 
 	for i := 0; i < len(moves); i++ {
 		nextOracle(moves, i)

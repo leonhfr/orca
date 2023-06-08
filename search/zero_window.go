@@ -30,7 +30,7 @@ func (si *searchInfo) zeroWindow(ctx context.Context, pos *chess.Position, beta 
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 	moves := pos.PseudoMoves(checkData)
-	quickScoreMoves(moves)
+	quickScoreMoves(pos, moves)
 
 	for i := 0; i < len(moves); i++ {
 		nextOracle(moves, i)
