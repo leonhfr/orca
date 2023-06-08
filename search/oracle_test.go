@@ -69,12 +69,7 @@ func TestOrderMoves(t *testing.T) {
 			"rnbq1knr/pPpp2pp/8/Pp6/7Q/8/8/R3K2R w KQ b6 0 1",
 			chess.NoMove,
 			[2]chess.Move{
-				chess.Move(chess.H4) ^
-					chess.Move(chess.H5)<<6 ^
-					chess.Move(chess.WhiteQueen)<<12 ^
-					chess.Move(chess.NoPiece)<<16 ^
-					chess.Move(chess.NoPiece)<<20 ^
-					chess.Move(chess.Quiet),
+				newMove(chess.H4, chess.H5, chess.WhiteQueen, chess.NoPiece, chess.NoPiece, chess.Quiet),
 			},
 			[]string{
 				"b7c8q", "b7a8q", "b7c8n", "b7a8n", "e1g1",
@@ -91,12 +86,7 @@ func TestOrderMoves(t *testing.T) {
 		{
 			"best move",
 			"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
-			chess.Move(chess.D2) ^
-				chess.Move(chess.D4)<<6 ^
-				chess.Move(chess.WhitePawn)<<12 ^
-				chess.Move(chess.NoPiece)<<16 ^
-				chess.Move(chess.NoPiece)<<20 ^
-				chess.Move(chess.Quiet),
+			newMove(chess.D2, chess.D4, chess.WhitePawn, chess.NoPiece, chess.NoPiece, chess.Quiet),
 			[2]chess.Move{},
 			[]string{
 				"d2d4", "g1f2", "c4c5", "g1h1", "f3d4",
@@ -121,4 +111,11 @@ func TestOrderMoves(t *testing.T) {
 			assert.Equal(t, tt.want, movesString(sorted))
 		})
 	}
+}
+
+func newMove(s1, s2 chess.Square, p1, p2, promo chess.Piece, tags chess.MoveTag) chess.Move {
+	return chess.Move(s1) ^ chess.Move(s2)<<6 ^
+		chess.Move(p1)<<12 ^ chess.Move(p2)<<16 ^
+		chess.Move(promo)<<20 ^
+		chess.Move(tags)
 }

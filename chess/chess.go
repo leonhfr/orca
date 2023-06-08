@@ -242,6 +242,21 @@ func (pos *Position) attackedByBitboard(sq Square, c Color) bitboard {
 	return bb & bbOpponent
 }
 
+// attackedAndDefendedByBitboard returns the bitboard of the pieces that attack and defend the square.
+func (pos *Position) attackedAndDefendedByBitboard(sq Square, bbOccupancy bitboard) bitboard {
+	bbRookMoves := bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
+	bbBishopMoves := bbMagicBishopMoves[bishopMagics[sq].index(bbOccupancy)]
+
+	var bb bitboard
+	bb |= singlePawnCaptureBitboard(sq, Black) & pos.board.bbPieces[Pawn]
+	bb |= singlePawnCaptureBitboard(sq, White) & pos.board.bbPieces[Pawn]
+	bb |= bbKingMoves[sq] & pos.board.bbPieces[King]
+	bb |= bbKnightMoves[sq] & pos.board.bbPieces[Knight]
+	bb |= (pos.board.bbPieces[Queen] | pos.board.bbPieces[Rook]) & bbRookMoves
+	bb |= (pos.board.bbPieces[Queen] | pos.board.bbPieces[Bishop]) & bbBishopMoves
+	return bb
+}
+
 // attackBitboards returns the bitboards where pieces would attack the square.
 func (pos *Position) attackBitboards(sq Square, c Color) [5]bitboard {
 	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
