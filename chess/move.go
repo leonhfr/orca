@@ -59,13 +59,13 @@ func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 		}
 	} else if pt == Pawn && s2 == enPassant {
 		tags ^= EnPassant
-		tags ^= Capture
+		p2 = Pawn.color(p1.Color().other())
 	} else if promo != NoPiece {
 		tags ^= Promotion
 	}
 
 	if p2 != NoPiece {
-		tags ^= Capture
+		tags |= Capture
 	}
 
 	if tags == 0 {
@@ -102,7 +102,7 @@ func newPawnMove(p1, p2 Piece, s1, s2 Square, enPassant Square, promo Piece, che
 
 	if s2 == enPassant {
 		tags ^= EnPassant
-		tags ^= Capture
+		p2 = Pawn.color(p1.Color().other())
 	} else if promo != NoPiece {
 		tags ^= Promotion
 	}

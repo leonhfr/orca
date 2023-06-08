@@ -21,10 +21,7 @@ func (c Color) String() string {
 
 // other returns the other color.
 func (c Color) other() Color {
-	if c == White {
-		return Black
-	}
-	return White
+	return Color((c + 1) & 1)
 }
 
 // PieceType is the type of a piece.
@@ -58,7 +55,7 @@ func (pt PieceType) String() string {
 
 // color returns a piece of the passed piece type and color.
 func (pt PieceType) color(c Color) Piece {
-	return 2*Piece(pt) ^ Piece(c)
+	return Piece(pt<<1) ^ Piece(c)
 }
 
 // Piece is a piece type with a color.
