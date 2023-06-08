@@ -86,7 +86,7 @@ var searchTestPositions = []struct {
 		},
 		principalVariation: searchTestResult{
 			score: mate - 1,
-			nodes: 52,
+			nodes: 88,
 			moves: []string{"f1h1"},
 		},
 		zeroWindow: searchTestResult{
@@ -109,7 +109,7 @@ var searchTestPositions = []struct {
 		},
 		principalVariation: searchTestResult{
 			score: mate - 1,
-			nodes: 658,
+			nodes: 249,
 			moves: []string{"f6f2"},
 		},
 		zeroWindow: searchTestResult{
@@ -132,7 +132,7 @@ var searchTestPositions = []struct {
 		},
 		principalVariation: searchTestResult{
 			score: mate - 3,
-			nodes: 42471,
+			nodes: 31753,
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 		zeroWindow: searchTestResult{
@@ -155,7 +155,7 @@ var searchTestPositions = []struct {
 		},
 		principalVariation: searchTestResult{
 			score: 42,
-			nodes: 5596,
+			nodes: 2296,
 			moves: []string{"b3b2", "e7f8", "g7f8", "a1b2", "h8h7"},
 		},
 		zeroWindow: searchTestResult{

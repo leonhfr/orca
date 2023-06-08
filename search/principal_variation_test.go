@@ -83,7 +83,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 
 			score = -score
 		} else {
-			score, err = si.principalVariation(ctx, pos, -alpha-1, -alpha, depth-1, index+1)
+			score, err = si.zeroWindow(ctx, pos, -alpha, depth-1)
 			if err != nil {
 				return 0, err
 			}
