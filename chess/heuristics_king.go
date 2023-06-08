@@ -3,11 +3,17 @@ package chess
 // KingMap executes the callback for both kings on the board.
 //
 // Intended to be used in evaluation functions.
-func (pos *Position) KingMap(cb func(p Piece, sq Square, shieldDefects int)) {
+func (pos *Position) KingMap(cb func(p Piece, sq Square, shieldDefects, openFiles, halfOpenFiles int)) {
+	bbOpenFiles, bbHalfOpenFiles := pos.fileData()
+
 	for c := Black; c <= White; c++ {
 		king := King.color(c)
 		bb := pos.board.bbColors[c] & pos.board.bbPieces[King]
 		sq := bb.scanForward()
+
+		bbFiles := bb | bb.eastOne() | bb.westOne()
+		openFiles := (bbOpenFiles & bbFiles).ones()
+		halfOpenFiles := (bbHalfOpenFiles[c] & bbFiles).ones()
 
 		var shieldDefects int
 		for _, psm := range pawnShieldMasks[c] {
@@ -23,8 +29,22 @@ func (pos *Position) KingMap(cb func(p Piece, sq Square, shieldDefects int)) {
 			}
 		}
 
-		cb(king, sq, shieldDefects)
+		cb(king, sq, shieldDefects, openFiles, halfOpenFiles)
 	}
+}
+
+// fileData computes open files and half open files, indexed by color.
+func (pos *Position) fileData() (bitboard, [2]bitboard) {
+	bbBlackPawn := pos.board.bbColors[Black] & pos.board.bbPieces[Pawn]
+	bbWhitePawn := pos.board.bbColors[White] & pos.board.bbPieces[Pawn]
+	bbBlackFileFill := bbBlackPawn.fileFill()
+	bbWhiteFileFill := bbWhitePawn.fileFill()
+
+	bbBlackHalfOpenFile := ^bbBlackFileFill
+	bbWhiteHalfOpenFile := ^bbWhiteFileFill
+	bbOpenFiles := bbBlackHalfOpenFile & bbWhiteHalfOpenFile
+
+	return bbOpenFiles, [2]bitboard{bbBlackHalfOpenFile, bbWhiteHalfOpenFile}
 }
 
 // pawnShieldMasks contains the shield masks indexed by color.

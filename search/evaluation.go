@@ -30,7 +30,7 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 		}
 	})
 
-	pos.KingMap(func(p chess.Piece, sq chess.Square, shieldDefects int) {
+	pos.KingMap(func(p chess.Piece, sq chess.Square, shieldDefects, openFiles, halfOpenFiles int) {
 		mgValue := pestoMGPieceSquareTable[p][sq]
 		egValue := pestoEGPieceSquareTable[p][sq]
 
