@@ -46,8 +46,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	}
 
 	if depth == 0 {
-		score, err := si.quiesce(ctx, pos, -beta, -alpha)
-		return score, err
+		return si.quiesce(ctx, pos, -beta, -alpha)
 	}
 
 	var validMoves int

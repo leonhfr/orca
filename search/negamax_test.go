@@ -17,12 +17,13 @@ type searchTestResult struct {
 }
 
 var searchTestPositions = []struct {
-	name       string
-	fen        string
-	depth      uint8
-	negamax    searchTestResult
-	alphaBeta  searchTestResult
-	zeroWindow searchTestResult
+	name               string
+	fen                string
+	depth              uint8
+	negamax            searchTestResult
+	alphaBeta          searchTestResult
+	principalVariation searchTestResult
+	zeroWindow         searchTestResult
 }{
 	{
 		name:  "draw stalemate in 1",
@@ -33,6 +34,11 @@ var searchTestPositions = []struct {
 			nodes: 718,
 		},
 		alphaBeta: searchTestResult{
+			score: 0,
+			nodes: 60,
+			moves: []string{"c6c7"},
+		},
+		principalVariation: searchTestResult{
 			score: 0,
 			nodes: 60,
 			moves: []string{"c6c7"},
@@ -55,6 +61,11 @@ var searchTestPositions = []struct {
 			nodes: 1,
 			moves: []string{},
 		},
+		principalVariation: searchTestResult{
+			score: -mate,
+			nodes: 1,
+			moves: []string{},
+		},
 		zeroWindow: searchTestResult{
 			score: mate - 1,
 			nodes: 1,
@@ -71,6 +82,11 @@ var searchTestPositions = []struct {
 		alphaBeta: searchTestResult{
 			score: mate - 1,
 			nodes: 43,
+			moves: []string{"f1h1"},
+		},
+		principalVariation: searchTestResult{
+			score: mate - 1,
+			nodes: 52,
 			moves: []string{"f1h1"},
 		},
 		zeroWindow: searchTestResult{
@@ -91,6 +107,11 @@ var searchTestPositions = []struct {
 			nodes: 1024,
 			moves: []string{"f6f2"},
 		},
+		principalVariation: searchTestResult{
+			score: mate - 1,
+			nodes: 658,
+			moves: []string{"f6f2"},
+		},
 		zeroWindow: searchTestResult{
 			score: mate - 1,
 			nodes: 339,
@@ -109,6 +130,11 @@ var searchTestPositions = []struct {
 			nodes: 35978,
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
+		principalVariation: searchTestResult{
+			score: mate - 3,
+			nodes: 42471,
+			moves: []string{"c6g2", "e2g2", "c1e1"},
+		},
 		zeroWindow: searchTestResult{
 			score: mate - 1,
 			nodes: 16925,
@@ -125,6 +151,11 @@ var searchTestPositions = []struct {
 		alphaBeta: searchTestResult{
 			score: 42,
 			nodes: 1471,
+			moves: []string{"b3b2", "e7f8", "g7f8", "a1b2", "h8h7"},
+		},
+		principalVariation: searchTestResult{
+			score: 42,
+			nodes: 5596,
 			moves: []string{"b3b2", "e7f8", "g7f8", "a1b2", "h8h7"},
 		},
 		zeroWindow: searchTestResult{
