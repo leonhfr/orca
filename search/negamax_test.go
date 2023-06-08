@@ -90,8 +90,8 @@ var searchTestPositions = []struct {
 			moves: []string{"f1h1"},
 		},
 		zeroWindow: searchTestResult{
-			score: mate - 1,
-			nodes: 44,
+			score: mate,
+			nodes: 35,
 		},
 	},
 	{
@@ -113,8 +113,8 @@ var searchTestPositions = []struct {
 			moves: []string{"f6f2"},
 		},
 		zeroWindow: searchTestResult{
-			score: mate - 1,
-			nodes: 339,
+			score: mate,
+			nodes: 55,
 		},
 	},
 	{
@@ -136,8 +136,8 @@ var searchTestPositions = []struct {
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 		zeroWindow: searchTestResult{
-			score: mate - 1,
-			nodes: 16925,
+			score: mate,
+			nodes: 2757,
 		},
 	},
 	{

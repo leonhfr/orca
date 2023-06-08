@@ -49,6 +49,7 @@ func (si *searchInfo) zeroWindow(ctx context.Context, pos *chess.Position, beta 
 		if err != nil {
 			return 0, err
 		}
+		score = -score
 
 		pos.UnmakeMove(move, metadata, hash, pawnHash)
 
