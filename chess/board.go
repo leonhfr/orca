@@ -38,22 +38,13 @@ func (b board) pieceAt(sq Square) Piece {
 
 // pieceByColor returns the piece present at the given square.
 func (b board) pieceByColor(sq Square, c Color) Piece {
-	switch bb := sq.bitboard(); {
-	case b.bbPieces[Pawn]&bb > 0:
-		return Pawn.color(c)
-	case b.bbPieces[Knight]&bb > 0:
-		return Knight.color(c)
-	case b.bbPieces[Bishop]&bb > 0:
-		return Bishop.color(c)
-	case b.bbPieces[Rook]&bb > 0:
-		return Rook.color(c)
-	case b.bbPieces[Queen]&bb > 0:
-		return Queen.color(c)
-	case b.bbPieces[King]&bb > 0:
-		return King.color(c)
-	default:
-		return NoPiece
+	bb := sq.bitboard()
+	for pt := Pawn; pt <= King; pt++ {
+		if b.bbPieces[pt]&bb > 0 {
+			return pt.color(c)
+		}
 	}
+	return NoPiece
 }
 
 // makeMove makes and unmakes a move on the board.

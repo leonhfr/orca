@@ -135,7 +135,7 @@ func BenchmarkBoard_PieceAt(b *testing.B) {
 	for _, sq := range squares {
 		b.Run(sq.String(), func(b *testing.B) {
 			for n := 0; n < b.N; n++ {
-				pos.board.pieceAt(E1)
+				pos.board.pieceAt(sq)
 			}
 		})
 	}
@@ -147,7 +147,7 @@ func BenchmarkBoard_PieceByColor(b *testing.B) {
 	for _, sq := range squares {
 		b.Run(sq.String(), func(b *testing.B) {
 			for n := 0; n < b.N; n++ {
-				pos.board.pieceByColor(E1, White)
+				pos.board.pieceByColor(sq, White)
 			}
 		})
 	}
