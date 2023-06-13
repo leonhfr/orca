@@ -118,7 +118,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 		return NoMetadata, false
 	}
 
-	pos.turn = pos.turn.other()
+	pos.turn = pos.turn.Other()
 	pos.castlingRights = moveCastlingRights(pos.castlingRights, m)
 	pos.enPassant = moveEnPassant(m)
 	if pos.enPassant != NoSquare {

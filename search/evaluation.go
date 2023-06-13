@@ -11,17 +11,31 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 		phase = 24 // in case of early promotion
 	}
 
+	var mgMaterial [2]int32
+	var egMaterial [2]int32
+
+	pawnCount := pos.PawnCount()
+	mgMaterial[chess.Black] = int32(pawnCount[chess.Black]) * pestoMGPieceValues[chess.Pawn]
+	mgMaterial[chess.White] = int32(pawnCount[chess.White]) * pestoMGPieceValues[chess.Pawn]
+	egMaterial[chess.Black] = int32(pawnCount[chess.Black]) * pestoEGPieceValues[chess.Pawn]
+	egMaterial[chess.White] = int32(pawnCount[chess.White]) * pestoEGPieceValues[chess.Pawn]
+
 	mg, eg := si.evaluatePawns(pos)
 
 	pos.PieceMap(func(p chess.Piece, sq chess.Square, mobility int) {
+		c := p.Color()
+		pt := p.Type()
+
+		mgMaterial[c] += pestoMGPieceValues[pt]
+		egMaterial[c] += pestoEGPieceValues[pt]
+
 		mgValue := pestoMGPieceSquareTable[p][sq]
 		egValue := pestoEGPieceSquareTable[p][sq]
 
-		pt := p.Type()
 		mgValue += mobilityTermsMG[pt][mobility]
 		egValue += mobilityTermsEG[pt][mobility]
 
-		if p.Color() == chess.White {
+		if c == chess.White {
 			mg += mgValue
 			eg += egValue
 		} else {
@@ -30,14 +44,26 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 		}
 	})
 
+	materialValue := [2]int32{
+		taperedEval(mgMaterial[chess.Black], egMaterial[chess.Black], phase),
+		taperedEval(mgMaterial[chess.White], egMaterial[chess.White], phase),
+	}
+
 	pos.KingMap(func(p chess.Piece, sq chess.Square, shieldDefects, openFiles, halfOpenFiles int) {
+		c := p.Color()
+
+		factor := materialValue[c.Other()] / initialMaterialValue
+
 		mgValue := pestoMGPieceSquareTable[p][sq]
 		egValue := pestoEGPieceSquareTable[p][sq]
 
-		mgValue += shieldDefectsPenaltyMG[shieldDefects]
-		egValue += shieldDefectsPenaltyEG[shieldDefects]
+		mgValue += shieldDefectsPenaltyMG[shieldDefects] * factor
+		egValue += shieldDefectsPenaltyEG[shieldDefects] * factor
 
-		if p.Color() == chess.White {
+		mgValue += (int32(openFiles)*openFilePenaltyMG + int32(halfOpenFiles)*halfOpenFilePenaltyMG) * factor
+		egValue += (int32(openFiles)*openFilePenaltyEG + int32(halfOpenFiles)*halfOpenFilePenaltyEG) * factor
+
+		if c == chess.White {
 			mg += mgValue
 			eg += egValue
 		} else {
@@ -45,13 +71,16 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 			eg -= egValue
 		}
 	})
+
+	mg += mgMaterial[chess.White] - mgMaterial[chess.Black]
+	eg += egMaterial[chess.White] - egMaterial[chess.Black]
 
 	if player == chess.Black {
 		mg, eg = -mg, -eg
 	}
 	mg += tempo
 
-	return (phase*mg + (24-phase)*eg) / 24
+	return taperedEval(mg, eg, phase)
 }
 
 // evaluatePawns evaluate the pawn structure.
@@ -100,11 +129,18 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
 	return mg, eg
 }
 
+func taperedEval(mg, eg, phase int32) int32 {
+	return (phase*mg + (24-phase)*eg) / 24
+}
+
 // tempo is a bonus for the player having the right to move.
 // Only applied for middle game.
 const tempo = 6
 
 var (
+	initialMaterialValue    int32
+	pestoMGPieceValues      = [6]int32{82, 337, 365, 477, 1025, 0}
+	pestoEGPieceValues      = [6]int32{94, 281, 297, 512, 936, 0}
 	pestoMGPieceSquareTable = [12][64]int32{}                            // Middle game piece square table. Includes material advantage. Indexed by square and piece.
 	pestoEGPieceSquareTable = [12][64]int32{}                            // End game piece square table. Includes material advantage. Indexed by square and piece.
 	doubledPenaltyMG        = [8]int32{-10, -6, -6, -6, -6, -6, -6, -10} // Middle game penalty for double pawns. Indexed by file.
@@ -113,8 +149,15 @@ var (
 	isolaniPenaltyEG        = [8]int32{-5, -3, -3, -3, -3, -3, -3, -5}   // End game penalty for isolated pawns. Indexed by file.
 	passedBonusMG           = [2][64]int32{}                             // Middle game bonus for passed pawns. Indexed by square and color.
 	passedBonusEG           = [2][64]int32{}                             // End game bonus for passed pawns. Indexed by square and color.
-	shieldDefectsPenaltyMG  = [4]int32{0, -10, -20, -30}                 // Middle game penalty for shield defects.
+	shieldDefectsPenaltyMG  = [4]int32{0, -20, -40, -60}                 // Middle game penalty for shield defects.
 	shieldDefectsPenaltyEG  = [4]int32{0, 0, 0, 0}                       // End game penalty for shield defects.
+)
+
+const (
+	openFilePenaltyMG     = -20
+	openFilePenaltyEG     = 0
+	halfOpenFilePenaltyMG = -10
+	halfOpenFilePenaltyEG = 0
 )
 
 var (

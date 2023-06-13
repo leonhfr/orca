@@ -19,8 +19,8 @@ func (c Color) String() string {
 	return colorName[c : c+1]
 }
 
-// other returns the other color.
-func (c Color) other() Color {
+// Other returns the Other color.
+func (c Color) Other() Color {
 	return Color((c + 1) & 1)
 }
 

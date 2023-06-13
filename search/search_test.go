@@ -120,7 +120,7 @@ func TestSearch(t *testing.T) {
 			depth: 2,
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 115, Score: 0, Mate: 0, PV: []chess.Move{0x13602c106a3}},
-				{Depth: 2, Nodes: 915, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc2ab9, 0x12c02c018da}},
+				{Depth: 2, Nodes: 918, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc2ab9, 0x12c02c018da}},
 			},
 		},
 		{
@@ -137,8 +137,8 @@ func TestSearch(t *testing.T) {
 			depth: 5,
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 683, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 4347, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
-				{Depth: 3, Nodes: 17966, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
+				{Depth: 2, Nodes: 4327, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
+				{Depth: 3, Nodes: 17876, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
 			},
 		},
 	}
@@ -177,11 +177,11 @@ func TestCachedSearch(t *testing.T) {
 			false,
 			[]uci.Output{
 				{Depth: 1, Nodes: 683, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 4347, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
-				{Depth: 3, Nodes: 17966, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
-				{Depth: 4, Nodes: 114095, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
-				{Depth: 5, Nodes: 930461, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
-				{Depth: 7, Nodes: 3334980, Score: 0, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x11306c14362, 0x14f02c4b346, 0x6401cc8eed, 0x11302c05a1a}},
+				{Depth: 2, Nodes: 4327, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
+				{Depth: 3, Nodes: 17876, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
+				{Depth: 4, Nodes: 111895, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
+				{Depth: 5, Nodes: 927457, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
+				{Depth: 7, Nodes: 3333920, Score: 0, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x11306c14362, 0x14f02c4b346, 0x6401cc8eed, 0x11302c05a1a}},
 			},
 		},
 		{
@@ -189,11 +189,11 @@ func TestCachedSearch(t *testing.T) {
 			true,
 			[]uci.Output{
 				{Depth: 1, Nodes: 683, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 4347, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
-				{Depth: 3, Nodes: 17966, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
-				{Depth: 4, Nodes: 114095, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
-				{Depth: 5, Nodes: 926508, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
-				{Depth: 7, Nodes: 3008759, Score: 0, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x11306c14362, 0x14f02c4b346, 0x6401cc8eed, 0x11302c05a1a}},
+				{Depth: 2, Nodes: 4327, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
+				{Depth: 3, Nodes: 17876, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
+				{Depth: 4, Nodes: 111895, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
+				{Depth: 5, Nodes: 923503, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
+				{Depth: 7, Nodes: 3010659, Score: 0, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x11306c14362, 0x14f02c4b346, 0x6401cc8eed, 0x11302c05a1a}},
 			},
 		},
 	}

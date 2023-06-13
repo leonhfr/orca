@@ -86,7 +86,7 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 	moves := make([]Move, 0, size)
 
 	// Setting up variables
-	player, opponent := pos.turn, pos.turn.other()
+	player, opponent := pos.turn, pos.turn.Other()
 	pawn := WhitePawn
 	king := WhiteKing
 	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
@@ -228,7 +228,7 @@ func (pos *Position) isSquareAttacked(sq Square) bool {
 
 // attackedByBitboard returns the bitboard of the pieces that attack the square.
 func (pos *Position) attackedByBitboard(sq Square, c Color) bitboard {
-	bbOpponent := pos.board.bbColors[c.other()]
+	bbOpponent := pos.board.bbColors[c.Other()]
 	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 	bbRookMoves := bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
 	bbBishopMoves := bbMagicBishopMoves[bishopMagics[sq].index(bbOccupancy)]
@@ -284,7 +284,7 @@ func (pos *Position) isCastleLegal(m Move) bool {
 	if m.HasTag(QueenSideCastle) {
 		s = queenSide
 	}
-	bbOpponent := pos.board.bbColors[pos.turn.other()]
+	bbOpponent := pos.board.bbColors[pos.turn.Other()]
 	cc := castleChecks[2*uint8(pos.turn)+uint8(s)]
 
 	if cc.bbPawn&pos.board.bbPieces[Pawn]&bbOpponent > 0 ||

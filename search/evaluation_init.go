@@ -4,6 +4,7 @@ import "github.com/leonhfr/orca/chess"
 
 func init() {
 	initPassedPawn()
+	initInitialMaterialValue()
 	initPesto()
 }
 
@@ -51,6 +52,16 @@ func passedPawnHumanPieceTables() ([8][8]int32, [8][8]int32) {
 	return passedPawnMGHumanPieceTable, passedPawnEGHumanPieceTable
 }
 
+// initializes the initial material value.
+func initInitialMaterialValue() {
+	initialMaterialValue = 8*pestoMGPieceValues[chess.Pawn] +
+		2*pestoMGPieceValues[chess.Knight] +
+		2*pestoMGPieceValues[chess.Bishop] +
+		2*pestoMGPieceValues[chess.Rook] +
+		pestoMGPieceValues[chess.Queen] +
+		pestoMGPieceValues[chess.King]
+}
+
 // initializes the square tables used in the
 // PeSTO (Piece-Square Tables Only) evaluation function by Ronald Friedrich.
 //
@@ -59,13 +70,9 @@ func passedPawnHumanPieceTables() ([8][8]int32, [8][8]int32) {
 //
 // Source: https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
 func initPesto() {
-	pestoMGPieceValues := [6]int32{82, 337, 365, 477, 1025, 0}
-	pestoEGPieceValues := [6]int32{94, 281, 297, 512, 936, 0}
 	pestoMGHumanPieceTables, pestoEGHumanPieceTables := pestoHumanPieceTables()
 
 	for p := chess.BlackPawn; p <= chess.WhiteKing; p++ {
-		mgValue := pestoMGPieceValues[p.Type()]
-		egValue := pestoEGPieceValues[p.Type()]
 		mgHuman := pestoMGHumanPieceTables[p.Type()]
 		egHuman := pestoEGHumanPieceTables[p.Type()]
 
@@ -75,8 +82,8 @@ func initPesto() {
 				rank = i / 8
 			}
 
-			pestoMGPieceSquareTable[p][i] = mgValue + mgHuman[rank][file]
-			pestoEGPieceSquareTable[p][i] = egValue + egHuman[rank][file]
+			pestoMGPieceSquareTable[p][i] = mgHuman[rank][file]
+			pestoEGPieceSquareTable[p][i] = egHuman[rank][file]
 		}
 	}
 }

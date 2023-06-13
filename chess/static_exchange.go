@@ -22,7 +22,7 @@ func (pos *Position) StaticExchange(m Move, cb func(pt PieceType) bool) {
 	c := p2.Color()
 	pt := p1.Type()
 
-	for ; bbFrom > 0; c = c.other() {
+	for ; bbFrom > 0; c = c.Other() {
 		if cb(pt) {
 			break
 		}

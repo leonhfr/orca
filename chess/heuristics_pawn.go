@@ -1,5 +1,13 @@
 package chess
 
+// PawnCount returns the pawn count, indexed by color.
+func (pos *Position) PawnCount() [2]int {
+	return [2]int{
+		(pos.board.bbColors[Black] & pos.board.bbPieces[Pawn]).ones(),
+		(pos.board.bbColors[White] & pos.board.bbPieces[Pawn]).ones(),
+	}
+}
+
 // PawnProperty represents different pawn properties.
 type PawnProperty uint8
 
@@ -30,8 +38,8 @@ func (pp PawnProperty) HasProperty(p PawnProperty) bool {
 func (pos *Position) PawnMap(cb func(p Piece, sq Square, properties PawnProperty)) {
 	for c := Black; c <= White; c++ {
 		bbPlayerPawn := pos.board.bbColors[c] & pos.board.bbPieces[Pawn]
-		bbOpponentPawn := pos.board.bbColors[c.other()] & pos.board.bbPieces[Pawn]
-		bbOpponentFrontSpans := bbOpponentPawn.frontSpans(c.other())
+		bbOpponentPawn := pos.board.bbColors[c.Other()] & pos.board.bbPieces[Pawn]
+		bbOpponentFrontSpans := bbOpponentPawn.frontSpans(c.Other())
 
 		bbPawnsBehindOwn := bbPlayerPawn & bbPlayerPawn.rearSpans(c)
 		bbPawnsInFrontOwn := bbPlayerPawn & bbPlayerPawn.frontSpans(c)
