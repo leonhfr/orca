@@ -22,7 +22,7 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 
 	mg, eg := si.evaluatePawns(pos)
 
-	pos.PieceMap(func(p chess.Piece, sq chess.Square, mobility int, trapped bool) {
+	pos.PieceMap(func(p chess.Piece, sq chess.Square, mobility int, properties chess.PieceProperty) {
 		c := p.Color()
 		pt := p.Type()
 
@@ -35,9 +35,14 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 		mgValue += mobilityTermsMG[pt][mobility]
 		egValue += mobilityTermsEG[pt][mobility]
 
-		if trapped {
+		if properties.HasProperty(chess.Trapped) {
 			mgValue += trappedPiecePenalty[pt]
 			egValue += trappedPiecePenalty[pt]
+		}
+
+		if properties.HasProperty(chess.Lost) {
+			mgValue += lostPiecePenalty[pt]
+			egValue += lostPiecePenalty[pt]
 		}
 
 		if c == chess.White {
@@ -157,6 +162,7 @@ var (
 	shieldDefectsPenaltyMG  = [4]int32{0, -20, -40, -60}                 // Middle game penalty for shield defects.
 	shieldDefectsPenaltyEG  = [4]int32{0, 0, 0, 0}                       // End game penalty for shield defects.
 	trappedPiecePenalty     = [6]int32{0, -20, -50, -40, 0, 0}           // Penalty for trapped pieces. Indexed by piece type.
+	lostPiecePenalty        = [6]int32{0, 0, -150, 0, 0, 0}              // Penalty for lost pieces. Indexed by piece type.
 )
 
 const (

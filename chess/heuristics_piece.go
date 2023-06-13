@@ -8,13 +8,31 @@ func (pos *Position) CountPieces() (int, int, int, int) {
 		pos.board.bbPieces[Queen].ones()
 }
 
+// PieceProperty represents different piece properties.
+type PieceProperty uint8
+
+// NoPieceProperty represents the absence of properties.
+const NoPieceProperty PieceProperty = 0
+
+const (
+	// Trapped represents a trapped piece. It should be hard for the piece to escape.
+	Trapped PieceProperty = 1 << iota
+	// Lost represents a lost piece. It should be impossible for the piece to escape.
+	Lost
+)
+
+// HasProperty checks the presence of the given property.
+func (pp PieceProperty) HasProperty(p PieceProperty) bool {
+	return pp&PieceProperty(p) > 0
+}
+
 // PieceMap executes the callback for each piece on the board, passing the piece
 // and its square as arguments.
 //
 // Does not take pawns or kings into account.
 //
 // Intended to be used in evaluation functions.
-func (pos *Position) PieceMap(cb func(p Piece, sq Square, mobility int, trapped bool)) {
+func (pos *Position) PieceMap(cb func(p Piece, sq Square, mobility int, properties PieceProperty)) {
 	bbOccupancy := pos.board.bbColors[Black] | pos.board.bbColors[White]
 
 	for p := BlackKnight; p <= WhiteQueen; p++ {
@@ -28,17 +46,17 @@ func (pos *Position) PieceMap(cb func(p Piece, sq Square, mobility int, trapped 
 
 			mobility := pieceMobility(sq, pt, pos.board.bbColors[c], bbOccupancy)
 
-			var trapped bool
-			for _, ts := range trappedSituations[p] {
-				if ts.bbTrapped&bb > 0 {
-					if ts.bbTrapping&pos.board.bbColors[op]&pos.board.bbPieces[ts.pt] > 0 {
-						trapped = true
+			var properties PieceProperty
+			for _, ts := range pieceSituations[p] {
+				if ts.bbPlayerPiece&bb > 0 {
+					if ts.bbOpponentPiece&pos.board.bbColors[op]&pos.board.bbPieces[ts.opponentPieceType] > 0 {
+						properties ^= Trapped
 					}
 					break
 				}
 			}
 
-			cb(p, sq, mobility, trapped)
+			cb(p, sq, mobility, properties)
 		}
 	}
 }
@@ -51,42 +69,43 @@ func pieceMobility(sq Square, pt PieceType, bbPlayer, bbOccupancy bitboard) int 
 	return bb.ones()
 }
 
-// trappedSituation represents a trapped piece situation.
-type trappedSituation struct {
-	bbTrapped  bitboard
-	bbTrapping bitboard
-	pt         PieceType
+// pieceSituation represents a piece situation.
+type pieceSituation struct {
+	bbPlayerPiece     bitboard
+	bbOpponentPiece   bitboard
+	opponentPieceType PieceType
+	property          PieceProperty
 }
 
-// trappedSituations contains the trapped situations, indexed by piece type.
-var trappedSituations = [10][]trappedSituation{
+// pieceSituations contains the piece situations, indexed by piece type.
+var pieceSituations = [10][]pieceSituation{
 	{}, // black pawns
 	{}, // white pawns
 	{ // black knights, same as below
-		{1 << H1, 1 << H2, Pawn},
-		{1 << H1, 1 << F2, Pawn},
-		{1 << H2, 1<<G2 | 1<<H3, Pawn},
-		{1 << H2, 1<<G2 | 1<<F3, Pawn},
+		{1 << H1, 1 << H2, Pawn, Trapped},
+		{1 << H1, 1 << F2, Pawn, Trapped},
+		{1 << H2, 1<<G2 | 1<<H3, Pawn, Trapped},
+		{1 << H2, 1<<G2 | 1<<F3, Pawn, Trapped},
 	},
 	{ // white knights
-		{1 << H8, 1 << H7, Pawn},       // a white knight on h8 with a black pawn on h7
-		{1 << H8, 1 << F7, Pawn},       // a white knight on h8 with a black pawn on f7
-		{1 << H7, 1<<G7 | 1<<H6, Pawn}, // a white knight on h7 with black pawns on g7 and h6
-		{1 << H7, 1<<G7 | 1<<F6, Pawn}, // a white knight on h7 with black pawns on g7 and f6
+		{1 << H8, 1 << H7, Pawn, Trapped},       // a white knight on h8 with a black pawn on h7
+		{1 << H8, 1 << F7, Pawn, Trapped},       // a white knight on h8 with a black pawn on f7
+		{1 << H7, 1<<G7 | 1<<H6, Pawn, Trapped}, // a white knight on h7 with black pawns on g7 and h6
+		{1 << H7, 1<<G7 | 1<<F6, Pawn, Trapped}, // a white knight on h7 with black pawns on g7 and f6
 	},
 	{ // black bishops, same as below
-		{1 << H2, 1<<F2 | 1<<G3, Pawn},
-		{1 << H3, 1<<G4 | 1<<F3, Pawn},
+		{1 << H2, 1<<F2 | 1<<G3, Pawn, Lost},
+		{1 << H3, 1<<G4 | 1<<F3, Pawn, Trapped},
 	},
 	{ // white bishops
-		{1 << H7, 1<<F7 | 1<<G6, Pawn},
-		{1 << H6, 1<<G5 | 1<<F6, Pawn},
+		{1 << H7, 1<<F7 | 1<<G6, Pawn, Lost},
+		{1 << H6, 1<<G5 | 1<<F6, Pawn, Trapped},
 	},
 	{ // black rooks, same as below
-		{1<<G8 | 1<<H8 | 1<<G7 | 1<<H7, 1<<F8 | 1<<G8, King},
+		{1<<G8 | 1<<H8 | 1<<G7 | 1<<H7, 1<<F8 | 1<<G8, King, Trapped},
 	},
 	{ // white rooks
-		{1<<G1 | 1<<H1 | 1<<G2 | 1<<H2, 1<<F1 | 1<<G1, King}, // a white rook on h1/g1/h2/g2 with a white king on f1 or g1
+		{1<<G1 | 1<<H1 | 1<<G2 | 1<<H2, 1<<F1 | 1<<G1, King, Trapped}, // a white rook on h1/g1/h2/g2 with a white king on f1 or g1
 	},
 	{}, // black queens
 	{}, // white queens
