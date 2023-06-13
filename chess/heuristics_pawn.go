@@ -24,7 +24,12 @@ const (
 	// HalfIsolani represents a pawn isolated on only one adjacent file.
 	HalfIsolani
 	// Passed represents a passed pawn.
+	// A passed pawn is a pawn with no opponent pawns in front on the same or adjacent files.
 	Passed
+	// Backward represents a backward pawn.
+	// A pawn is backward if its stop square is not in its own front attack spans
+	// but is controlled by an enemy sentry.
+	Backward
 )
 
 // HasProperty checks the presence of the given property.
@@ -39,19 +44,11 @@ func (pos *Position) PawnMap(cb func(p Piece, sq Square, properties PawnProperty
 	for c := Black; c <= White; c++ {
 		bbPlayerPawn := pos.board.bbColors[c] & pos.board.bbPieces[Pawn]
 		bbOpponentPawn := pos.board.bbColors[c.Other()] & pos.board.bbPieces[Pawn]
-		bbOpponentFrontSpans := bbOpponentPawn.frontSpans(c.Other())
 
-		bbPawnsBehindOwn := bbPlayerPawn & bbPlayerPawn.rearSpans(c)
-		bbPawnsInFrontOwn := bbPlayerPawn & bbPlayerPawn.frontSpans(c)
-		bbDoubled := bbPawnsBehindOwn | bbPawnsInFrontOwn
-
-		bbNoNeighborOnEastFile := bbPlayerPawn.noNeighborOnEastFile()
-		bbNoNeighborOnWestFile := bbPlayerPawn.noNeighborOnWestFile()
-
-		bbIsolanis := bbNoNeighborOnEastFile & bbNoNeighborOnWestFile
-		bbHalfIsolanis := bbNoNeighborOnEastFile ^ bbNoNeighborOnWestFile
-
-		bbPassed := passedPawns(bbPlayerPawn, bbOpponentFrontSpans)
+		bbDoubled := doubledPawns(c, bbPlayerPawn)
+		bbIsolanis, bbHalfIsolanis := isolatedPawns(bbPlayerPawn)
+		bbPassed := passedPawns(c, bbPlayerPawn, bbOpponentPawn)
+		bbBackward := backwardPawns(c, bbPlayerPawn, bbOpponentPawn)
 
 		for pawn := Pawn.color(c); bbPlayerPawn > 0; bbPlayerPawn = bbPlayerPawn.resetLSB() {
 			sq := bbPlayerPawn.scanForward()
@@ -72,15 +69,47 @@ func (pos *Position) PawnMap(cb func(p Piece, sq Square, properties PawnProperty
 				properties ^= Passed
 			}
 
+			if bb&bbBackward > 0 {
+				properties ^= Backward
+			}
+
 			cb(pawn, sq, properties)
 		}
 	}
 }
 
-func passedPawns(bbPlayerPawn, bbOpponentFrontSpans bitboard) bitboard {
-	bbAllFrontSpans := bbOpponentFrontSpans
+func doubledPawns(c Color, bbPlayerPawn bitboard) bitboard {
+	bbPawnsBehindOwn := bbPlayerPawn & bbPlayerPawn.rearSpans(c)
+	bbPawnsInFrontOwn := bbPlayerPawn & bbPlayerPawn.frontSpans(c)
+	return bbPawnsBehindOwn | bbPawnsInFrontOwn
+}
+
+func isolatedPawns(bbPlayerPawn bitboard) (bitboard, bitboard) {
+	bbNoNeighborOnEastFile := bbPlayerPawn.noNeighborOnEastFile()
+	bbNoNeighborOnWestFile := bbPlayerPawn.noNeighborOnWestFile()
+	bbIsolanis := bbNoNeighborOnEastFile & bbNoNeighborOnWestFile
+	bbHalfIsolanis := bbNoNeighborOnEastFile ^ bbNoNeighborOnWestFile
+	return bbIsolanis, bbHalfIsolanis
+}
+
+func passedPawns(c Color, bbPlayerPawn, bbOpponentPawn bitboard) bitboard {
+	bbAllFrontSpans := bbOpponentPawn.frontSpans(c.Other())
 	bbAllFrontSpans |= bbAllFrontSpans.eastOne() | bbAllFrontSpans.westOne()
 	return bbPlayerPawn & ^bbAllFrontSpans
+}
+
+func backwardPawns(c Color, bbPlayerPawn, bbOpponentPawns bitboard) bitboard {
+	bbStops := bbPlayerPawn.stops(c)
+	bbPlayerAttackSpans := bbPlayerPawn.frontSpans(c).eastAttackFileFill() |
+		bbPlayerPawn.frontSpans(c).westAttackFileFill()
+	bbOpponentAttacks := bbOpponentPawns.eastAttack(c.Other()) |
+		bbOpponentPawns.westAttack(c.Other())
+	bbIntersection := bbStops & bbOpponentAttacks & ^bbPlayerAttackSpans
+
+	if c == Black {
+		return bbIntersection.northOne()
+	}
+	return bbIntersection.southOne()
 }
 
 func (b bitboard) noNeighborOnEastFile() bitboard {
@@ -89,6 +118,14 @@ func (b bitboard) noNeighborOnEastFile() bitboard {
 
 func (b bitboard) noNeighborOnWestFile() bitboard {
 	return b & ^b.eastAttackFileFill()
+}
+
+// stops returns the stops bitboard.
+func (b bitboard) stops(c Color) bitboard {
+	if c == Black {
+		return b.southOne()
+	}
+	return b.northOne()
 }
 
 // frontSpans computes the front spans.
@@ -107,6 +144,22 @@ func (b bitboard) rearSpans(c Color) bitboard {
 		return b.northFill().northOne()
 	}
 	return b.southFill().southOne()
+}
+
+// eastAttack returns the east attacks.
+func (b bitboard) eastAttack(c Color) bitboard {
+	if c == Black {
+		return b.southEastOne()
+	}
+	return b.northEastOne()
+}
+
+// westAttack returns the west attacks.
+func (b bitboard) westAttack(c Color) bitboard {
+	if c == Black {
+		return b.southWestOne()
+	}
+	return b.northWestOne()
 }
 
 // eastAttackFileFill computes the east attack file fill.
@@ -138,24 +191,4 @@ func (b bitboard) southFill() bitboard {
 	b |= b >> 16
 	b |= b >> 32
 	return b
-}
-
-// northOne shifts the bitboard toward the north.
-func (b bitboard) northOne() bitboard {
-	return b << 8
-}
-
-// southOne shifts the bitboard toward the south.
-func (b bitboard) southOne() bitboard {
-	return b >> 8
-}
-
-// eastOne shifts the bitboard toward the east.
-func (b bitboard) eastOne() bitboard {
-	return b << 1 & ^bbFileA
-}
-
-// westOne shifts the bitboard toward the west.
-func (b bitboard) westOne() bitboard {
-	return b >> 1 & ^bbFileH
 }

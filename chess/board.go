@@ -87,11 +87,11 @@ func (b *board) makeMove(m Move) {
 		b.bbPieces[p2.Type()] ^= s2bb
 		b.bbColors[p2.Color()] ^= s2bb
 	case c == White && enPassant: // white en passant
-		bb := s2.bitboard() >> 8
+		bb := s2.bitboard().southOne()
 		b.bbPieces[Pawn] ^= bb
 		b.bbColors[Black] ^= bb
 	case c == Black && enPassant: // black en passant
-		bb := s2.bitboard() << 8
+		bb := s2.bitboard().northOne()
 		b.bbPieces[Pawn] ^= bb
 		b.bbColors[White] ^= bb
 	case c == White && m.HasTag(KingSideCastle): // white king side castle

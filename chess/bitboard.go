@@ -54,6 +54,46 @@ func (b bitboard) ones() int {
 	return bits.OnesCount64(uint64(b))
 }
 
+// northOne shifts the bitboard toward the north.
+func (b bitboard) northOne() bitboard {
+	return b << 8
+}
+
+// southOne shifts the bitboard toward the south.
+func (b bitboard) southOne() bitboard {
+	return b >> 8
+}
+
+// eastOne shifts the bitboard toward the east.
+func (b bitboard) eastOne() bitboard {
+	return b << 1 & ^bbFileA
+}
+
+// westOne shifts the bitboard toward the west.
+func (b bitboard) westOne() bitboard {
+	return b >> 1 & ^bbFileH
+}
+
+// northEastOne shifts the bitboard toward the north east.
+func (b bitboard) northEastOne() bitboard {
+	return b << 9 & ^bbFileA
+}
+
+// northWestOne shifts the bitboard toward the north west.
+func (b bitboard) northWestOne() bitboard {
+	return b << 7 & ^bbFileH
+}
+
+// southEastOne shifts the bitboard toward the south east.
+func (b bitboard) southEastOne() bitboard {
+	return b >> 7 & ^bbFileA
+}
+
+// southWestOne shifts the bitboard toward the south west.
+func (b bitboard) southWestOne() bitboard {
+	return b >> 9 & ^bbFileH
+}
+
 // String returns a 64 character string of 1s and 0s
 // with the most significant bit.
 func (b bitboard) String() string {

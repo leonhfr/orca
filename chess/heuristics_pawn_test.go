@@ -35,11 +35,11 @@ var pawnPieceMapTests = []struct {
 		name: "half-isolani, isolani, doubled",
 		fen:  "4k3/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/4K3 w - - 0 1",
 		pieces: map[Square]pawnCallbackArgs{
-			A7: {BlackPawn, Isolani}, C7: {BlackPawn, HalfIsolani},
+			A7: {BlackPawn, Isolani ^ Backward}, C7: {BlackPawn, HalfIsolani},
 			D6: {BlackPawn, HalfIsolani}, G7: {BlackPawn, HalfIsolani},
 			H6: {BlackPawn, HalfIsolani},
 			B5: {WhitePawn, HalfIsolani ^ Doubled}, B4: {WhitePawn, HalfIsolani ^ Doubled},
-			C4: {WhitePawn, HalfIsolani}, E4: {WhitePawn, Isolani},
+			C4: {WhitePawn, HalfIsolani}, E4: {WhitePawn, Isolani ^ Backward},
 			G4: {WhitePawn, HalfIsolani}, H5: {WhitePawn, HalfIsolani},
 		},
 	},
@@ -48,7 +48,7 @@ var pawnPieceMapTests = []struct {
 		fen:  "4k3/8/7p/1P2Pp1P/2Pp1PP1/8/8/4K3 w - - 0 1",
 		pieces: map[Square]pawnCallbackArgs{
 			D4: {BlackPawn, Isolani ^ Passed}, F5: {BlackPawn, Isolani},
-			H6: {BlackPawn, Isolani},
+			H6: {BlackPawn, Isolani ^ Backward},
 			B5: {WhitePawn, HalfIsolani ^ Passed}, C4: {WhitePawn, HalfIsolani ^ Passed},
 			E5: {WhitePawn, HalfIsolani ^ Passed}, F4: {WhitePawn, NoPawnProperty},
 			G4: {WhitePawn, NoPawnProperty}, H5: {WhitePawn, HalfIsolani},

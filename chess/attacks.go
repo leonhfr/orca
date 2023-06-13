@@ -98,13 +98,13 @@ func pieceBitboard(sq Square, pt PieceType, occupancy bitboard) bitboard {
 // pawnMoveBitboard returns the pawn move bitboard.
 func pawnMoveBitboard(pawn, occupancy bitboard, color Color) (upOne bitboard, upTwo bitboard) {
 	if color == Black {
-		upOne = ^occupancy & (pawn >> 8)
-		upTwo = ^occupancy & ((upOne & bbRank6) >> 8)
+		upOne = ^occupancy & pawn.southOne()
+		upTwo = ^occupancy & (upOne & bbRank6).southOne()
 		return
 	}
 
-	upOne = ^occupancy & (pawn << 8)
-	upTwo = ^occupancy & ((upOne & bbRank3) << 8)
+	upOne = ^occupancy & pawn.northOne()
+	upTwo = ^occupancy & (upOne & bbRank3).northOne()
 	return
 }
 
@@ -113,24 +113,14 @@ func pawnMoveBitboard(pawn, occupancy bitboard, color Color) (upOne bitboard, up
 // The returned bitboard has to be AND with the bitboard of the opponent of the player
 // whose turn it is, which should have already been OR with the en passant square bitboard.
 func pawnCaptureBitboard(pawn bitboard, color Color) (captureR bitboard, captureL bitboard) {
-	if color == Black {
-		captureR = (pawn & ^bbFileH) >> 7
-		captureL = (pawn & ^bbFileA) >> 9
-		return
-	}
-
-	captureR = (pawn & ^bbFileH) << 9
-	captureL = (pawn & ^bbFileA) << 7
-	return
+	return pawn.eastAttack(color), pawn.westAttack(color)
 }
 
 // singlePawnCaptureBitboard returns a single pawn capture bitboard.
 func singlePawnCaptureBitboard(sq Square, color Color) bitboard {
 	bbPawn := sq.bitboard()
-	if color == Black {
-		return (bbPawn & ^bbFileH)>>7 | (bbPawn & ^bbFileA)>>9
-	}
-	return (bbPawn & ^bbFileH)<<9 | (bbPawn & ^bbFileA)<<7
+	captureR, captureL := pawnCaptureBitboard(bbPawn, color)
+	return captureR | captureL
 }
 
 // slowMoves computes the move bitboard for each piece type.
