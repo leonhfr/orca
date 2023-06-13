@@ -21,6 +21,7 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 	egMaterial[chess.White] = int32(pawnCount[chess.White]) * pestoEGPieceValues[chess.Pawn]
 
 	mg, eg := si.evaluatePawns(pos)
+	fd := pos.FileData()
 
 	pos.PieceMap(func(p chess.Piece, sq chess.Square, mobility int, properties chess.PieceProperty) {
 		c := p.Color()
@@ -43,6 +44,20 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 		if properties.HasProperty(chess.Lost) {
 			mgValue += lostPiecePenalty[pt]
 			egValue += lostPiecePenalty[pt]
+		}
+
+		if pt == chess.Rook {
+			switch {
+			case sq.Rank() == rookPenultimateRank[c]:
+				mgValue += rookPenultimateRankBonus
+				egValue += rookPenultimateRankBonus
+			case fd.OnOpenFile(sq):
+				mgValue += rookOpenFileBonus
+				egValue += rookOpenFileBonus
+			case fd.OnHalfOpenFile(sq, c.Other()):
+				mgValue += rookHalfOpenFileBonus
+				egValue += rookHalfOpenFileBonus
+			}
 		}
 
 		if c == chess.White {
@@ -170,6 +185,14 @@ const (
 	openFilePenaltyEG     = 0
 	halfOpenFilePenaltyMG = -10
 	halfOpenFilePenaltyEG = 0
+)
+
+var rookPenultimateRank = [2]chess.Rank{chess.Rank2, chess.Rank7} // rookPenultimateRank indicates the rook penultimate rank. Indexed by color.
+
+const (
+	rookPenultimateRankBonus = 80 // Bonus for rooks on penultimate rank.
+	rookOpenFileBonus        = 60 // Bonus for rooks on open files.
+	rookHalfOpenFileBonus    = 40 // Bonus for rooks on half open files.
 )
 
 var (

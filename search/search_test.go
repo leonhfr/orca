@@ -120,7 +120,7 @@ func TestSearch(t *testing.T) {
 			depth: 2,
 			outputs: []uci.Output{
 				{Depth: 1, Nodes: 115, Score: 0, Mate: 0, PV: []chess.Move{0x13602c106a3}},
-				{Depth: 2, Nodes: 918, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc2ab9, 0x12c02c018da}},
+				{Depth: 2, Nodes: 924, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc2ab9, 0x12c02c018da}},
 			},
 		},
 		{
@@ -136,9 +136,9 @@ func TestSearch(t *testing.T) {
 			nodes: 16384,
 			depth: 5,
 			outputs: []uci.Output{
-				{Depth: 1, Nodes: 683, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 4327, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
-				{Depth: 3, Nodes: 17876, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
+				{Depth: 1, Nodes: 747, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 5805, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
+				{Depth: 3, Nodes: 19792, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
 			},
 		},
 	}
@@ -176,24 +176,24 @@ func TestCachedSearch(t *testing.T) {
 			"not cached",
 			false,
 			[]uci.Output{
-				{Depth: 1, Nodes: 683, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 4327, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
-				{Depth: 3, Nodes: 17876, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
-				{Depth: 4, Nodes: 111877, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
-				{Depth: 5, Nodes: 927242, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
-				{Depth: 7, Nodes: 3333496, Score: 0, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x11306c14362, 0x14f02c4b346, 0x6401cc8eed, 0x11302c05a1a}},
+				{Depth: 1, Nodes: 747, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 5805, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
+				{Depth: 3, Nodes: 19792, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
+				{Depth: 4, Nodes: 118808, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
+				{Depth: 5, Nodes: 977499, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
+				{Depth: 7, Nodes: 3445487, Score: 1, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x6401cc2e6a, 0x19006c83b63, 0x14a02c30b76, 0x11802c03915}},
 			},
 		},
 		{
 			"cached",
 			true,
 			[]uci.Output{
-				{Depth: 1, Nodes: 683, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
-				{Depth: 2, Nodes: 4327, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
-				{Depth: 3, Nodes: 17876, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
-				{Depth: 4, Nodes: 111877, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
-				{Depth: 5, Nodes: 923288, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
-				{Depth: 7, Nodes: 3010601, Score: 0, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x11306c14362, 0x14f02c4b346, 0x6401cc8eed, 0x11302c05a1a}},
+				{Depth: 1, Nodes: 747, Score: 5, Mate: 0, PV: []chess.Move{0x6401cc38d2}},
+				{Depth: 2, Nodes: 5805, Score: 23, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed}},
+				{Depth: 3, Nodes: 19792, Score: 25, Mate: 0, PV: []chess.Move{0x6401cc38d2, 0x12c02c328ed, 0x19002c85d26}},
+				{Depth: 4, Nodes: 118808, Score: 4, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc15cf, 0x6401cc26ea}},
+				{Depth: 5, Nodes: 972902, Score: 3, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c50b76, 0x6401cc1649, 0x12702c3455e, 0x14f02c4954c}},
+				{Depth: 7, Nodes: 3091535, Score: 1, Mate: 0, PV: []chess.Move{0x12702c25b66, 0x14f02c58b74, 0x6401cc38d2, 0x6401cc2e6a, 0x19006c83b63, 0x14a02c30b76, 0x11802c03915}},
 			},
 		},
 	}

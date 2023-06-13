@@ -8,6 +8,38 @@ func (pos *Position) CountPieces() (int, int, int, int) {
 		pos.board.bbPieces[Queen].ones()
 }
 
+// FileData contains data on half open and open files for a particular pawn structure.
+type FileData [3]bitboard
+
+// FileData computes data  on closed, half open, and open files
+// for a particular pawn structure.
+func (pos *Position) FileData() FileData {
+	bbBlackPawn := pos.board.bbColors[Black] & pos.board.bbPieces[Pawn]
+	bbWhitePawn := pos.board.bbColors[White] & pos.board.bbPieces[Pawn]
+	bbBlackFileFill := bbBlackPawn.fileFill()
+	bbWhiteFileFill := bbWhitePawn.fileFill()
+
+	bbBlackHalfOpenFile := ^bbBlackFileFill
+	bbWhiteHalfOpenFile := ^bbWhiteFileFill
+	bbOpenFiles := bbBlackHalfOpenFile & bbWhiteHalfOpenFile
+
+	return FileData{
+		bbBlackHalfOpenFile,
+		bbWhiteHalfOpenFile,
+		bbOpenFiles,
+	}
+}
+
+// OnHalfOpenFile returns true if the square is on an half file of the given color.
+func (fd FileData) OnHalfOpenFile(sq Square, c Color) bool {
+	return fd[c]&sq.bitboard() > 0
+}
+
+// OnOpenFile returns true if the square is on an open file.
+func (fd FileData) OnOpenFile(sq Square) bool {
+	return fd[2]&sq.bitboard() > 0
+}
+
 // PieceProperty represents different piece properties.
 type PieceProperty uint8
 
