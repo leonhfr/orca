@@ -6,7 +6,7 @@ type CheckData bitboard
 
 // InCheck returns check data and whether the king is in check.
 func (pos *Position) InCheck() (CheckData, bool) {
-	bbAttackedBy := pos.attackedByBitboard(pos.board.kingSquare(pos.turn), pos.turn)
+	bbAttackedBy := pos.attackedByBitboard(pos.board.sqKings[pos.turn], pos.turn)
 	return CheckData(bbAttackedBy), bbAttackedBy > 0
 }
 
@@ -52,7 +52,7 @@ func (pos *Position) PseudoMoves(data CheckData) []Move {
 		return pos.pseudoMoves(bbFull, true, false)
 	case count == 1:
 		s1 := bbAttackedBy.scanForward()
-		s2 := pos.board.kingSquare(pos.turn)
+		s2 := pos.board.sqKings[pos.turn]
 		bbInterference := bbInBetweens[s1][s2] | bbAttackedBy
 		return pos.pseudoMoves(bbInterference, false, false)
 	default:
@@ -103,7 +103,7 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 	bbPawn := pos.board.bbPieces[Pawn] & bbPlayer
 
 	// King moves
-	sqKing, sqEnemyKing := pos.board.kingSquare(player), pos.board.kingSquare(opponent)
+	sqKing, sqEnemyKing := pos.board.sqKings[player], pos.board.sqKings[opponent]
 	bbKing := bbKingMoves[sqKing] & ^bbKingMoves[sqEnemyKing] & ^bbPlayer
 	if loud {
 		bbKing &= bbOpponent

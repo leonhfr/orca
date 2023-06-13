@@ -6,6 +6,7 @@ import "strings"
 type board struct {
 	bbPieces [6]bitboard
 	bbColors [2]bitboard
+	sqKings  [2]Square
 }
 
 // newBoard creates a new board.
@@ -15,6 +16,10 @@ func newBoard(m map[Square]Piece) board {
 		bb := sq.bitboard()
 		b.bbPieces[p.Type()] ^= bb
 		b.bbColors[p.Color()] ^= bb
+
+		if p.Type() == King {
+			b.sqKings[p.Color()] = sq
+		}
 	}
 	return b
 }
@@ -51,14 +56,6 @@ func (b board) pieceByColor(sq Square, c Color) Piece {
 	}
 }
 
-// kingSquare returns the king's square.
-func (b *board) kingSquare(c Color) Square {
-	if c == White {
-		return (b.bbColors[White] & b.bbPieces[King]).scanForward()
-	}
-	return (b.bbColors[Black] & b.bbPieces[King]).scanForward()
-}
-
 // makeMove makes and unmakes a move on the board.
 func (b *board) makeMove(m Move) {
 	p1, p2 := m.P1(), m.P2()
@@ -77,6 +74,64 @@ func (b *board) makeMove(m Move) {
 	}
 
 	b.bbColors[c] ^= mbb
+
+	if p1.Type() == King {
+		b.sqKings[c] = s2
+	}
+
+	if m.HasTag(Quiet) {
+		return
+	}
+
+	switch enPassant := m.HasTag(EnPassant); {
+	case p2 != NoPiece && !enPassant: // capture
+		b.bbPieces[p2.Type()] ^= s2bb
+		b.bbColors[p2.Color()] ^= s2bb
+	case c == White && enPassant: // white en passant
+		bb := s2.bitboard().southOne()
+		b.bbPieces[Pawn] ^= bb
+		b.bbColors[Black] ^= bb
+	case c == Black && enPassant: // black en passant
+		bb := s2.bitboard().northOne()
+		b.bbPieces[Pawn] ^= bb
+		b.bbColors[White] ^= bb
+	case c == White && m.HasTag(KingSideCastle): // white king side castle
+		b.bbPieces[Rook] ^= bbWhiteKingCastle
+		b.bbColors[White] ^= bbWhiteKingCastle
+	case c == White && m.HasTag(QueenSideCastle): // white queen side castle
+		b.bbPieces[Rook] ^= bbWhiteQueenCastle
+		b.bbColors[White] ^= bbWhiteQueenCastle
+	case c == Black && m.HasTag(KingSideCastle): // black king side castle
+		b.bbPieces[Rook] ^= bbBlackKingCastle
+		b.bbColors[Black] ^= bbBlackKingCastle
+	case c == Black && m.HasTag(QueenSideCastle): // black queen side castle
+		b.bbPieces[Rook] ^= bbBlackQueenCastle
+		b.bbColors[Black] ^= bbBlackQueenCastle
+	}
+}
+
+// unmakeMove unmakes a move on the board.
+func (b *board) unmakeMove(m Move) {
+	p1, p2 := m.P1(), m.P2()
+	s1, s2 := m.S1(), m.S2()
+	c := p1.Color()
+
+	s1bb, s2bb := s1.bitboard(), s2.bitboard()
+	mbb := s1bb ^ s2bb
+
+	if promo := m.Promo(); promo == NoPiece {
+		b.bbPieces[p1.Type()] ^= mbb
+	} else {
+		// promotion
+		b.bbPieces[p1.Type()] ^= s1bb
+		b.bbPieces[promo.Type()] ^= s2bb
+	}
+
+	b.bbColors[c] ^= mbb
+
+	if p1.Type() == King {
+		b.sqKings[c] = s1
+	}
 
 	if m.HasTag(Quiet) {
 		return

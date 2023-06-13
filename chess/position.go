@@ -113,8 +113,8 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 	}
 
 	pos.board.makeMove(m)
-	if pos.isSquareAttacked(pos.board.kingSquare(pos.turn)) {
-		pos.board.makeMove(m)
+	if pos.isSquareAttacked(pos.board.sqKings[pos.turn]) {
+		pos.board.unmakeMove(m)
 		return NoMetadata, false
 	}
 
@@ -145,7 +145,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 
 // UnmakeMove unmakes a move and restores the previous position.
 func (pos *Position) UnmakeMove(m Move, meta Metadata, hash, pawnHash Hash) {
-	pos.board.makeMove(m)
+	pos.board.unmakeMove(m)
 	pos.turn = meta.turn()
 	pos.castlingRights = meta.castleRights()
 	pos.enPassant = meta.enPassant()

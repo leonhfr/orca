@@ -32,6 +32,7 @@ var (
 			18446462598732840960,
 			65535,
 		},
+		sqKings: [2]Square{E8, E1},
 	}
 
 	testPositions = []struct {
