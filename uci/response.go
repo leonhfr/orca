@@ -199,7 +199,7 @@ func (o responseOutput) String() string {
 	}
 	if o.Mate != 0 {
 		res = append(res, "score mate", fmt.Sprint(o.Mate))
-	} else if o.Score != 0 {
+	} else {
 		res = append(res, "score cp", fmt.Sprint(o.Score))
 	}
 	if len(o.PV) > 0 {
