@@ -104,7 +104,7 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 1,
-			nodes: 1142,
+			nodes: 1144,
 			moves: []string{"f6f2"},
 		},
 		principalVariation: searchTestResult{
@@ -127,7 +127,7 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 3,
-			nodes: 37017,
+			nodes: 36995,
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 		principalVariation: searchTestResult{

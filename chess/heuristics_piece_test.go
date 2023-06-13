@@ -61,7 +61,7 @@ func TestPieceMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			var pieces int
-			pos.PieceMap(func(p Piece, sq Square, mobility int) {
+			pos.PieceMap(func(p Piece, sq Square, mobility int, trapped bool) {
 				pieces++
 				assert.Equal(t, tt.pm[sq].piece, p, fmt.Sprintf("%v:%v", sq.String(), p.String()))
 				assert.Equal(t, tt.pm[sq].mobility, mobility, fmt.Sprintf("%v:%d", sq.String(), mobility))
@@ -76,7 +76,7 @@ func BenchmarkPieceMap(b *testing.B) {
 		b.Run(bb.name, func(b *testing.B) {
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {
-				pos.PieceMap(func(p Piece, sq Square, mobility int) {
+				pos.PieceMap(func(p Piece, sq Square, mobility int, trapped bool) {
 					_ = 1
 				})
 			}

@@ -22,7 +22,7 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 
 	mg, eg := si.evaluatePawns(pos)
 
-	pos.PieceMap(func(p chess.Piece, sq chess.Square, mobility int) {
+	pos.PieceMap(func(p chess.Piece, sq chess.Square, mobility int, trapped bool) {
 		c := p.Color()
 		pt := p.Type()
 
@@ -34,6 +34,11 @@ func (si *searchInfo) evaluate(pos *chess.Position) int32 {
 
 		mgValue += mobilityTermsMG[pt][mobility]
 		egValue += mobilityTermsEG[pt][mobility]
+
+		if trapped {
+			mgValue += trappedPiecePenalty[pt]
+			egValue += trappedPiecePenalty[pt]
+		}
 
 		if c == chess.White {
 			mg += mgValue
@@ -139,10 +144,10 @@ const tempo = 6
 
 var (
 	initialMaterialValue    int32
-	pestoMGPieceValues      = [6]int32{82, 337, 365, 477, 1025, 0}
-	pestoEGPieceValues      = [6]int32{94, 281, 297, 512, 936, 0}
-	pestoMGPieceSquareTable = [12][64]int32{}                            // Middle game piece square table. Includes material advantage. Indexed by square and piece.
-	pestoEGPieceSquareTable = [12][64]int32{}                            // End game piece square table. Includes material advantage. Indexed by square and piece.
+	pestoMGPieceValues      = [6]int32{82, 337, 365, 477, 1025, 0}       // Middle game piece material values. Indexed by piece type.
+	pestoEGPieceValues      = [6]int32{94, 281, 297, 512, 936, 0}        // End game piece material values. Indexed by piece type.
+	pestoMGPieceSquareTable = [12][64]int32{}                            // Middle game piece square table. Indexed by square and piece.
+	pestoEGPieceSquareTable = [12][64]int32{}                            // End game piece square table. Indexed by square and piece.
 	doubledPenaltyMG        = [8]int32{-10, -6, -6, -6, -6, -6, -6, -10} // Middle game penalty for double pawns. Indexed by file.
 	doubledPenaltyEG        = [8]int32{-5, -3, -3, -3, -3, -3, -3, -5}   // End game penalty for double pawns. Indexed by file.
 	isolaniPenaltyMG        = [8]int32{-10, -6, -6, -6, -6, -6, -6, -10} // Middle game penalty for isolated pawns. Indexed by file.
@@ -151,6 +156,7 @@ var (
 	passedBonusEG           = [2][64]int32{}                             // End game bonus for passed pawns. Indexed by square and color.
 	shieldDefectsPenaltyMG  = [4]int32{0, -20, -40, -60}                 // Middle game penalty for shield defects.
 	shieldDefectsPenaltyEG  = [4]int32{0, 0, 0, 0}                       // End game penalty for shield defects.
+	trappedPiecePenalty     = [6]int32{0, -20, -50, -40, 0, 0}           // Penalty for trapped pieces. Indexed by piece type.
 )
 
 const (
