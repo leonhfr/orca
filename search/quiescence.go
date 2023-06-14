@@ -35,12 +35,13 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 		}
 
 		score, err := si.quiesce(ctx, pos, -beta, -alpha)
-		if err != nil {
-			return 0, nil
-		}
 
 		score = -score
 		pos.UnmakeMove(move, metadata, hash, pawnHash)
+
+		if err != nil {
+			return 0, nil
+		}
 
 		if score >= beta {
 			return beta, nil

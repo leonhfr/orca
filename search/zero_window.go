@@ -42,12 +42,13 @@ func (si *searchInfo) zeroWindow(ctx context.Context, pos *chess.Position, beta 
 		}
 
 		score, err := si.zeroWindow(ctx, pos, 1-beta, depth-1)
+
+		pos.UnmakeMove(move, metadata, hash, pawnHash)
+
 		if err != nil {
 			return 0, err
 		}
 		score = -score
-
-		pos.UnmakeMove(move, metadata, hash, pawnHash)
 
 		if score >= beta {
 			return beta, nil

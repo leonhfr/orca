@@ -70,31 +70,23 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 
 		if searchPv {
 			score, err = si.principalVariation(ctx, pos, -beta, -alpha, depth-1, index+1)
-			if err != nil {
-				return 0, err
-			}
-
 			score = -score
 		} else {
 			lmr := lateMoveReduction(validMoves, inCheck, depth, move)
 			score, err = si.zeroWindow(ctx, pos, -alpha, depth-lmr-1)
-			if err != nil {
-				return 0, err
-			}
-
 			score = -score
 
-			if score > alpha {
+			if score > alpha && err == nil {
 				score, err = si.principalVariation(ctx, pos, -beta, -alpha, depth-lmr-1, index+1)
-				if err != nil {
-					return 0, err
-				}
-
 				score = -score
 			}
 		}
 
 		pos.UnmakeMove(move, metadata, hash, pawnHash)
+
+		if err != nil {
+			return 0, err
+		}
 
 		if score >= beta {
 			if move.HasTag(chess.Quiet) {

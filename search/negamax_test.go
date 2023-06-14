@@ -205,6 +205,9 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 		validMoves++
 
 		current, err := si.negamax(ctx, pos, depth-1)
+
+		pos.UnmakeMove(move, metadata, hash, pawnHash)
+
 		if err != nil {
 			return 0, err
 		}
@@ -213,8 +216,6 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 		if current > score {
 			score = current
 		}
-
-		pos.UnmakeMove(move, metadata, hash, pawnHash)
 	}
 
 	if validMoves > 0 {
