@@ -76,7 +76,8 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 
 			score = -score
 		} else {
-			score, err = si.zeroWindow(ctx, pos, -alpha, depth-1)
+			lmr := lateMoveReduction(validMoves, inCheck, depth, move)
+			score, err = si.zeroWindow(ctx, pos, -alpha, depth-lmr-1)
 			if err != nil {
 				return 0, err
 			}
@@ -84,7 +85,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 			score = -score
 
 			if score > alpha {
-				score, err = si.principalVariation(ctx, pos, -beta, -alpha, depth-1, index+1)
+				score, err = si.principalVariation(ctx, pos, -beta, -alpha, depth-lmr-1, index+1)
 				if err != nil {
 					return 0, err
 				}
@@ -120,10 +121,9 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 	case validMoves == 0:
 		si.table.set(hash, best, draw, exact, depth)
 		return draw, nil
+	default:
+		alpha = incMateDistance(alpha)
+		si.table.set(hash, best, alpha, nt, depth)
+		return alpha, nil
 	}
-
-	alpha = incMateDistance(alpha)
-	si.table.set(hash, best, alpha, nt, depth)
-
-	return alpha, nil
 }

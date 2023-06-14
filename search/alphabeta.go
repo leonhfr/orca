@@ -70,7 +70,8 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		}
 		validMoves++
 
-		current, err := si.alphaBeta(ctx, pos, -beta, -alpha, depth-1, index+1)
+		lmr := lateMoveReduction(validMoves, inCheck, depth, move)
+		current, err := si.alphaBeta(ctx, pos, -beta, -alpha, depth-lmr-1, index+1)
 		if err != nil {
 			return 0, err
 		}
@@ -102,13 +103,12 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	case validMoves == 0:
 		si.table.set(hash, best, draw, exact, depth)
 		return draw, nil
+	default:
+		score = incMateDistance(score)
+		nodeType := getNodeType(originalAlpha, beta, score)
+		si.table.set(hash, best, score, nodeType, depth)
+		return score, nil
 	}
-
-	score = incMateDistance(score)
-	nodeType := getNodeType(originalAlpha, beta, score)
-	si.table.set(hash, best, score, nodeType, depth)
-
-	return score, nil
 }
 
 // getNodeType returns the node type according to the alpha and beta bounds.

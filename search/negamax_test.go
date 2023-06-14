@@ -127,12 +127,12 @@ var searchTestPositions = []struct {
 		},
 		alphaBeta: searchTestResult{
 			score: mate - 3,
-			nodes: 37972,
+			nodes: 29989,
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 		principalVariation: searchTestResult{
 			score: mate - 3,
-			nodes: 30454,
+			nodes: 21446,
 			moves: []string{"c6g2", "e2g2", "c1e1"},
 		},
 		zeroWindow: searchTestResult{
