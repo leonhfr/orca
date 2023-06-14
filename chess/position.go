@@ -155,6 +155,30 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata, hash, pawnHash Hash) {
 	pos.pawnHash = pawnHash
 }
 
+// MakeNullMove makes a null (passing) move.
+func (pos *Position) MakeNullMove() Metadata {
+	metadata := newMetadata(pos.turn, 0, 0, 0, pos.enPassant)
+
+	if pos.enPassant != NoSquare {
+		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
+			pos.board.bbColors[White]&pos.board.bbPieces[Pawn],
+			pos.board.bbColors[Black]&pos.board.bbPieces[Pawn])
+	}
+
+	pos.turn = pos.turn.Other()
+	pos.enPassant = NoSquare
+	pos.hash ^= polyTurn
+
+	return metadata
+}
+
+// UnmakeNullMove unmakes a null move.
+func (pos *Position) UnmakeNullMove(meta Metadata, hash Hash) {
+	pos.turn = meta.turn()
+	pos.enPassant = meta.enPassant()
+	pos.hash = hash
+}
+
 // String implements the Stringer interface.
 //
 // Returns a FEN formatted string.

@@ -1,11 +1,20 @@
 package chess
 
-// CountPieces returns the count of knights, bishops, rooks, and queens.
+// CountPieces returns the counts of knights, bishops, rooks, and queens.
 func (pos *Position) CountPieces() (int, int, int, int) {
 	return pos.board.bbPieces[Knight].ones(),
 		pos.board.bbPieces[Bishop].ones(),
 		pos.board.bbPieces[Rook].ones(),
 		pos.board.bbPieces[Queen].ones()
+}
+
+// CountOwnPieces returns the count of knights, bishops, rooks, and queens.
+func (pos *Position) CountOwnPieces() int {
+	bbPieces := pos.board.bbPieces[Knight] ^
+		pos.board.bbPieces[Bishop] ^
+		pos.board.bbPieces[Rook] ^
+		pos.board.bbPieces[Queen]
+	return (pos.board.bbColors[pos.turn] & bbPieces).ones()
 }
 
 // FileData contains data on half open and open files for a particular pawn structure.

@@ -48,6 +48,21 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 		return si.quiesce(ctx, pos, -beta, -alpha)
 	}
 
+	if shouldNullMovePrune(pos, inCheck, depth) {
+		meta := pos.MakeNullMove()
+		score, err := si.zeroWindow(ctx, pos, beta, depth-rNullMovePruning-1)
+		score = -score
+		pos.UnmakeNullMove(meta, hash)
+
+		if err != nil {
+			return 0, err
+		}
+
+		if score >= beta {
+			return score, nil
+		}
+	}
+
 	var validMoves int
 	var best chess.Move
 	nt := upperBound
