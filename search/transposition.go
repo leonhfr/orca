@@ -131,9 +131,9 @@ func (ar *arrayTable) principalVariation(pos *chess.Position) []chess.Move {
 			break
 		}
 
+		meta := pos.Metadata()
 		pawnHash := pos.PawnHash()
-		meta, ok := pos.MakeMove(entry.best)
-		if !ok {
+		if ok := pos.MakeMove(entry.best); !ok {
 			break
 		}
 

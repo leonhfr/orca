@@ -15,6 +15,12 @@ type Metadata uint32
 // NoMetadata represents the absence of metadata.
 const NoMetadata Metadata = 0
 
+// Metadata returns the position metadata.
+func (pos *Position) Metadata() Metadata {
+	return newMetadata(pos.turn, pos.castlingRights,
+		pos.halfMoveClock, pos.fullMoves, pos.enPassant)
+}
+
 // newMetadata create a new metadata.
 func newMetadata(c Color, cr castlingRights, halfMoveClock, fullMoves uint8, enPassant Square) Metadata {
 	return Metadata(c) |

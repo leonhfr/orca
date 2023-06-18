@@ -33,8 +33,7 @@ func perft(args []string) (chess.PerftResult, error) {
 				return chess.PerftResult{}, err
 			}
 
-			_, ok := pos.MakeMove(m)
-			if !ok {
+			if ok := pos.MakeMove(m); !ok {
 				return chess.PerftResult{}, fmt.Errorf("could not play move %v", m.String())
 			}
 		}

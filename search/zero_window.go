@@ -27,6 +27,7 @@ func (si *searchInfo) zeroWindow(ctx context.Context, pos *chess.Position, beta 
 		return si.quiesce(ctx, pos, beta-1, beta)
 	}
 
+	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 	moves := pos.PseudoMoves(checkData)
@@ -36,14 +37,13 @@ func (si *searchInfo) zeroWindow(ctx context.Context, pos *chess.Position, beta 
 		nextOracle(moves, i)
 		move := moves[i]
 
-		metadata, ok := pos.MakeMove(move)
-		if !ok {
+		if ok := pos.MakeMove(move); !ok {
 			continue
 		}
 
 		score, err := si.zeroWindow(ctx, pos, 1-beta, depth-1)
 
-		pos.UnmakeMove(move, metadata, hash, pawnHash)
+		pos.UnmakeMove(move, meta, hash, pawnHash)
 
 		if err != nil {
 			return 0, err

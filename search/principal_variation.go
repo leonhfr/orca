@@ -15,6 +15,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 		si.nodes++
 	}
 
+	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 
@@ -49,7 +50,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 	}
 
 	if shouldNullMovePrune(pos, inCheck, depth) {
-		meta := pos.MakeNullMove()
+		pos.MakeNullMove()
 		score, err := si.zeroWindow(ctx, pos, beta, depth-rNullMovePruning-1)
 		score = -score
 		pos.UnmakeNullMove(meta, hash)
@@ -74,8 +75,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 		nextOracle(moves, i)
 		move := moves[i]
 
-		metadata, ok := pos.MakeMove(move)
-		if !ok {
+		if ok := pos.MakeMove(move); !ok {
 			continue
 		}
 		validMoves++
@@ -97,7 +97,7 @@ func (si *searchInfo) principalVariation(ctx context.Context, pos *chess.Positio
 			}
 		}
 
-		pos.UnmakeMove(move, metadata, hash, pawnHash)
+		pos.UnmakeMove(move, meta, hash, pawnHash)
 
 		if err != nil {
 			return 0, err

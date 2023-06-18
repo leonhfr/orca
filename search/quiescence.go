@@ -14,6 +14,7 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 		si.nodes++
 	}
 
+	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 	if standPat := si.evaluate(pos); standPat >= beta {
@@ -29,15 +30,14 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 		nextOracle(moves, i)
 		move := moves[i]
 
-		metadata, ok := pos.MakeMove(move)
-		if !ok {
+		if ok := pos.MakeMove(move); !ok {
 			continue
 		}
 
 		score, err := si.quiesce(ctx, pos, -beta, -alpha)
 
 		score = -score
-		pos.UnmakeMove(move, metadata, hash, pawnHash)
+		pos.UnmakeMove(move, meta, hash, pawnHash)
 
 		if err != nil {
 			return 0, nil

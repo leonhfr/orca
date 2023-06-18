@@ -181,8 +181,10 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 		return draw, nil
 	}
 
+	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
+
 	checkData, inCheck := pos.InCheck()
 	moves := pos.PseudoMoves(checkData)
 	switch {
@@ -198,15 +200,14 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 
 	var validMoves int
 	for _, move := range moves {
-		metadata, ok := pos.MakeMove(move)
-		if !ok {
+		if ok := pos.MakeMove(move); !ok {
 			continue
 		}
 		validMoves++
 
 		current, err := si.negamax(ctx, pos, depth-1)
 
-		pos.UnmakeMove(move, metadata, hash, pawnHash)
+		pos.UnmakeMove(move, meta, hash, pawnHash)
 
 		if err != nil {
 			return 0, err

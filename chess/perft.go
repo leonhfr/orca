@@ -20,13 +20,14 @@ type perftMove struct {
 
 // Perft performs a perft test.
 func (pos *Position) Perft(depth int) PerftResult {
+	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 
 	var result PerftResult
 	checkData, _ := pos.InCheck()
 	for _, m := range pos.PseudoMoves(checkData) {
-		if meta, ok := pos.MakeMove(m); ok {
+		if ok := pos.MakeMove(m); ok {
 			nodes := perft(pos, depth-1)
 			result.moves = append(result.moves, perftMove{
 				move:  m,
@@ -46,6 +47,7 @@ func (pos *Position) Perft(depth int) PerftResult {
 
 // perft returns the number of nodes until the given depth.
 func perft(pos *Position, depth int) int {
+	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 
@@ -59,7 +61,7 @@ func perft(pos *Position, depth int) int {
 	if depth == 1 {
 		var nodes int
 		for _, m := range moves {
-			if meta, ok := pos.MakeMove(m); ok {
+			if ok := pos.MakeMove(m); ok {
 				nodes++
 				pos.UnmakeMove(m, meta, hash, pawnHash)
 			}
@@ -69,7 +71,7 @@ func perft(pos *Position, depth int) int {
 
 	var nodes int
 	for _, m := range moves {
-		if meta, ok := pos.MakeMove(m); ok {
+		if ok := pos.MakeMove(m); ok {
 			nodes += perft(pos, depth-1)
 			pos.UnmakeMove(m, meta, hash, pawnHash)
 		}

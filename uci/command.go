@@ -177,7 +177,7 @@ func (cmd commandPosition) run(_ context.Context, _ Engine, c *Controller) {
 			return
 		}
 
-		if _, ok := c.position.MakeMove(m); !ok {
+		if ok := c.position.MakeMove(m); !ok {
 			c.logError(fmt.Errorf("failed to play move %s", move))
 			return
 		}

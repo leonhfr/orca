@@ -20,6 +20,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		si.nodes++
 	}
 
+	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 	originalAlpha := alpha
@@ -54,7 +55,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	}
 
 	if shouldNullMovePrune(pos, inCheck, depth) {
-		meta := pos.MakeNullMove()
+		pos.MakeNullMove()
 		score, err := si.zeroWindow(ctx, pos, beta, depth-rNullMovePruning-1)
 		score = -score
 		pos.UnmakeNullMove(meta, hash)
@@ -83,8 +84,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		nextOracle(moves, i)
 		move := moves[i]
 
-		metadata, ok := pos.MakeMove(move)
-		if !ok {
+		if ok := pos.MakeMove(move); !ok {
 			continue
 		}
 		validMoves++
@@ -92,7 +92,7 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 		lmr := lateMoveReduction(validMoves, inCheck, depth, move)
 		current, err := si.alphaBeta(ctx, pos, -beta, -alpha, depth-lmr-1, index+1)
 
-		pos.UnmakeMove(move, metadata, hash, pawnHash)
+		pos.UnmakeMove(move, meta, hash, pawnHash)
 
 		if err != nil {
 			return 0, err

@@ -98,13 +98,11 @@ func (pos Position) FullMoves() uint8 {
 //
 // The returned metadata can be used to unmake the move and
 // restore the position to the previous state.
-func (pos *Position) MakeMove(m Move) (Metadata, bool) {
+func (pos *Position) MakeMove(m Move) bool {
 	if (m.HasTag(KingSideCastle) || m.HasTag(QueenSideCastle)) && !pos.isCastleLegal(m) {
-		return NoMetadata, false
+		return false
 	}
 
-	metadata := newMetadata(pos.turn, pos.castlingRights,
-		pos.halfMoveClock, pos.fullMoves, pos.enPassant)
 	cr := pos.castlingRights
 
 	if pos.enPassant != NoSquare {
@@ -115,7 +113,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 	pos.board.makeMove(m)
 	if pos.isSquareAttacked(pos.board.sqKings[pos.turn]) {
 		pos.board.unmakeMove(m)
-		return NoMetadata, false
+		return false
 	}
 
 	pos.turn = pos.turn.Other()
@@ -140,7 +138,7 @@ func (pos *Position) MakeMove(m Move) (Metadata, bool) {
 		pos.fullMoves++
 	}
 
-	return metadata, true
+	return true
 }
 
 // UnmakeMove unmakes a move and restores the previous position.
@@ -156,9 +154,7 @@ func (pos *Position) UnmakeMove(m Move, meta Metadata, hash, pawnHash Hash) {
 }
 
 // MakeNullMove makes a null (passing) move.
-func (pos *Position) MakeNullMove() Metadata {
-	metadata := newMetadata(pos.turn, 0, 0, 0, pos.enPassant)
-
+func (pos *Position) MakeNullMove() {
 	if pos.enPassant != NoSquare {
 		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
 			pos.board.bbColors[White]&pos.board.bbPieces[Pawn],
@@ -168,8 +164,6 @@ func (pos *Position) MakeNullMove() Metadata {
 	pos.turn = pos.turn.Other()
 	pos.enPassant = NoSquare
 	pos.hash ^= polyTurn
-
-	return metadata
 }
 
 // UnmakeNullMove unmakes a null move.
