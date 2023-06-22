@@ -181,24 +181,20 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 		return draw, nil
 	}
 
+	if depth == 0 {
+		return si.evaluate(pos), nil
+	}
+
 	meta := pos.Metadata()
 	hash := pos.Hash()
 	pawnHash := pos.PawnHash()
 
+	var score int32 = -mate
+	var validMoves int
+
 	checkData, inCheck := pos.InCheck()
 	moves := pos.PseudoMoves(checkData)
-	switch {
-	case len(moves) == 0 && inCheck:
-		return -mate, nil
-	case len(moves) == 0:
-		return draw, nil
-	case depth == 0:
-		return si.evaluate(pos), nil
-	}
 
-	var score int32 = -mate
-
-	var validMoves int
 	for _, move := range moves {
 		if ok := pos.MakeMove(move); !ok {
 			continue
@@ -219,11 +215,14 @@ func (si *searchInfo) negamax(ctx context.Context, pos *chess.Position, depth ui
 		}
 	}
 
-	if validMoves > 0 {
-		score = incMateDistance(score)
+	switch {
+	case validMoves == 0 && inCheck:
+		return -mate, nil
+	case validMoves == 0:
+		return draw, nil
+	default:
+		return incMateDistance(score), nil
 	}
-
-	return score, nil
 }
 
 func TestNegamax(t *testing.T) {
