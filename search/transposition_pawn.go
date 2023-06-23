@@ -13,26 +13,23 @@ import (
 type transpositionPawnTable interface {
 	// get returns the entry (if any) for the given hash
 	// and a boolean representing whether the value was found or not.
-	get(key chess.Hash) (pawnEntry, bool)
+	get(hash chess.Hash) (pawnEntry, bool)
 	// set adds an entry to the table for the given hash.
 	// If an entry already exists, it is replaced.
-	set(key chess.Hash, mg, eg int32)
+	set(hash chess.Hash, mg, eg int32)
 	// close initiates a graceful shutdown of the pawn transposition table.
 	close()
 }
 
 // pawnEntry hols a pawn evaluation.
 type pawnEntry struct {
-	hash chess.Hash
+	hash uint64
 	data uint64
 }
 
-// newPawnEntry creates a new pawnEntry.
-func newPawnEntry(hash chess.Hash, mg, eg int32) pawnEntry {
-	return pawnEntry{
-		hash,
-		uint64(eg)<<32 + uint64(mg),
-	}
+// serializePawnData serializes a pawn entry data.
+func serializePawnData(mg, eg int32) uint64 {
+	return uint64(eg)<<32 + uint64(mg)
 }
 
 // mg returns the middle game score.
@@ -74,15 +71,20 @@ func newArrayPawnTable(size int) *arrayPawnTable {
 }
 
 // Implements the transpositionPawnTable interface.
-func (ar *arrayPawnTable) get(key chess.Hash) (pawnEntry, bool) {
-	entry := ar.table[ar.hash(key)]
-	return entry, entry.hash == key
+func (ar *arrayPawnTable) get(hash chess.Hash) (pawnEntry, bool) {
+	entry := ar.table[ar.hash(hash)]
+	return entry, chess.Hash(entry.hash^entry.data) == hash
 }
 
 // Implements the transpositionPawnTable interface.
-func (ar *arrayPawnTable) set(key chess.Hash, mg, eg int32) {
-	index := ar.hash(key)
-	ar.table[index] = newPawnEntry(key, mg, eg)
+func (ar *arrayPawnTable) set(hash chess.Hash, mg, eg int32) {
+	index := ar.hash(hash)
+	data := serializePawnData(mg, eg)
+
+	ar.table[index] = pawnEntry{
+		uint64(hash) ^ data,
+		data,
+	}
 }
 
 // Implements the transpositionPawnTable interface.
@@ -91,7 +93,7 @@ func (ar *arrayPawnTable) close() {
 }
 
 // hash is the hash function used by the array table.
-func (ar *arrayPawnTable) hash(key chess.Hash) uint64 {
-	index, _ := bits.Mul64(uint64(key), ar.length)
+func (ar *arrayPawnTable) hash(hash chess.Hash) uint64 {
+	index, _ := bits.Mul64(uint64(hash), ar.length)
 	return index
 }

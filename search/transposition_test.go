@@ -39,16 +39,20 @@ func TestTableSet(t *testing.T) {
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
 	//nolint:gosec
-	want := newSearchEntry(hash, chess.NoMove, rand.Int31(), exact, uint8(rand.Uint32()), 0)
+	score, depth := rand.Int31(), uint8(rand.Uint32())
+	best, nt := chess.NoMove, exact
 
 	table := newArrayTable(1)
 	defer table.close()
 
-	table.set(hash, want.best, want.score(), want.nodeType(), want.depth())
+	table.set(hash, best, score, nt, depth)
 	entry, ok := table.get(hash)
 
 	require.True(t, ok)
-	require.Equal(t, want, entry)
+	require.Equal(t, best, entry.best)
+	require.Equal(t, score, entry.score())
+	require.Equal(t, nt, entry.nodeType())
+	require.Equal(t, depth, entry.depth())
 }
 
 // hashMapTable uses a map as backend. Intended to be used for tests.
@@ -77,8 +81,12 @@ func (hm *hashMapTable) get(_ chess.Hash) (searchEntry, bool) {
 }
 
 // Implements the transpositionTable interface.
-func (hm *hashMapTable) set(key chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8) {
-	hm.table[key] = newSearchEntry(key, best, score, nt, depth, 0)
+func (hm *hashMapTable) set(hash chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8) {
+	hm.table[hash] = searchEntry{
+		uint64(hash),
+		best,
+		serializeSearchData(score, nt, depth, 0),
+	}
 }
 
 // Implements the transpositionTable interface.

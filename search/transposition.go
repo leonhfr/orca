@@ -16,11 +16,11 @@ type transpositionTable interface {
 	inc()
 	// get returns the entry (if any) for the given hash
 	// and a boolean representing whether the value was found or not.
-	get(key chess.Hash) (searchEntry, bool)
+	get(hash chess.Hash) (searchEntry, bool)
 	// set adds an entry to the table for the given hash.
 	// If an entry already exists, it is replaced.
 	// The addition is not guaranteed.
-	set(key chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8)
+	set(hash chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8)
 	// principalVariation recovers the principal variation from the transposition table.
 	principalVariation(pos *chess.Position) []chess.Move
 	// close initiates a graceful shutdown of the transposition table.
@@ -30,18 +30,14 @@ type transpositionTable interface {
 // searchEntry holds a search result entry.
 // Only essential information is retained.
 type searchEntry struct {
-	hash chess.Hash
+	hash uint64
 	best chess.Move
 	data uint64
 }
 
-// newSearchEntry creates a new searchEntry.
-func newSearchEntry(hash chess.Hash, best chess.Move, score int32, nt nodeType, depth, epoch uint8) searchEntry {
-	return searchEntry{
-		hash: hash,
-		best: best,
-		data: uint64(uint32(score)) ^ uint64(nt)<<32 ^ uint64(depth)<<40 ^ uint64(epoch)<<48,
-	}
+// serializeSearchData serializes a search entry data.
+func serializeSearchData(score int32, nt nodeType, depth, epoch uint8) uint64 {
+	return uint64(uint32(score)) ^ uint64(nt)<<32 ^ uint64(depth)<<40 ^ uint64(epoch)<<48
 }
 
 // score returns the search entry score.
@@ -117,16 +113,23 @@ func (ar *arrayTable) inc() {
 }
 
 // Implements the transpositionTable interface.
-func (ar *arrayTable) get(key chess.Hash) (searchEntry, bool) {
-	entry := ar.table[ar.hash(key)]
-	return entry, entry.nodeType() != noEntry && entry.hash == key
+func (ar *arrayTable) get(hash chess.Hash) (searchEntry, bool) {
+	entry := ar.table[ar.hash(hash)]
+	return entry, entry.nodeType() != noEntry && chess.Hash(entry.hash^uint64(entry.best)^entry.data) == hash
 }
 
 // Implements the transpositionTable interface.
-func (ar *arrayTable) set(key chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8) {
-	index := ar.hash(key)
+func (ar *arrayTable) set(hash chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8) {
+	index := ar.hash(hash)
 	cached := ar.table[index]
-	entry := newSearchEntry(key, best, score, nt, depth, ar.epoch)
+	data := serializeSearchData(score, nt, depth, ar.epoch)
+
+	entry := searchEntry{
+		uint64(hash) ^ uint64(best) ^ data,
+		best,
+		data,
+	}
+
 	if entry.quality() >= cached.quality() {
 		ar.table[index] = entry
 	}
@@ -180,9 +183,9 @@ func (ar *arrayTable) close() {
 }
 
 // hash is the hash function used by the array table.
-func (ar *arrayTable) hash(key chess.Hash) uint64 {
+func (ar *arrayTable) hash(hash chess.Hash) uint64 {
 	// fast indexing function from Daniel Lemire's blog post
 	// https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-	index, _ := bits.Mul64(uint64(key), ar.length)
+	index, _ := bits.Mul64(uint64(hash), ar.length)
 	return index
 }
