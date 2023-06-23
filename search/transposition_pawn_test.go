@@ -36,20 +36,16 @@ func TestPawnTableSet(t *testing.T) {
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
 	//nolint:gosec
-	want := pawnEntry{
-		hash: hash,
-		mg:   rand.Int31(),
-		eg:   rand.Int31(),
-	}
+	want := newPawnEntry(hash, rand.Int31(), rand.Int31())
 
 	table := newArrayPawnTable(1)
 	defer table.close()
 
-	table.set(hash, want.mg, want.eg)
+	table.set(hash, want.mg(), want.eg())
 
 	entry, ok := table.get(hash)
 
 	require.True(t, ok)
-	require.Equal(t, want.mg, entry.mg)
-	require.Equal(t, want.eg, entry.eg)
+	require.Equal(t, want.mg(), entry.mg())
+	require.Equal(t, want.eg(), entry.eg())
 }

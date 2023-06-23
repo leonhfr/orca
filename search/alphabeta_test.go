@@ -26,18 +26,18 @@ func (si *searchInfo) alphaBeta(ctx context.Context, pos *chess.Position, alpha,
 	originalAlpha := alpha
 
 	entry, inCache := si.table.get(hash)
-	if inCache && entry.depth >= depth {
-		switch {
-		case entry.nodeType == exact:
-			return entry.score, nil
-		case entry.nodeType == lowerBound && entry.score > alpha:
-			alpha = entry.score
-		case entry.nodeType == upperBound && entry.score < beta:
-			beta = entry.score
+	if inCache && entry.depth() >= depth {
+		switch nt, score := entry.nodeType(), entry.score(); {
+		case nt == exact:
+			return score, nil
+		case nt == lowerBound && score > alpha:
+			alpha = score
+		case nt == upperBound && score < beta:
+			beta = score
 		}
 
 		if alpha >= beta {
-			return entry.score, nil
+			return entry.score(), nil
 		}
 	}
 

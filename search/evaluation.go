@@ -115,7 +115,7 @@ func (si *searchInfo) evaluatePawns(pos *chess.Position) (int32, int32) {
 	pawnHash := pos.PawnHash()
 
 	if entry, inCache := si.pawnTable.get(pawnHash); inCache {
-		return entry.mg, entry.eg
+		return entry.mg(), entry.eg()
 	}
 
 	var mg, eg int32

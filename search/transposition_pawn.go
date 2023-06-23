@@ -24,8 +24,25 @@ type transpositionPawnTable interface {
 // pawnEntry hols a pawn evaluation.
 type pawnEntry struct {
 	hash chess.Hash
-	mg   int32
-	eg   int32
+	data uint64
+}
+
+// newPawnEntry creates a new pawnEntry.
+func newPawnEntry(hash chess.Hash, mg, eg int32) pawnEntry {
+	return pawnEntry{
+		hash,
+		uint64(eg)<<32 + uint64(mg),
+	}
+}
+
+// mg returns the middle game score.
+func (pe pawnEntry) mg() int32 {
+	return int32(uint32(pe.data))
+}
+
+// eg returns the endgame score.
+func (pe pawnEntry) eg() int32 {
+	return int32(uint32(uint64(pe.data+1<<31) >> 32))
 }
 
 // noPawnTable does not store anything at all.
@@ -65,7 +82,7 @@ func (ar *arrayPawnTable) get(key chess.Hash) (pawnEntry, bool) {
 // Implements the transpositionPawnTable interface.
 func (ar *arrayPawnTable) set(key chess.Hash, mg, eg int32) {
 	index := ar.hash(key)
-	ar.table[index] = pawnEntry{key, mg, eg}
+	ar.table[index] = newPawnEntry(key, mg, eg)
 }
 
 // Implements the transpositionPawnTable interface.

@@ -30,16 +30,42 @@ type transpositionTable interface {
 // searchEntry holds a search result entry.
 // Only essential information is retained.
 type searchEntry struct {
-	hash     chess.Hash
-	best     chess.Move
-	score    int32
-	nodeType nodeType
-	depth    uint8
-	epoch    uint8
+	hash chess.Hash
+	best chess.Move
+	data uint64
+}
+
+// newSearchEntry creates a new searchEntry.
+func newSearchEntry(hash chess.Hash, best chess.Move, score int32, nt nodeType, depth, epoch uint8) searchEntry {
+	return searchEntry{
+		hash: hash,
+		best: best,
+		data: uint64(uint32(score)) ^ uint64(nt)<<32 ^ uint64(depth)<<40 ^ uint64(epoch)<<48,
+	}
+}
+
+// score returns the search entry score.
+func (se searchEntry) score() int32 {
+	return int32(uint32(se.data))
+}
+
+// nodeType returns the search entry node type.
+func (se searchEntry) nodeType() nodeType {
+	return nodeType(uint8(se.data >> 32))
+}
+
+// depth returns the search entry depth.
+func (se searchEntry) depth() uint8 {
+	return uint8(se.data >> 40)
+}
+
+// epoch returns the search entry epoch.
+func (se searchEntry) epoch() uint8 {
+	return uint8(se.data >> 48)
 }
 
 func (se searchEntry) quality() uint8 {
-	return se.epoch + se.depth/3
+	return se.epoch() + se.depth()/3
 }
 
 // nodeType represents the score bounds for this entry.
@@ -93,21 +119,14 @@ func (ar *arrayTable) inc() {
 // Implements the transpositionTable interface.
 func (ar *arrayTable) get(key chess.Hash) (searchEntry, bool) {
 	entry := ar.table[ar.hash(key)]
-	return entry, entry.nodeType != noEntry && entry.hash == key
+	return entry, entry.nodeType() != noEntry && entry.hash == key
 }
 
 // Implements the transpositionTable interface.
 func (ar *arrayTable) set(key chess.Hash, best chess.Move, score int32, nt nodeType, depth uint8) {
 	index := ar.hash(key)
 	cached := ar.table[index]
-	entry := searchEntry{
-		hash:     key,
-		best:     best,
-		score:    score,
-		nodeType: nt,
-		depth:    depth,
-		epoch:    ar.epoch,
-	}
+	entry := newSearchEntry(key, best, score, nt, depth, ar.epoch)
 	if entry.quality() >= cached.quality() {
 		ar.table[index] = entry
 	}
