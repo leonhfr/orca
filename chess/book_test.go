@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	data "github.com/leonhfr/orca/data/test"
+	data "github.com/leonhfr/orca/test/data"
 )
 
 func TestNewBook(t *testing.T) {
