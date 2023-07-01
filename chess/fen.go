@@ -60,6 +60,11 @@ func fenTurn(field string) (Color, error) {
 	}
 }
 
+// fenCastlingFiles parses the castling files from FEN.
+func fenCastlingFiles(_ string) ([2]File, error) {
+	return [2]File{FileA, FileH}, nil
+}
+
 // fenCastlingRights parses the castling rights from FEN.
 func fenCastlingRights(field string) (castlingRights, error) {
 	if field == "-" {
@@ -70,15 +75,15 @@ func fenCastlingRights(field string) (castlingRights, error) {
 	for _, r := range field {
 		switch r {
 		case 'K':
-			cr |= castleWhiteKing
+			cr |= castleWhiteH
 		case 'Q':
-			cr |= castleWhiteQueen
+			cr |= castleWhiteA
 		case 'k':
-			cr |= castleBlackKing
+			cr |= castleBlackH
 		case 'q':
-			cr |= castleBlackQueen
+			cr |= castleBlackA
 		default:
-			return 0, fmt.Errorf("invalid fen castling rights (%s)", field)
+			return noCastle, fmt.Errorf("invalid fen castling rights (%s)", field)
 		}
 	}
 	return cr, nil

@@ -16,7 +16,4 @@ func init() {
 	initBBKnightMoves()
 	initBBMagicRookMoves()
 	initBBMagicBishopMoves()
-
-	// Castle checks
-	initCastleChecks()
 }

@@ -7,14 +7,15 @@ import (
 
 // Position represents the state of the game.
 type Position struct {
-	board          board
-	hash           Hash
-	pawnHash       Hash
-	turn           Color
-	castlingRights castlingRights
-	enPassant      Square
-	halfMoveClock  uint8
-	fullMoves      uint8
+	board         board
+	hash          Hash
+	pawnHash      Hash
+	castleChecks  [4]castleCheck
+	castling      castling
+	turn          Color
+	enPassant     Square
+	halfMoveClock uint8
+	fullMoves     uint8
 }
 
 const startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -39,9 +40,22 @@ func NewPosition(fen string) (*Position, error) {
 		return nil, err
 	}
 
-	pos.castlingRights, err = fenCastlingRights(fields[2])
+	files, err := fenCastlingFiles(fields[2])
 	if err != nil {
 		return nil, err
+	}
+
+	rights, err := fenCastlingRights(fields[2])
+	if err != nil {
+		return nil, err
+	}
+
+	pos.castling = castling{files, rights}
+
+	for c := Black; c <= White; c++ {
+		for s := aSide; s <= hSide; s++ {
+			pos.castleChecks[2*uint8(c)+uint8(s)] = newCastleCheck(c, s, pos.board.sqKings, files, rights)
+		}
 	}
 
 	pos.enPassant, err = fenEnPassantSquare(fields[3])
@@ -103,7 +117,7 @@ func (pos *Position) MakeMove(m Move) bool {
 		return false
 	}
 
-	cr := pos.castlingRights
+	cr := pos.castling.rights
 
 	if pos.enPassant != NoSquare {
 		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
@@ -117,14 +131,14 @@ func (pos *Position) MakeMove(m Move) bool {
 	}
 
 	pos.turn = pos.turn.Other()
-	pos.castlingRights = moveCastlingRights(pos.castlingRights, m)
+	pos.castling.rights = moveCastlingRights(pos.castling.rights, pos.castling.files, m)
 	pos.enPassant = moveEnPassant(m)
 	if pos.enPassant != NoSquare {
 		pos.hash ^= enPassantHash(pos.enPassant, pos.turn,
 			pos.board.bbColors[White]&pos.board.bbPieces[Pawn], pos.board.bbColors[Black]&pos.board.bbPieces[Pawn])
 	}
 
-	partialHash, partialPawnHash := xorHashPartialMove(m, cr, pos.castlingRights)
+	partialHash, partialPawnHash := xorHashPartialMove(m, cr, pos.castling.rights)
 	pos.hash ^= partialHash
 	pos.pawnHash ^= partialPawnHash
 
@@ -145,7 +159,7 @@ func (pos *Position) MakeMove(m Move) bool {
 func (pos *Position) UnmakeMove(m Move, meta Metadata, hash, pawnHash Hash) {
 	pos.board.unmakeMove(m)
 	pos.turn = meta.turn()
-	pos.castlingRights = meta.castleRights()
+	pos.castling.rights = meta.castleRights()
 	pos.enPassant = meta.enPassant()
 	pos.halfMoveClock = meta.halfMoveClock()
 	pos.fullMoves = meta.fullMoves()
@@ -186,7 +200,7 @@ func (pos Position) String() string {
 		"%s %s %s %s %d %d",
 		pos.board.String(),
 		pos.turn.String(),
-		pos.castlingRights.String(),
+		pos.castling.String(),
 		sq,
 		pos.halfMoveClock,
 		pos.fullMoves,
@@ -194,25 +208,30 @@ func (pos Position) String() string {
 }
 
 // moveCastlingRights computes the new castling rights after a move.
-func moveCastlingRights(cr castlingRights, m Move) castlingRights {
+func moveCastlingRights(cr castlingRights, cf [2]File, m Move) castlingRights {
 	p1 := m.P1()
 	if pt := p1.Type(); pt != King && pt != Rook && !m.HasTag(Capture) {
 		return cr
 	}
 
+	blackRookA := newSquare(cf[aSide], Rank8)
+	blackRookH := newSquare(cf[hSide], Rank8)
+	whiteRookA := newSquare(cf[aSide], Rank1)
+	whiteRookH := newSquare(cf[hSide], Rank1)
+
 	switch s1, s2 := m.S1(), m.S2(); {
-	case p1 == WhiteKing:
-		return cr & ^(castleWhiteKing | castleWhiteQueen)
 	case p1 == BlackKing:
-		return cr & ^(castleBlackKing | castleBlackQueen)
-	case (p1 == WhiteRook && s1 == A1) || s2 == A1:
-		return cr & ^castleWhiteQueen
-	case (p1 == WhiteRook && s1 == H1) || s2 == H1:
-		return cr & ^castleWhiteKing
-	case (p1 == BlackRook && s1 == A8) || s2 == A8:
-		return cr & ^castleBlackQueen
-	case (p1 == BlackRook && s1 == H8) || s2 == H8:
-		return cr & ^castleBlackKing
+		return cr & ^(castleBlackA | castleBlackH)
+	case p1 == WhiteKing:
+		return cr & ^(castleWhiteA | castleWhiteH)
+	case (p1 == BlackRook && s1 == blackRookA) || s2 == blackRookA:
+		return cr & ^castleBlackA
+	case (p1 == BlackRook && s1 == blackRookH) || s2 == blackRookH:
+		return cr & ^castleBlackH
+	case (p1 == WhiteRook && s1 == whiteRookA) || s2 == whiteRookA:
+		return cr & ^castleWhiteA
+	case (p1 == WhiteRook && s1 == whiteRookH) || s2 == whiteRookH:
+		return cr & ^castleWhiteH
 	default:
 		return cr
 	}

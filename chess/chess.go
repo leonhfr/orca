@@ -124,13 +124,17 @@ func (pos *Position) pseudoMoves(bbInterference bitboard, onlyKing, loud bool) [
 
 	// Castles
 	if !loud {
-		if data := castles[2*uint8(player)+uint8(kingSide)]; pos.castlingRights.canCastle(player, kingSide) && bbOccupancy&data.bbTravel == 0 {
-			check := data.rook2.bitboard()&bbChecks[Rook] > 0
-			moves = append(moves, newCastleMove(king, data.king1, data.king2, kingSide, check))
+		if cc := pos.castleChecks[2*uint8(player)+uint8(hSide)]; pos.castling.rights.canCastle(player, hSide) &&
+			bbOccupancy&cc.bbKingTravel == 0 &&
+			bbOccupancy&cc.bbRookTravel == 0 {
+			check := cc.rook2.bitboard()&bbChecks[Rook] > 0
+			moves = append(moves, newCastleMove(king, cc.king1, cc.king2, hSide, check))
 		}
-		if data := castles[2*uint8(player)+uint8(queenSide)]; pos.castlingRights.canCastle(player, queenSide) && bbOccupancy&data.bbTravel == 0 {
-			check := data.rook2.bitboard()&bbChecks[Rook] > 0
-			moves = append(moves, newCastleMove(king, data.king1, data.king2, queenSide, check))
+		if cc := pos.castleChecks[2*uint8(player)+uint8(aSide)]; pos.castling.rights.canCastle(player, aSide) &&
+			bbOccupancy&cc.bbKingTravel == 0 &&
+			bbOccupancy&cc.bbRookTravel == 0 {
+			check := cc.rook2.bitboard()&bbChecks[Rook] > 0
+			moves = append(moves, newCastleMove(king, cc.king1, cc.king2, aSide, check))
 		}
 	}
 
@@ -278,99 +282,36 @@ func (pos *Position) attackBitboards(sq Square, c Color) [5]bitboard {
 // that the king's travel path is clear.
 //
 // Checks that the king does not leave, cross over, or finish on
-// s square attacked by an enemy piece.
+// a square attacked by an enemy piece.
 func (pos *Position) isCastleLegal(m Move) bool {
-	s := kingSide
+	s := hSide
 	if m.HasTag(QueenSideCastle) {
-		s = queenSide
+		s = aSide
 	}
-	bbOpponent := pos.board.bbColors[pos.turn.Other()]
-	cc := castleChecks[2*uint8(pos.turn)+uint8(s)]
 
-	if cc.bbPawn&pos.board.bbPieces[Pawn]&bbOpponent > 0 ||
-		cc.bbKnight&pos.board.bbPieces[Knight]&bbOpponent > 0 ||
-		cc.bbKing&pos.board.bbPieces[King]&bbOpponent > 0 {
+	bbOpponent := pos.board.bbColors[pos.turn.Other()]
+	cc := pos.castleChecks[2*uint8(pos.turn)+uint8(s)]
+
+	if cc.bbNoEnemyPawn&pos.board.bbPieces[Pawn]&bbOpponent > 0 ||
+		cc.bbNoEnemyKnight&pos.board.bbPieces[Knight]&bbOpponent > 0 ||
+		cc.bbNoEnemyKing&pos.board.bbPieces[King]&bbOpponent > 0 {
 		return false
 	}
 
 	var bbBishopAttacks, bbRookAttacks bitboard
 	bbOccupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
-	for _, sq := range cc.squares {
-		index := bishopMagics[sq].index(bbOccupancy)
-		bbBishopAttacks |= bbMagicBishopMoves[index]
+	for bb := cc.bbNoCheck; bb > 0; bb = bb.resetLSB() {
+		sq := bb.scanForward()
+		bbBishopAttacks |= bbMagicBishopMoves[bishopMagics[sq].index(bbOccupancy)]
+		bbRookAttacks |= bbMagicRookMoves[rookMagics[sq].index(bbOccupancy)]
 	}
 
-	if bb := pos.board.bbPieces[Bishop] | pos.board.bbPieces[Queen]; bbBishopAttacks&bbOpponent&bb > 0 {
-		return false
-	}
-
-	for _, sq := range cc.squares {
-		index := rookMagics[sq].index(bbOccupancy)
-		bbRookAttacks |= bbMagicRookMoves[index]
-	}
-
-	return bbRookAttacks&(pos.board.bbPieces[Rook]|pos.board.bbPieces[Queen])&bbOpponent == 0
+	return bbBishopAttacks&(pos.board.bbPieces[Bishop]|pos.board.bbPieces[Queen])&bbOpponent == 0 &&
+		bbRookAttacks&(pos.board.bbPieces[Rook]|pos.board.bbPieces[Queen])&bbOpponent == 0
 }
 
 // bbDir associates a bitboard with a direction.
 type bbDir struct {
 	bb  bitboard
 	dir direction
-}
-
-// castles contains the castles' data.
-//
-// indexed by `2*Color+side`.
-var castles = [4]castleData{
-	{1<<F8 | 1<<G8, E8, G8, F8},         // black, king side
-	{1<<B8 | 1<<C8 | 1<<D8, E8, C8, D8}, // black, queen side
-	{1<<F1 | 1<<G1, E1, G1, E1},         // white, king side
-	{1<<B1 | 1<<C1 | 1<<D1, E1, C1, D1}, // white, queen side
-}
-
-// casteData represents a castle's data.
-type castleData struct {
-	bbTravel bitboard // bitboard traveled by the king
-	king1    Square   // king s1
-	king2    Square   // king s2
-	rook2    Square   // rook s2
-}
-
-// castleCheck represents a castle's check.
-type castleCheck struct {
-	bbPawn   bitboard
-	bbKnight bitboard
-	bbKing   bitboard
-	squares  [3]Square
-}
-
-// castleChecks contains the castle checks.
-//
-// indexed by `2*Color+side`.
-var castleChecks [4]castleCheck
-
-// initializes castleChecks.
-//
-// requires bbKingMoves, bbKnightMoves.
-func initCastleChecks() {
-	castles := [4]struct {
-		color   Color
-		squares [3]Square
-	}{
-		{Black, [3]Square{E8, F8, G8}},
-		{Black, [3]Square{C8, D8, E8}},
-		{White, [3]Square{E1, F1, G1}},
-		{White, [3]Square{C1, D1, E1}},
-	}
-
-	for i, castle := range castles {
-		var bbPawn, bbKnight, bbKing bitboard
-		for _, sq := range castle.squares {
-			bbPawn |= singlePawnCaptureBitboard(sq, castle.color)
-			bbKnight |= bbKnightMoves[sq]
-			bbKing |= bbKingMoves[sq]
-		}
-
-		castleChecks[i] = castleCheck{bbPawn, bbKnight, bbKing, castle.squares}
-	}
 }

@@ -30,7 +30,7 @@ func newZobristHash(pos *Position) (hash Hash) {
 	bbBlackPawn := pos.board.bbPieces[Pawn] & pos.board.bbColors[Black]
 	bbWhitePawn := pos.board.bbPieces[Pawn] & pos.board.bbColors[White]
 	hash ^= pieceHash(pos)
-	hash ^= castleHash(pos.castlingRights)
+	hash ^= castleHash(pos.castling.rights)
 	hash ^= enPassantHash(pos.enPassant, pos.turn, bbWhitePawn, bbBlackPawn)
 	hash ^= turnHash(pos.turn)
 	return
@@ -150,16 +150,16 @@ func pieceHash(pos *Position) (hash Hash) {
 //	black king side castle   2
 //	black queen side castle  3
 func castleHash(cr castlingRights) (hash Hash) {
-	if cr&castleWhiteKing > 0 {
+	if cr&castleWhiteH > 0 {
 		hash ^= polyCastleWhiteKing
 	}
-	if cr&castleWhiteQueen > 0 {
+	if cr&castleWhiteA > 0 {
 		hash ^= polyCastleWhiteQueen
 	}
-	if cr&castleBlackKing > 0 {
+	if cr&castleBlackH > 0 {
 		hash ^= polyCastleBlackKing
 	}
-	if cr&castleBlackQueen > 0 {
+	if cr&castleBlackA > 0 {
 		hash ^= polyCastleBlackQueen
 	}
 	return

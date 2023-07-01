@@ -81,7 +81,7 @@ func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 func newCastleMove(p1 Piece, s1, s2 Square, s side, check bool) Move {
 	var tags MoveTag
 
-	if s == kingSide {
+	if s == hSide {
 		tags ^= KingSideCastle
 	} else {
 		tags ^= QueenSideCastle

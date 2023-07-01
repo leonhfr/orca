@@ -100,6 +100,30 @@ func TestFENTurn(t *testing.T) {
 	}
 }
 
+func TestFENCastlingFiles(t *testing.T) {
+	type want struct {
+		cf  [2]File
+		err error
+	}
+
+	tests := []struct {
+		args string
+		want
+	}{
+		{"-", want{[2]File{FileA, FileH}, nil}},
+		{"KQkq", want{[2]File{FileA, FileH}, nil}},
+		{"KQ", want{[2]File{FileA, FileH}, nil}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.args, func(t *testing.T) {
+			cf, err := fenCastlingFiles(tt.args)
+			assert.Equal(t, tt.want.cf, cf)
+			assert.Equal(t, tt.want.err, err)
+		})
+	}
+}
+
 func TestFENCastlingRights(t *testing.T) {
 	type want struct {
 		cr  castlingRights
@@ -111,8 +135,8 @@ func TestFENCastlingRights(t *testing.T) {
 		want
 	}{
 		{"-", want{0, nil}},
-		{"KQkq", want{15, nil}},
-		{"KQ", want{3, nil}},
+		{"KQkq", want{castleBlackA | castleBlackH | castleWhiteA | castleWhiteH, nil}},
+		{"KQ", want{castleWhiteA | castleWhiteH, nil}},
 		{"A", want{0, errors.New("invalid fen castling rights (A)")}},
 	}
 
