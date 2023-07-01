@@ -11,7 +11,7 @@ run:
 
 .PHONY: perft
 perft:
-	perftree ./perft.sh
+	perftree ./test/perft/perft.sh
 
 .PHONY: gen
 gen:

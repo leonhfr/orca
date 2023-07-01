@@ -1,13 +1,30 @@
+// This package provides the capability to run perft tests.
 package main
 
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/leonhfr/orca/chess"
 )
+
+func main() {
+	if len(os.Args) < 1 {
+		fmt.Println("expected arguments to be provided")
+		os.Exit(1)
+	}
+
+	r, err := perft(os.Args[1:])
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println(r)
+}
 
 // perft expects the arguments to be depth, then fen,
 // and finally an optional space-separated move list.
