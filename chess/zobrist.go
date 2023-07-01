@@ -53,7 +53,7 @@ func newPawnZobristHash(pos *Position) (hash Hash) {
 // xorHashPartialMove updates a position hash incrementally.
 //
 // This function does not account for changes in en passant squares.
-func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
+func xorHashPartialMove(m Move, cr1, cr2 castlingRights, cf [2]File) (h, ph Hash) {
 	// turn
 	h = polyTurn
 
@@ -105,18 +105,18 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights) (h, ph Hash) {
 		hep := polyRandom[64*int(WhitePawn)+int(s2+8)]
 		h ^= hep
 		ph ^= hep
-	case c == White && m.HasTag(KingSideCastle):
-		h ^= polyRandom[64*int(WhiteRook)+int(H1)]
-		h ^= polyRandom[64*int(WhiteRook)+int(F1)]
-	case c == White && m.HasTag(QueenSideCastle):
-		h ^= polyRandom[64*int(WhiteRook)+int(A1)]
-		h ^= polyRandom[64*int(WhiteRook)+int(D1)]
-	case c == Black && m.HasTag(KingSideCastle):
-		h ^= polyRandom[64*int(BlackRook)+int(H8)]
-		h ^= polyRandom[64*int(BlackRook)+int(F8)]
-	case c == Black && m.HasTag(QueenSideCastle):
-		h ^= polyRandom[64*int(BlackRook)+int(A8)]
+	case c == Black && m.HasTag(ASideCastle):
+		h ^= polyRandom[64*int(BlackRook)+int(newSquare(cf[aSide], Rank8))]
 		h ^= polyRandom[64*int(BlackRook)+int(D8)]
+	case c == Black && m.HasTag(HSideCastle):
+		h ^= polyRandom[64*int(BlackRook)+int(newSquare(cf[hSide], Rank8))]
+		h ^= polyRandom[64*int(BlackRook)+int(F8)]
+	case c == White && m.HasTag(ASideCastle):
+		h ^= polyRandom[64*int(WhiteRook)+int(newSquare(cf[aSide], Rank1))]
+		h ^= polyRandom[64*int(WhiteRook)+int(D1)]
+	case c == White && m.HasTag(HSideCastle):
+		h ^= polyRandom[64*int(WhiteRook)+int(newSquare(cf[hSide], Rank1))]
+		h ^= polyRandom[64*int(WhiteRook)+int(F1)]
 	}
 
 	return

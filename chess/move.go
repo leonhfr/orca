@@ -23,10 +23,10 @@ const (
 	EnPassant
 	// Promotion indicates that the move is a promotion.
 	Promotion
-	// KingSideCastle indicates that the move is a king side castle.
-	KingSideCastle
-	// QueenSideCastle indicates that the move is a queen side castle.
-	QueenSideCastle
+	// ASideCastle indicates that the move is a A side castle (queen side in classic chess).
+	ASideCastle
+	// HSideCastle indicates that the move is a H side castle (king side in classic chess).
+	HSideCastle
 )
 
 // Move represents a move from one square to another.
@@ -52,10 +52,10 @@ const NoMove Move = 0
 func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 	var tags MoveTag
 	if pt := p1.Type(); pt == King {
-		if (s1 == E1 && s2 == G1) || (s1 == E8 && s2 == G8) {
-			tags ^= KingSideCastle
-		} else if (s1 == E1 && s2 == C1) || (s1 == E8 && s2 == C8) {
-			tags ^= QueenSideCastle
+		if (s1 == E1 && s2 == C1) || (s1 == E8 && s2 == C8) {
+			tags ^= ASideCastle
+		} else if (s1 == E1 && s2 == G1) || (s1 == E8 && s2 == G8) {
+			tags ^= HSideCastle
 		}
 	} else if pt == Pawn && s2 == enPassant {
 		tags ^= EnPassant
@@ -81,10 +81,10 @@ func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 func newCastleMove(p1 Piece, s1, s2 Square, s side, check bool) Move {
 	var tags MoveTag
 
-	if s == hSide {
-		tags ^= KingSideCastle
+	if s == aSide {
+		tags ^= ASideCastle
 	} else {
-		tags ^= QueenSideCastle
+		tags ^= HSideCastle
 	}
 
 	if check {

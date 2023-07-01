@@ -284,9 +284,9 @@ func (pos *Position) attackBitboards(sq Square, c Color) [5]bitboard {
 // Checks that the king does not leave, cross over, or finish on
 // a square attacked by an enemy piece.
 func (pos *Position) isCastleLegal(m Move) bool {
-	s := hSide
-	if m.HasTag(QueenSideCastle) {
-		s = aSide
+	s := aSide
+	if m.HasTag(HSideCastle) {
+		s = hSide
 	}
 
 	bbOpponent := pos.board.bbColors[pos.turn.Other()]

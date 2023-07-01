@@ -199,10 +199,3 @@ func initBBInBetweens() {
 		}
 	}
 }
-
-const (
-	bbWhiteKingCastle  = 1<<F1 | 1<<H1 // bbWhiteKingCastle is the rook swap bitboard of a white king side castle.
-	bbWhiteQueenCastle = 1<<A1 | 1<<D1 // bbWhiteQueenCastle is the rook swap bitboard of a white queen side castle.
-	bbBlackKingCastle  = 1<<F8 | 1<<H8 // bbBlackKingCastle is the rook swap bitboard of a black king side castle.
-	bbBlackQueenCastle = 1<<A8 | 1<<D8 // bbBlackQueenCastle is the rook swap bitboard of a black queen side castle.
-)

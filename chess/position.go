@@ -113,7 +113,7 @@ func (pos Position) FullMoves() uint8 {
 // The returned metadata can be used to unmake the move and
 // restore the position to the previous state.
 func (pos *Position) MakeMove(m Move) bool {
-	if (m.HasTag(KingSideCastle) || m.HasTag(QueenSideCastle)) && !pos.isCastleLegal(m) {
+	if (m.HasTag(ASideCastle) || m.HasTag(HSideCastle)) && !pos.isCastleLegal(m) {
 		return false
 	}
 
@@ -124,9 +124,9 @@ func (pos *Position) MakeMove(m Move) bool {
 			pos.board.bbColors[White]&pos.board.bbPieces[Pawn], pos.board.bbColors[Black]&pos.board.bbPieces[Pawn])
 	}
 
-	pos.board.makeMove(m)
+	pos.board.makeMove(m, pos.castling.files)
 	if pos.isSquareAttacked(pos.board.sqKings[pos.turn]) {
-		pos.board.unmakeMove(m)
+		pos.board.unmakeMove(m, pos.castling.files)
 		return false
 	}
 
@@ -138,7 +138,7 @@ func (pos *Position) MakeMove(m Move) bool {
 			pos.board.bbColors[White]&pos.board.bbPieces[Pawn], pos.board.bbColors[Black]&pos.board.bbPieces[Pawn])
 	}
 
-	partialHash, partialPawnHash := xorHashPartialMove(m, cr, pos.castling.rights)
+	partialHash, partialPawnHash := xorHashPartialMove(m, cr, pos.castling.rights, pos.castling.files)
 	pos.hash ^= partialHash
 	pos.pawnHash ^= partialPawnHash
 
@@ -157,7 +157,7 @@ func (pos *Position) MakeMove(m Move) bool {
 
 // UnmakeMove unmakes a move and restores the previous position.
 func (pos *Position) UnmakeMove(m Move, meta Metadata, hash, pawnHash Hash) {
-	pos.board.unmakeMove(m)
+	pos.board.unmakeMove(m, pos.castling.files)
 	pos.turn = meta.turn()
 	pos.castling.rights = meta.castleRights()
 	pos.enPassant = meta.enPassant()

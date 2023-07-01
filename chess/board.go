@@ -48,7 +48,7 @@ func (b board) pieceByColor(sq Square, c Color) Piece {
 }
 
 // makeMove makes and unmakes a move on the board.
-func (b *board) makeMove(m Move) {
+func (b *board) makeMove(m Move, cf [2]File) {
 	p1, p2 := m.P1(), m.P2()
 	s1, s2 := m.S1(), m.S2()
 	c := p1.Color()
@@ -86,23 +86,27 @@ func (b *board) makeMove(m Move) {
 		bb := s2.bitboard().northOne()
 		b.bbPieces[Pawn] ^= bb
 		b.bbColors[White] ^= bb
-	case c == White && m.HasTag(KingSideCastle): // white king side castle
-		b.bbPieces[Rook] ^= bbWhiteKingCastle
-		b.bbColors[White] ^= bbWhiteKingCastle
-	case c == White && m.HasTag(QueenSideCastle): // white queen side castle
-		b.bbPieces[Rook] ^= bbWhiteQueenCastle
-		b.bbColors[White] ^= bbWhiteQueenCastle
-	case c == Black && m.HasTag(KingSideCastle): // black king side castle
-		b.bbPieces[Rook] ^= bbBlackKingCastle
-		b.bbColors[Black] ^= bbBlackKingCastle
-	case c == Black && m.HasTag(QueenSideCastle): // black queen side castle
-		b.bbPieces[Rook] ^= bbBlackQueenCastle
-		b.bbColors[Black] ^= bbBlackQueenCastle
+	case c == Black && m.HasTag(ASideCastle): // black A side castle
+		bb := newSquare(cf[aSide], Rank8).bitboard() | D8.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[Black] ^= bb
+	case c == Black && m.HasTag(HSideCastle): // black H side castle
+		bb := newSquare(cf[hSide], Rank8).bitboard() | F8.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[Black] ^= bb
+	case c == White && m.HasTag(ASideCastle): // white A side castle
+		bb := newSquare(cf[aSide], Rank1).bitboard() | D1.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[White] ^= bb
+	case c == White && m.HasTag(HSideCastle): // white H side castle
+		bb := newSquare(cf[hSide], Rank1).bitboard() | F1.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[White] ^= bb
 	}
 }
 
 // unmakeMove unmakes a move on the board.
-func (b *board) unmakeMove(m Move) {
+func (b *board) unmakeMove(m Move, cf [2]File) {
 	p1, p2 := m.P1(), m.P2()
 	s1, s2 := m.S1(), m.S2()
 	c := p1.Color()
@@ -140,18 +144,22 @@ func (b *board) unmakeMove(m Move) {
 		bb := s2.bitboard().northOne()
 		b.bbPieces[Pawn] ^= bb
 		b.bbColors[White] ^= bb
-	case c == White && m.HasTag(KingSideCastle): // white king side castle
-		b.bbPieces[Rook] ^= bbWhiteKingCastle
-		b.bbColors[White] ^= bbWhiteKingCastle
-	case c == White && m.HasTag(QueenSideCastle): // white queen side castle
-		b.bbPieces[Rook] ^= bbWhiteQueenCastle
-		b.bbColors[White] ^= bbWhiteQueenCastle
-	case c == Black && m.HasTag(KingSideCastle): // black king side castle
-		b.bbPieces[Rook] ^= bbBlackKingCastle
-		b.bbColors[Black] ^= bbBlackKingCastle
-	case c == Black && m.HasTag(QueenSideCastle): // black queen side castle
-		b.bbPieces[Rook] ^= bbBlackQueenCastle
-		b.bbColors[Black] ^= bbBlackQueenCastle
+	case c == Black && m.HasTag(ASideCastle): // black A side castle
+		bb := newSquare(cf[aSide], Rank8).bitboard() | D8.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[Black] ^= bb
+	case c == Black && m.HasTag(HSideCastle): // black H side castle
+		bb := newSquare(cf[hSide], Rank8).bitboard() | F8.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[Black] ^= bb
+	case c == White && m.HasTag(ASideCastle): // white A side castle
+		bb := newSquare(cf[aSide], Rank1).bitboard() | D1.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[White] ^= bb
+	case c == White && m.HasTag(HSideCastle): // white H side castle
+		bb := newSquare(cf[hSide], Rank1).bitboard() | F1.bitboard()
+		b.bbPieces[Rook] ^= bb
+		b.bbColors[White] ^= bb
 	}
 }
 

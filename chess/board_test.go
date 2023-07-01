@@ -59,7 +59,7 @@ var (
 		{
 			move:    newMove(WhiteKing, NoPiece, E1, G1, NoSquare, NoPiece),
 			moveUCI: "e1g1",
-			tags:    []MoveTag{KingSideCastle},
+			tags:    []MoveTag{HSideCastle},
 			preFEN:  "r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B1K2R w KQkq - 1 9",
 			postFEN: "r2qk2r/pp1n1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P4PPP/R1B2RK1 b kq - 2 9",
 		},
@@ -73,7 +73,7 @@ var (
 		{
 			move:    newMove(WhiteKing, NoPiece, E1, C1, NoSquare, NoPiece),
 			moveUCI: "e1c1",
-			tags:    []MoveTag{QueenSideCastle},
+			tags:    []MoveTag{ASideCastle},
 			preFEN:  "r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/R3K2R w KQkq - 3 10",
 			postFEN: "r3k2r/ppqn1ppp/2pbpn2/3p4/2PP4/1PNQPN2/P2B1PPP/2KR3R b kq - 4 10",
 		},
@@ -116,7 +116,7 @@ func TestBoard_MakeMoveBoard(t *testing.T) {
 	for _, tt := range testPositions {
 		t.Run(tt.move.String(), func(t *testing.T) {
 			pos, post := unsafeFEN(tt.preFEN), unsafeFEN(tt.postFEN)
-			pos.board.makeMove(tt.move)
+			pos.board.makeMove(tt.move, pos.castling.files)
 			want := strings.Fields(tt.postFEN)[0]
 			assert.Equal(t, want, pos.board.String())
 			assert.Equal(t, post.board, pos.board)

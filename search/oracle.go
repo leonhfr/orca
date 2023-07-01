@@ -50,9 +50,9 @@ func score(pos *chess.Position, m, best chess.Move, killers [2]chess.Move) uint3
 	switch {
 	case m == best:
 		return rankBestMove
-	case m.HasTag(chess.KingSideCastle):
+	case m.HasTag(chess.HSideCastle):
 		return rankKingSideCastle
-	case m.HasTag(chess.QueenSideCastle):
+	case m.HasTag(chess.ASideCastle):
 		return rankQueenSideCastle
 	case m.HasTag(chess.Promotion):
 		return promoRank[m.Promo()]
@@ -68,9 +68,9 @@ func score(pos *chess.Position, m, best chess.Move, killers [2]chess.Move) uint3
 // quickScore scores the move without the best and killer moves.
 func quickScore(pos *chess.Position, m chess.Move) uint32 {
 	switch {
-	case m.HasTag(chess.KingSideCastle):
+	case m.HasTag(chess.HSideCastle):
 		return rankKingSideCastle
-	case m.HasTag(chess.QueenSideCastle):
+	case m.HasTag(chess.ASideCastle):
 		return rankQueenSideCastle
 	case m.HasTag(chess.Promotion):
 		return promoRank[m.Promo()]
