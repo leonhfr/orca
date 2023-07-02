@@ -21,24 +21,28 @@ import (
 //
 //nolint:govet
 type Controller struct {
-	name     string
-	author   string
-	debug    bool
-	position *chess.Position
-	writer   io.Writer
-	mu       sync.Mutex
-	stop     chan struct{}
+	name         string
+	author       string
+	debug        bool
+	position     *chess.Position
+	notation     chess.Notation
+	moveNotation chess.MoveNotation
+	writer       io.Writer
+	mu           sync.Mutex
+	stop         chan struct{}
 }
 
 // NewController creates a new Controller.
 func NewController(name, author string, writer io.Writer) *Controller {
 	return &Controller{
-		name:     name,
-		author:   author,
-		position: chess.StartingPosition(),
-		writer:   writer,
-		mu:       sync.Mutex{},
-		stop:     make(chan struct{}),
+		name:         name,
+		author:       author,
+		position:     chess.StartingPosition(),
+		notation:     chess.FEN{},
+		moveNotation: chess.UCI{},
+		writer:       writer,
+		mu:           sync.Mutex{},
+		stop:         make(chan struct{}),
 	}
 }
 
@@ -79,5 +83,5 @@ func (c *Controller) logDebug(v ...any) {
 
 // respond processes responses.
 func (c *Controller) respond(r response) {
-	fmt.Fprintln(c.writer, r.String())
+	fmt.Fprintln(c.writer, r.format(c))
 }

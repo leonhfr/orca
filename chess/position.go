@@ -16,13 +16,17 @@ type Position struct {
 const startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 // NewPosition creates a position from a string.
-func NewPosition(s string, n Notation) (*Position, error) {
-	return n.Decode(s)
+//
+// Shorthand for:
+//
+//	FEN{}.Decode(s)
+func NewPosition(s string) (*Position, error) {
+	return FEN{}.Decode(s)
 }
 
 // StartingPosition returns the starting position.
 func StartingPosition() *Position {
-	pos, _ := NewPosition(startFEN, FEN{})
+	pos, _ := NewPosition(startFEN)
 	return pos
 }
 
@@ -129,6 +133,10 @@ func (pos *Position) UnmakeNullMove(meta Metadata, hash Hash) {
 }
 
 // String returns the position in FEN notation.
+//
+// Shorthand for:
+//
+//	FEN{}.Encode(pos)
 func (pos *Position) String() string {
 	return FEN{}.Encode(pos)
 }

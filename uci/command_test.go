@@ -28,7 +28,7 @@ func TestCommandUCI(t *testing.T) {
 	w := &strings.Builder{}
 	c := NewController(name, author, w)
 
-	expected := concatenateResponses([]response{
+	expected := concatenateResponses(c, []response{
 		responseID{name, author},
 		testOptions[OptionInteger],
 		responseUCIOK{},
@@ -75,12 +75,13 @@ func TestCommandIsReady(t *testing.T) {
 			e := new(mockEngine)
 			e.On("Init").Return(tt.err)
 
-			want := concatenateResponses(tt.rr)
+			c := NewController("", "", io.Discard)
+			want := concatenateResponses(c, tt.rr)
 			if len(tt.logs) > 0 {
 				want = strings.Join(tt.logs, "\n") + "\n" + want
 			}
 			w := newMockWaitWriter(len(want))
-			c := NewController("", "", w)
+			c.writer = w
 
 			commandIsReady{}.run(context.Background(), e, c)
 			w.Wait()
@@ -158,7 +159,7 @@ func TestCommandUCINewGame(t *testing.T) {
 			want := strings.Join(tt.logs, "\n") + "\n"
 			w := newMockWaitWriter(len(want))
 			c := NewController("", "", w)
-			c.position, _ = chess.NewPosition(tt.fen, chess.FEN{})
+			c.position, _ = chess.NewPosition(tt.fen)
 
 			commandUCINewGame{}.run(context.Background(), e, c)
 			w.Wait()
@@ -263,9 +264,10 @@ func TestCommandGo(t *testing.T) {
 			close(oc)
 			e.On("Search", mock.Anything, mock.Anything, tt.c.depth, tt.c.nodes).Return(oc)
 
-			expected := concatenateResponses(tt.rr)
+			c := NewController("", "", io.Discard)
+			expected := concatenateResponses(c, tt.rr)
 			w := newMockWaitWriter(len(expected))
-			c := NewController("", "", w)
+			c.writer = w
 
 			tt.c.run(context.Background(), e, c)
 
@@ -354,10 +356,10 @@ func concatenateStrings(ss []string) string {
 }
 
 // concatenateResponses concatenate responses and adds a newline.
-func concatenateResponses(responses []response) string {
+func concatenateResponses(c *Controller, responses []response) string {
 	s := make([]string, len(responses))
 	for i, r := range responses {
-		s[i] = r.String() + "\n"
+		s[i] = r.format(c) + "\n"
 	}
 	return strings.Join(s, "")
 }

@@ -11,7 +11,7 @@ import (
 // response is the interface implemented by objects that represent
 // UCI responses from the Engine to the GUI.
 type response interface {
-	fmt.Stringer
+	format(c *Controller) string
 }
 
 // responseID represents a "id" command.
@@ -30,7 +30,7 @@ type responseID struct {
 	author string
 }
 
-func (r responseID) String() string {
+func (r responseID) format(_ *Controller) string {
 	return fmt.Sprintf("id name %s\nid author %s", r.name, r.author)
 }
 
@@ -40,7 +40,7 @@ func (r responseID) String() string {
 // has sent all infos and is ready in uci mode.
 type responseUCIOK struct{}
 
-func (r responseUCIOK) String() string {
+func (r responseUCIOK) format(_ *Controller) string {
 	return "uciok"
 }
 
@@ -54,7 +54,7 @@ func (r responseUCIOK) String() string {
 // and must always be answered with "isready".
 type responseReadyOK struct{}
 
-func (r responseReadyOK) String() string {
+func (r responseReadyOK) format(_ *Controller) string {
 	return "readyok"
 }
 
@@ -73,8 +73,8 @@ type responseBestMove struct {
 	move chess.Move
 }
 
-func (r responseBestMove) String() string {
-	return fmt.Sprintf("bestmove %s", r.move.String())
+func (r responseBestMove) format(c *Controller) string {
+	return fmt.Sprintf("bestmove %s", c.moveNotation.Encode(c.position, r.move))
 }
 
 // responseInfo represents an "info" command.
@@ -188,7 +188,7 @@ type responseOutput struct {
 	time time.Duration
 }
 
-func (o responseOutput) String() string {
+func (o responseOutput) format(c *Controller) string {
 	var res []string
 
 	if o.Depth > 0 {
@@ -205,7 +205,7 @@ func (o responseOutput) String() string {
 	if len(o.PV) > 0 {
 		res = append(res, "pv")
 		for _, move := range o.PV {
-			res = append(res, move.String())
+			res = append(res, c.moveNotation.Encode(c.position, move))
 		}
 	}
 	if o.time > 0 {
@@ -283,7 +283,7 @@ func (o responseOutput) String() string {
 //   - "option name Style type combo default Normal var Solid var Normal var Risky\n"
 //   - "option name NalimovPath type string default c:\\n"
 //   - "option name Clear Hash type button\n"
-func (o Option) String() string {
+func (o Option) format(_ *Controller) string {
 	switch o.Type {
 	case OptionInteger:
 		var min, max string

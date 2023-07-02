@@ -1,6 +1,7 @@
 package uci
 
 import (
+	"io"
 	"testing"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 )
 
 func TestResponseString(t *testing.T) {
+	controller := NewController("", "", io.Discard)
+
 	m1 := chess.Move(chess.B1) ^ chess.Move(chess.A3)<<6 ^ chess.Move(chess.NoPiece)<<20
 	m2 := chess.Move(chess.E6) ^ chess.Move(chess.E7)<<6 ^ chess.Move(chess.NoPiece)<<20
 
@@ -90,7 +93,7 @@ func TestResponseString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, tt.args.String())
+			assert.Equal(t, tt.want, tt.args.format(controller))
 		})
 	}
 }

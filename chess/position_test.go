@@ -22,7 +22,7 @@ func TestNewPosition(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args.s, func(t *testing.T) {
-			pos, err := NewPosition(tt.args.s, tt.args.n)
+			pos, err := NewPosition(tt.args.s)
 			if tt.want == nil {
 				assert.Equal(t, pos.String(), tt.args.s)
 			}
