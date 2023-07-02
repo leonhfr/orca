@@ -1,10 +1,5 @@
 package chess
 
-import (
-	"fmt"
-	"strings"
-)
-
 // Position represents the state of the game.
 type Position struct {
 	board         board
@@ -20,68 +15,14 @@ type Position struct {
 
 const startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-// NewPosition creates a position from a FEN string.
-func NewPosition(fen string) (*Position, error) {
-	fields := strings.Fields(strings.TrimSpace(fen))
-	if len(fields) != 6 {
-		return nil, fmt.Errorf("invalid fen (%s), must have 6 fields", fen)
-	}
-
-	var err error
-	pos := &Position{}
-
-	pos.board, err = fenBoard(fields[0])
-	if err != nil {
-		return nil, err
-	}
-
-	pos.turn, err = fenTurn(fields[1])
-	if err != nil {
-		return nil, err
-	}
-
-	files, err := fenCastlingFiles(fields[2])
-	if err != nil {
-		return nil, err
-	}
-
-	rights, err := fenCastlingRights(fields[2])
-	if err != nil {
-		return nil, err
-	}
-
-	pos.castling = castling{files, rights}
-
-	for c := Black; c <= White; c++ {
-		for s := aSide; s <= hSide; s++ {
-			pos.castleChecks[2*uint8(c)+uint8(s)] = newCastleCheck(c, s, pos.board.sqKings, files, rights)
-		}
-	}
-
-	pos.enPassant, err = fenEnPassantSquare(fields[3])
-	if err != nil {
-		return nil, err
-	}
-
-	pos.halfMoveClock, err = fenHalfMoveClock(fields[4])
-	if err != nil {
-		return nil, err
-	}
-
-	pos.fullMoves, err = fenFullMoves(fields[5])
-	if err != nil {
-		return nil, err
-	}
-
-	pos.hash = newZobristHash(pos)
-	pos.pawnHash = newPawnZobristHash(pos)
-
-	return pos, nil
+// NewPosition creates a position from a string.
+func NewPosition(s string, n Notation) (*Position, error) {
+	return n.Decode(s)
 }
 
 // StartingPosition returns the starting position.
 func StartingPosition() *Position {
-	pos, _ := NewPosition(startFEN)
+	pos, _ := NewPosition(startFEN, FEN{})
 	return pos
 }
 
@@ -187,24 +128,9 @@ func (pos *Position) UnmakeNullMove(meta Metadata, hash Hash) {
 	pos.hash = hash
 }
 
-// String implements the Stringer interface.
-//
-// Returns a FEN formatted string.
-func (pos Position) String() string {
-	sq := "-"
-	if pos.enPassant != NoSquare {
-		sq = pos.enPassant.String()
-	}
-
-	return fmt.Sprintf(
-		"%s %s %s %s %d %d",
-		pos.board.String(),
-		pos.turn.String(),
-		pos.castling.String(),
-		sq,
-		pos.halfMoveClock,
-		pos.fullMoves,
-	)
+// String returns the position in FEN notation.
+func (pos *Position) String() string {
+	return FEN{}.Encode(pos)
 }
 
 // moveCastlingRights computes the new castling rights after a move.

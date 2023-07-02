@@ -162,7 +162,7 @@ func (cmd commandPosition) run(_ context.Context, _ Engine, c *Controller) {
 	if cmd.startPos {
 		c.position = chess.StartingPosition()
 	} else if len(cmd.fen) > 0 {
-		pos, err := chess.NewPosition(cmd.fen)
+		pos, err := chess.NewPosition(cmd.fen, chess.FEN{})
 		if err != nil {
 			c.logError(err)
 			return

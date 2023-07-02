@@ -7,6 +7,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// compile time check that FEN implements Notation.
+var _ Notation = FEN{}
+
+func TestFEN(t *testing.T) {
+	tests := []struct {
+		args string
+		want error
+	}{
+		{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", nil},
+		{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPP/RNBQKBNR w KQkq - 0 1", errors.New("invalid fen rank field (PPPPPPP)")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.args, func(t *testing.T) {
+			pos, err := FEN{}.Decode(tt.args)
+			if tt.want == nil {
+				assert.Equal(t, FEN{}.Encode(pos), tt.args)
+			}
+			assert.Equal(t, tt.want, err)
+		})
+	}
+}
+
 func TestFENBoard(t *testing.T) {
 	type want struct {
 		b   board

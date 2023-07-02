@@ -59,7 +59,7 @@ func BenchmarkEvaluate(b *testing.B) {
 }
 
 func unsafeFEN(fen string) *chess.Position {
-	p, err := chess.NewPosition(fen)
+	p, err := chess.NewPosition(fen, chess.FEN{})
 	if err != nil {
 		panic(err)
 	}

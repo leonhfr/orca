@@ -14,7 +14,7 @@ const colorName = "bw"
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a FEN compatible representation.
 func (c Color) String() string {
 	return colorName[c : c+1]
 }
@@ -94,7 +94,7 @@ const pieceName = "pPnNbBrRqQkK-"
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a FEN compatible representation.
 func (p Piece) String() string {
 	return pieceName[p : p+1]
 }

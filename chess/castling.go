@@ -52,7 +52,7 @@ type castling struct {
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a FEN compatible representation.
 func (c castling) String() string {
 	if c.rights == noCastle {
 		return "-"

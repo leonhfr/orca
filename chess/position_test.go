@@ -8,19 +8,23 @@ import (
 )
 
 func TestNewPosition(t *testing.T) {
+	type args struct {
+		s string
+		n Notation
+	}
 	tests := []struct {
-		args string
+		args
 		want error
 	}{
-		{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", nil},
-		{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPP/RNBQKBNR w KQkq - 0 1", errors.New("invalid fen rank field (PPPPPPP)")},
+		{args{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", FEN{}}, nil},
+		{args{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPP/RNBQKBNR w KQkq - 0 1", FEN{}}, errors.New("invalid fen rank field (PPPPPPP)")},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.args, func(t *testing.T) {
-			pos, err := NewPosition(tt.args)
+		t.Run(tt.args.s, func(t *testing.T) {
+			pos, err := NewPosition(tt.args.s, tt.args.n)
 			if tt.want == nil {
-				assert.Equal(t, pos.String(), tt.args)
+				assert.Equal(t, pos.String(), tt.args.s)
 			}
 			assert.Equal(t, tt.want, err)
 		})

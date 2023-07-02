@@ -165,7 +165,7 @@ func (b *board) unmakeMove(m Move, cf [2]File) {
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a FEN compatible representation.
 func (b board) String() string {
 	var fields []string
 	for rank := 7; rank >= 0; rank-- {

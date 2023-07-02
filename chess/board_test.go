@@ -155,7 +155,7 @@ func BenchmarkBoard_PieceByColor(b *testing.B) {
 
 // unsafeFEN returns a position without error checking, only meant for tests.
 func unsafeFEN(fen string) *Position {
-	p, err := NewPosition(fen)
+	p, err := NewPosition(fen, FEN{})
 	if err != nil {
 		panic(err)
 	}

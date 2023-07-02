@@ -158,7 +158,7 @@ func TestCommandUCINewGame(t *testing.T) {
 			want := strings.Join(tt.logs, "\n") + "\n"
 			w := newMockWaitWriter(len(want))
 			c := NewController("", "", w)
-			c.position, _ = chess.NewPosition(tt.fen)
+			c.position, _ = chess.NewPosition(tt.fen, chess.FEN{})
 
 			commandUCINewGame{}.run(context.Background(), e, c)
 			w.Wait()

@@ -38,7 +38,7 @@ func perft(args []string) (chess.PerftResult, error) {
 		return chess.PerftResult{}, err
 	}
 
-	pos, err := chess.NewPosition(args[1])
+	pos, err := chess.NewPosition(args[1], chess.FEN{})
 	if err != nil {
 		return chess.PerftResult{}, err
 	}

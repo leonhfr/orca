@@ -6,6 +6,90 @@ import (
 	"strings"
 )
 
+// FEN is the Forsyth-Edwards Notation.
+type FEN struct{}
+
+// Encode encodes a Position into a FEN string.
+//
+// Implements the Notation interface.
+func (FEN) Encode(pos *Position) string {
+	sq := "-"
+	if pos.enPassant != NoSquare {
+		sq = pos.enPassant.String()
+	}
+
+	return fmt.Sprintf(
+		"%s %s %s %s %d %d",
+		pos.board.String(),
+		pos.turn.String(),
+		pos.castling.String(),
+		sq,
+		pos.halfMoveClock,
+		pos.fullMoves,
+	)
+}
+
+// Decode decodes a FEN string into a Position.
+//
+// Implements the Notation interface.
+func (FEN) Decode(s string) (*Position, error) {
+	fields := strings.Fields(strings.TrimSpace(s))
+	if len(fields) != 6 {
+		return nil, fmt.Errorf("invalid fen (%s), must have 6 fields", s)
+	}
+
+	var err error
+	pos := &Position{}
+
+	pos.board, err = fenBoard(fields[0])
+	if err != nil {
+		return nil, err
+	}
+
+	pos.turn, err = fenTurn(fields[1])
+	if err != nil {
+		return nil, err
+	}
+
+	files, err := fenCastlingFiles(fields[2])
+	if err != nil {
+		return nil, err
+	}
+
+	rights, err := fenCastlingRights(fields[2])
+	if err != nil {
+		return nil, err
+	}
+
+	pos.castling = castling{files, rights}
+
+	for c := Black; c <= White; c++ {
+		for s := aSide; s <= hSide; s++ {
+			pos.castleChecks[2*uint8(c)+uint8(s)] = newCastleCheck(c, s, pos.board.sqKings, files, rights)
+		}
+	}
+
+	pos.enPassant, err = fenEnPassantSquare(fields[3])
+	if err != nil {
+		return nil, err
+	}
+
+	pos.halfMoveClock, err = fenHalfMoveClock(fields[4])
+	if err != nil {
+		return nil, err
+	}
+
+	pos.fullMoves, err = fenFullMoves(fields[5])
+	if err != nil {
+		return nil, err
+	}
+
+	pos.hash = newZobristHash(pos)
+	pos.pawnHash = newPawnZobristHash(pos)
+
+	return pos, nil
+}
+
 // fenBoard parses the board from FEN.
 func fenBoard(field string) (board, error) {
 	rankFields := strings.Split(field, "/")
