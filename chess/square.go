@@ -57,7 +57,7 @@ func (sq Square) sameColor(other Square) bool {
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a UCI-compatible representation.
 func (sq Square) String() string {
 	return sq.File().String() + sq.Rank().String()
 }
@@ -83,7 +83,7 @@ const (
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a UCI-compatible representation.
 func (f File) String() string {
 	return fileChars[f : f+1]
 }
@@ -104,7 +104,7 @@ const (
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a UCI-compatible representation.
 func (r Rank) String() string {
 	return rankChars[r : r+1]
 }

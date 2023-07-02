@@ -49,6 +49,8 @@ type Move uint64
 const NoMove Move = 0
 
 // newMove creates a new move.
+//
+// Expects the classic chess castling convention (king jumps two squares to castle).
 func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 	var tags MoveTag
 	if pt := p1.Type(); pt == King {
@@ -146,40 +148,12 @@ func newPieceMove(p1, p2 Piece, s1, s2 Square, check bool) Move {
 }
 
 // NewMove creates a new move from a UCI string.
+//
+// Shorthand for:
+//
+//	UCI{}.Decode(pos, move)
 func NewMove(pos *Position, move string) (Move, error) {
-	if pos == nil {
-		return 0, errMissingPosition
-	}
-
-	if len(move) < 4 || len(move) > 5 {
-		return 0, errInvalidMove
-	}
-
-	s1, err := uciSquare(move[0:2])
-	if err != nil {
-		return 0, errInvalidMove
-	}
-	s2, err := uciSquare(move[2:4])
-	if err != nil {
-		return 0, errInvalidMove
-	}
-
-	promo := NoPiece
-	if len(move) == 5 {
-		r := []byte(move)[4]
-		if !('A' <= r && r <= 'z') {
-			return 0, errInvalidMove
-		}
-		promoType := promoPieceTypeTable[r-'A']
-		if promoType == NoPieceType {
-			return 0, errInvalidMove
-		}
-		promo = promoType.color(pos.turn)
-	}
-
-	p1 := pos.board.pieceAt(s1)
-	p2 := pos.board.pieceAt(s2)
-	return newMove(p1, p2, s1, s2, pos.enPassant, promo), nil
+	return UCI{}.Decode(pos, move)
 }
 
 // S1 returns the origin square of the move.
@@ -224,15 +198,11 @@ func (m Move) WithScore(score uint32) Move {
 
 // String implements the Stringer interface.
 //
-// Returns an UCI-compatible representation.
+// Returns a UCI-compatible representation.
+//
+// Shorthand for:
+//
+//	UCI{}.Encode(nil, move)
 func (m Move) String() string {
-	if m == NoMove {
-		return "null"
-	}
-
-	base := m.S1().String() + m.S2().String()
-	if promo := m.Promo(); promo != NoPiece {
-		base += promo.Type().String()
-	}
-	return base
+	return UCI{}.Encode(nil, m)
 }

@@ -47,8 +47,6 @@ const (
 const pieceTypeName = "pnbrqk-"
 
 // String implements the Stringer interface.
-//
-// Returns an UCI-compatible representation.
 func (pt PieceType) String() string {
 	return pieceTypeName[pt : pt+1]
 }
