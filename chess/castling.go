@@ -99,9 +99,9 @@ func newCastleCheck(c Color, s side, kings [2]Square, cf [2]File, cr castlingRig
 	rook1 := newSquare(cf[s], castleRank[c])
 	rook2 := newSquare(rookFinalFile[s], castleRank[c])
 
-	bbKingTravel := bbInBetweens[king1][king2] | king2.bitboard()
-	bbRookTravel := bbInBetweens[rook1][rook2] | rook2.bitboard()
-	bbNoCheck := bbKingTravel | king1.bitboard()
+	bbKingTravel := (bbInBetweens[king1][king2] | (king2.bitboard() & ^king1.bitboard())) & ^rook1.bitboard()
+	bbRookTravel := (bbInBetweens[rook1][rook2] | (rook2.bitboard() & ^rook1.bitboard())) & ^king1.bitboard()
+	bbNoCheck := bbInBetweens[king1][king2] | king1.bitboard() | king2.bitboard()
 
 	var bbNoEnemyPawn, bbNoEnemyKnight, bbNoEnemyKing bitboard
 	for bb := bbNoCheck; bb > 0; bb = bb.resetLSB() {

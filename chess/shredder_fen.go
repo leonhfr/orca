@@ -54,7 +54,7 @@ func (ShredderFEN) Decode(s string) (*Position, error) {
 		return nil, err
 	}
 
-	files, err := shredderFenCastlingFiles(fields[2])
+	files, err := shredderFenCastlingFiles(fields[2], pos.board.sqKings)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func shredderFenCastling(c castling) string {
 }
 
 // shredderFenCastlingFiles parses the castling files from FEN.
-func shredderFenCastlingFiles(field string) ([2]File, error) {
+func shredderFenCastlingFiles(field string, kings [2]Square) ([2]File, error) {
 	if field == "-" {
 		return [2]File{FileA, FileH}, nil
 	}
@@ -135,7 +135,13 @@ func shredderFenCastlingFiles(field string) ([2]File, error) {
 	case 0:
 		return [2]File{FileA, FileH}, nil
 	case 1:
-		return [2]File{File(runes[0] - 'a'), FileH}, nil
+		f := File(runes[0] - 'a')
+		k1, k2 := kings[0].File(), kings[1].File()
+		if f < k1 || f < k2 {
+			return [2]File{File(runes[0] - 'a'), FileH}, nil
+		}
+
+		return [2]File{FileA, File(runes[0] - 'a')}, nil
 	case 2:
 		return [2]File{File(runes[0] - 'a'), File(runes[1] - 'a')}, nil
 	default:

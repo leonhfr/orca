@@ -79,7 +79,7 @@ func perft(pos *Position, depth int) int {
 	return nodes
 }
 
-// String implements fmt.Stringer.
+// String implements the Stringer interface.
 //
 // Returns the perft result as an output accepted by the perftree cli.
 func (pr PerftResult) String() string {
@@ -91,7 +91,7 @@ func (pr PerftResult) String() string {
 	return b.String()
 }
 
-// String implements fmt.Stringer.
+// String implements the Stringer interface.
 //
 // Returns the move in UCI notation followed by a space, then the number of nodes
 // of which this move is an ancestor.

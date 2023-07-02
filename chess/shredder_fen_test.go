@@ -56,27 +56,32 @@ func TestShredderFENCastling(t *testing.T) {
 }
 
 func TestShredderFENCastlingFiles(t *testing.T) {
+	type args struct {
+		field string
+		kings [2]Square
+	}
+
 	type want struct {
 		cf  [2]File
 		err error
 	}
 
 	tests := []struct {
-		args string
+		args
 		want
 	}{
-		{"-", want{[2]File{FileA, FileH}, nil}},
-		{"HAha", want{[2]File{FileA, FileH}, nil}},
-		{"HA", want{[2]File{FileA, FileH}, nil}},
-		{"HFhf", want{[2]File{FileF, FileH}, nil}},
-		{"GE", want{[2]File{FileE, FileG}, nil}},
-		{"HDhd", want{[2]File{FileD, FileH}, nil}},
-		{"ABc", want{[2]File{FileA, FileH}, errors.New("invalid fen castling files (ABc)")}},
+		{args{"-", [2]Square{E8, E1}}, want{[2]File{FileA, FileH}, nil}},
+		{args{"HAha", [2]Square{E8, E1}}, want{[2]File{FileA, FileH}, nil}},
+		{args{"HA", [2]Square{E8, E1}}, want{[2]File{FileA, FileH}, nil}},
+		{args{"HFhf", [2]Square{G8, G1}}, want{[2]File{FileF, FileH}, nil}},
+		{args{"GE", [2]Square{F8, F1}}, want{[2]File{FileE, FileG}, nil}},
+		{args{"HDhd", [2]Square{E8, E1}}, want{[2]File{FileD, FileH}, nil}},
+		{args{"ABc", [2]Square{E8, E1}}, want{[2]File{FileA, FileH}, errors.New("invalid fen castling files (ABc)")}},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.args, func(t *testing.T) {
-			cf, err := shredderFenCastlingFiles(tt.args)
+		t.Run(tt.args.field, func(t *testing.T) {
+			cf, err := shredderFenCastlingFiles(tt.args.field, tt.args.kings)
 			assert.Equal(t, tt.want.cf, cf)
 			assert.Equal(t, tt.want.err, err)
 		})
