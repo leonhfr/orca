@@ -51,11 +51,7 @@ func (FEN) Decode(s string) (*Position, error) {
 		return nil, err
 	}
 
-	files, err := fenCastlingFiles(fields[2])
-	if err != nil {
-		return nil, err
-	}
-
+	files := [2]File{FileA, FileH}
 	rights, err := fenCastlingRights(fields[2])
 	if err != nil {
 		return nil, err
@@ -142,11 +138,6 @@ func fenTurn(field string) (Color, error) {
 	default:
 		return White, fmt.Errorf("invalid fen turn (%s)", field)
 	}
-}
-
-// fenCastlingFiles parses the castling files from FEN.
-func fenCastlingFiles(_ string) ([2]File, error) {
-	return [2]File{FileA, FileH}, nil
 }
 
 // fenCastlingRights parses the castling rights from FEN.
