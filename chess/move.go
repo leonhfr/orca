@@ -51,18 +51,55 @@ const NoMove Move = 0
 // newMove creates a new move.
 //
 // Expects the classic chess castling convention (king jumps two squares to castle).
+//
+// Example: e1g1 for H side white castle.
 func newMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece) Move {
 	var tags MoveTag
-	if pt := p1.Type(); pt == King {
-		if (s1 == E1 && s2 == C1) || (s1 == E8 && s2 == C8) {
-			tags ^= ASideCastle
-		} else if (s1 == E1 && s2 == G1) || (s1 == E8 && s2 == G8) {
-			tags ^= HSideCastle
-		}
-	} else if pt == Pawn && s2 == enPassant {
+	switch pt := p1.Type(); {
+	case pt == King && ((s1 == E1 && s2 == C1) || (s1 == E8 && s2 == C8)):
+		tags ^= ASideCastle
+	case pt == King && ((s1 == E1 && s2 == G1) || (s1 == E8 && s2 == G8)):
+		tags ^= HSideCastle
+	case pt == Pawn && s2 == enPassant:
 		tags ^= EnPassant
 		p2 = Pawn.color(p1.Color().Other())
-	} else if promo != NoPiece {
+	case promo != NoPiece:
+		tags ^= Promotion
+	}
+
+	if p2 != NoPiece {
+		tags |= Capture
+	}
+
+	if tags == 0 {
+		tags ^= Quiet
+	}
+
+	return Move(s1) ^ Move(s2)<<6 ^
+		Move(p1)<<12 ^ Move(p2)<<16 ^
+		Move(promo)<<20 ^ Move(tags)
+}
+
+// newChess960Move creates a new move.
+//
+// Expects the Chess960 castling convention (king takes own rook).
+//
+// Example: e1h1 for H side white castle in the classic position.
+func newChess960Move(p1, p2 Piece, s1, s2, enPassant Square, promo Piece, files [2]File) Move {
+	var tags MoveTag
+	switch pt, rook := p1.Type(), Rook.color(p1.Color()); {
+	case pt == King && p2 == rook && s2.File() == files[aSide]:
+		tags ^= ASideCastle
+		p2 = NoPiece
+		s2 = newSquare(kingFinalFile[aSide], s1.Rank())
+	case pt == King && p2 == rook && s2.File() == files[hSide]:
+		tags ^= HSideCastle
+		p2 = NoPiece
+		s2 = newSquare(kingFinalFile[hSide], s1.Rank())
+	case pt == Pawn && s2 == enPassant:
+		tags ^= EnPassant
+		p2 = Pawn.color(p1.Color().Other())
+	case promo != NoPiece:
 		tags ^= Promotion
 	}
 
