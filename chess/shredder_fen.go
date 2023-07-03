@@ -54,21 +54,14 @@ func (ShredderFEN) Decode(s string) (*Position, error) {
 		return nil, err
 	}
 
-	files, err := shredderFenCastlingFiles(fields[2], pos.board.sqKings)
+	pos.castling, err = shredderFenCastlingField(fields[2], pos.board.sqKings)
 	if err != nil {
 		return nil, err
 	}
-
-	rights, err := shredderFenCastlingRights(fields[2], files)
-	if err != nil {
-		return nil, err
-	}
-
-	pos.castling = castling{files, rights}
 
 	for c := Black; c <= White; c++ {
 		for s := aSide; s <= hSide; s++ {
-			pos.castleChecks[2*uint8(c)+uint8(s)] = newCastleCheck(c, s, pos.board.sqKings, files, rights)
+			pos.castleChecks[2*uint8(c)+uint8(s)] = newCastleCheck(c, s, pos.board.sqKings, pos.castling.files, pos.castling.rights)
 		}
 	}
 
@@ -93,6 +86,8 @@ func (ShredderFEN) Decode(s string) (*Position, error) {
 	return pos, nil
 }
 
+// shredderFenCastling formats castling to string
+// and follows the Shredder-FEN notation.
 func shredderFenCastling(c castling) string {
 	if c.rights == noCastle {
 		return "-"
@@ -114,64 +109,39 @@ func shredderFenCastling(c castling) string {
 	return rights
 }
 
-// shredderFenCastlingFiles parses the castling files from FEN.
-func shredderFenCastlingFiles(field string, kings [2]Square) ([2]File, error) {
+// shredderFenCastlingField parses a castling field that
+// follows the Shredder-FEN notation.
+func shredderFenCastlingField(field string, kings [2]Square) (castling, error) {
 	if field == "-" {
-		return [2]File{FileA, FileH}, nil
+		return castling{}, nil
 	}
 
-	set := make(map[rune]struct{})
-	runes := []rune{}
-	for _, r := range strings.ToLower(field) {
-		if _, ok := set[r]; !ok {
-			set[r] = struct{}{}
-			runes = append(runes, r)
-		}
-	}
+	files := [2]File{FileA, FileH}
+	rights := noCastle
 
+	runes := []rune(field)
 	sort.Slice(runes, func(i, j int) bool { return runes[i] < runes[j] })
 
-	switch len(runes) {
-	case 0:
-		return [2]File{FileA, FileH}, nil
-	case 1:
-		f := File(runes[0] - 'a')
-		k1, k2 := kings[0].File(), kings[1].File()
-		if f < k1 || f < k2 {
-			return [2]File{File(runes[0] - 'a'), FileH}, nil
+	for _, r := range runes {
+		lr := unicode.ToLower(r)
+		if lr < 'a' || 'h' < lr {
+			return castling{}, fmt.Errorf("invalid fen castling field (%s)", field)
 		}
 
-		return [2]File{FileA, File(runes[0] - 'a')}, nil
-	case 2:
-		return [2]File{File(runes[0] - 'a'), File(runes[1] - 'a')}, nil
-	default:
-		return [2]File{FileA, FileH}, fmt.Errorf("invalid fen castling files (%s)", field)
-	}
-}
-
-// shredderFenCastlingRights parses the castling rights from FEN.
-func shredderFenCastlingRights(field string, files [2]File) (castlingRights, error) {
-	if field == "-" {
-		return noCastle, nil
-	}
-
-	aSideFile := []rune(files[aSide].String())[0]
-	hSideFile := []rune(files[hSide].String())[0]
-
-	var cr castlingRights
-	for _, r := range field {
-		switch r {
-		case aSideFile:
-			cr |= castleBlackA
-		case hSideFile:
-			cr |= castleBlackH
-		case unicode.ToUpper(aSideFile):
-			cr |= castleWhiteA
-		case unicode.ToUpper(hSideFile):
-			cr |= castleWhiteH
-		default:
-			return noCastle, fmt.Errorf("invalid fen castling rights (%s)", field)
+		file := File(lr - 'a')
+		c, s := Black, aSide
+		if r == unicode.ToUpper(r) {
+			c = White
 		}
+		if File(kings[c].File().String()[0]-'a') < file {
+			s = hSide
+		}
+
+		rights |= castlingRightsMap[2*uint8(c)+uint8(s)]
+		files[s] = file
 	}
-	return cr, nil
+
+	return castling{files: files, rights: rights}, nil
 }
+
+var castlingRightsMap = [4]castlingRights{castleBlackA, castleBlackH, castleWhiteA, castleWhiteH} // indexed by 2*Color+side.

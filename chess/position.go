@@ -58,7 +58,7 @@ func (pos Position) FullMoves() uint8 {
 // The returned metadata can be used to unmake the move and
 // restore the position to the previous state.
 func (pos *Position) MakeMove(m Move) bool {
-	if (m.HasTag(ASideCastle) || m.HasTag(HSideCastle)) && !pos.isCastleLegal(m) {
+	if m.HasTag(ASideCastle^HSideCastle) && !pos.isCastleLegal(m) {
 		return false
 	}
 
