@@ -6,19 +6,25 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/leonhfr/orca/search"
 )
 
 func TestControllerRun(t *testing.T) {
 	name, author := "NAME", "AUTHOR"
-	e := new(mockEngine)
-	e.On("Close")
-	e.On("Options").Return([]Option{})
+	e := search.NewEngine()
 	w := &strings.Builder{}
-	s := NewController(name, author, w)
+	c := NewController(name, author, w)
 
 	r := strings.NewReader("uci\nfake command\nquit\n")
 
-	s.Run(context.Background(), e, r)
-	e.AssertExpectations(t)
-	assert.Equal(t, "id name NAME\nid author AUTHOR\nuciok\n", w.String())
+	expected := concatenateResponses(c, []response{
+		responseID{name, author},
+		availableOptions[0].uci(),
+		availableOptions[1].uci(),
+		responseUCIOK{},
+	})
+
+	c.Run(context.Background(), e, r)
+	assert.Equal(t, expected, w.String())
 }

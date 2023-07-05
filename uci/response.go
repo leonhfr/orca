@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/leonhfr/orca/chess"
+	"github.com/leonhfr/orca/search"
 )
 
 // response is the interface implemented by objects that represent
@@ -49,7 +50,7 @@ func (r responseBestMove) format(c *Controller) string {
 
 // responseInfo represents an "info" command.
 type responseOutput struct {
-	Output
+	search.Output
 	time time.Duration
 }
 
@@ -80,10 +81,20 @@ func (o responseOutput) format(c *Controller) string {
 	return fmt.Sprintf("info %s", strings.Join(res, " "))
 }
 
-// Option represents an "option" command.
-func (o Option) format(_ *Controller) string {
+// responseOption represents an "option" command.
+//
+//nolint:govet
+type responseOption struct {
+	Type    optionType
+	Name    string
+	Default string
+	Min     string
+	Max     string
+}
+
+func (o responseOption) format(_ *Controller) string {
 	switch o.Type {
-	case OptionInteger:
+	case integerOptionType:
 		var min, max string
 		if len(o.Min) > 0 {
 			min = fmt.Sprintf(" min %s", o.Min)
@@ -95,7 +106,7 @@ func (o Option) format(_ *Controller) string {
 			"option name %s type spin default %s%s%s",
 			o.Name, o.Default, min, max,
 		)
-	case OptionBoolean:
+	case booleanOptionType:
 		return fmt.Sprintf(
 			"option name %s type check default %s",
 			o.Name, o.Default,

@@ -1,11 +1,19 @@
-package search
+package uci
 
 import (
 	"errors"
 	"fmt"
 	"strconv"
 
-	"github.com/leonhfr/orca/uci"
+	"github.com/leonhfr/orca/search"
+)
+
+// optionType represent an option type.
+type optionType uint8
+
+const (
+	integerOptionType optionType = iota // OptionInteger represents an integer option.
+	booleanOptionType                   // OptionBoolean represents a boolean option.
 )
 
 var (
@@ -18,14 +26,14 @@ var (
 		def:  64,
 		min:  1,
 		max:  16 * 1024,
-		fn:   WithTableSize,
+		fn:   search.WithTableSize,
 	}
 
 	// ownBook represents whether the search engine should use its own opening book.
 	ownBookOption = optionBoolean{
 		name: "OwnBook",
 		def:  false,
-		fn:   WithOwnBook,
+		fn:   search.WithOwnBook,
 	}
 
 	errOptionName   = errors.New("option name not found")
@@ -35,9 +43,9 @@ var (
 // option is the interface implemented by each option type.
 type option interface {
 	fmt.Stringer
-	uci() uci.Option
-	defaultFunc() func(*Engine)
-	optionFunc(value string) (func(*Engine), error)
+	uci() responseOption
+	defaultFunc() func(*search.Engine)
+	optionFunc(value string) (func(*search.Engine), error)
 }
 
 // optionInteger represents an integer option.
@@ -46,7 +54,7 @@ type option interface {
 type optionInteger struct {
 	name          string
 	def, min, max int
-	fn            func(int) func(*Engine)
+	fn            func(int) func(*search.Engine)
 }
 
 // String implements the option interface.
@@ -55,9 +63,9 @@ func (o optionInteger) String() string {
 }
 
 // uci implements the option interface.
-func (o optionInteger) uci() uci.Option {
-	return uci.Option{
-		Type:    uci.OptionInteger,
+func (o optionInteger) uci() responseOption {
+	return responseOption{
+		Type:    integerOptionType,
 		Name:    o.name,
 		Default: fmt.Sprint(o.def),
 		Min:     fmt.Sprint(o.min),
@@ -66,19 +74,19 @@ func (o optionInteger) uci() uci.Option {
 }
 
 // defaultFunc implements the option interface.
-func (o optionInteger) defaultFunc() func(*Engine) {
+func (o optionInteger) defaultFunc() func(*search.Engine) {
 	return o.fn(o.def)
 }
 
 // optionFunc implements the option interface.
-func (o optionInteger) optionFunc(value string) (func(*Engine), error) {
+func (o optionInteger) optionFunc(value string) (func(*search.Engine), error) {
 	v, err := strconv.ParseInt(value, 10, 0)
 	if err != nil {
-		return func(e *Engine) {}, err
+		return func(e *search.Engine) {}, err
 	}
 
 	if int(v) < o.min || int(v) > o.max {
-		return func(e *Engine) {}, errOutsideBound
+		return func(e *search.Engine) {}, errOutsideBound
 	}
 
 	return o.fn(int(v)), nil
@@ -90,7 +98,7 @@ func (o optionInteger) optionFunc(value string) (func(*Engine), error) {
 type optionBoolean struct {
 	name string
 	def  bool
-	fn   func(bool) func(*Engine)
+	fn   func(bool) func(*search.Engine)
 }
 
 // String implements the option interface.
@@ -99,24 +107,24 @@ func (o optionBoolean) String() string {
 }
 
 // uci implements the option interface.
-func (o optionBoolean) uci() uci.Option {
-	return uci.Option{
-		Type:    uci.OptionBoolean,
+func (o optionBoolean) uci() responseOption {
+	return responseOption{
+		Type:    booleanOptionType,
 		Name:    o.name,
 		Default: fmt.Sprint(o.def),
 	}
 }
 
 // defaultFunc implements the option interface.
-func (o optionBoolean) defaultFunc() func(*Engine) {
+func (o optionBoolean) defaultFunc() func(*search.Engine) {
 	return o.fn(o.def)
 }
 
 // optionFunc implements the option interface.
-func (o optionBoolean) optionFunc(value string) (func(*Engine), error) {
+func (o optionBoolean) optionFunc(value string) (func(*search.Engine), error) {
 	v, err := strconv.ParseBool(value)
 	if err != nil {
-		return func(e *Engine) {}, err
+		return func(e *search.Engine) {}, err
 	}
 
 	return o.fn(v), nil

@@ -13,7 +13,6 @@ import (
 
 	"github.com/leonhfr/orca/chess"
 	"github.com/leonhfr/orca/data/books"
-	"github.com/leonhfr/orca/uci"
 )
 
 const (
@@ -26,8 +25,6 @@ const (
 )
 
 // Engine represents the search engine.
-//
-// Implements the uci.Engine interface.
 //
 //nolint:govet
 type Engine struct {
@@ -47,9 +44,7 @@ func NewEngine(options ...func(*Engine)) *Engine {
 		killers:   newKillerList(),
 		table:     noTable{},
 		pawnTable: noPawnTable{},
-	}
-	for _, o := range availableOptions {
-		o.defaultFunc()(e)
+		tableSize: 64,
 	}
 	for _, fn := range options {
 		fn(e)
@@ -72,8 +67,6 @@ func WithOwnBook(on bool) func(*Engine) {
 }
 
 // Init initializes the search engine.
-//
-// Implements the uci.Engine interface.
 func (e *Engine) Init() error {
 	var err error
 	e.once.Do(func() {
@@ -87,50 +80,17 @@ func (e *Engine) Init() error {
 }
 
 // Close shuts down the resources used by the search engine.
-//
-// Implements the uci.Engine interface.
 func (e *Engine) Close() {
 	_ = e.Init()
 	e.table.close()
 	e.pawnTable.close()
 }
 
-// Options lists the available options.
-//
-// Implements the uci.Engine interface.
-func (e *Engine) Options() []uci.Option {
-	options := make([]uci.Option, len(availableOptions))
-	for i, option := range availableOptions {
-		options[i] = option.uci()
-	}
-	return options
-}
-
-// SetOption sets an option.
-//
-// Implements the uci.Engine interface.
-func (e *Engine) SetOption(name, value string) error {
-	for _, option := range availableOptions {
-		if option.String() == name {
-			fn, err := option.optionFunc(value)
-			if err != nil {
-				return err
-			}
-			fn(e)
-			return nil
-		}
-	}
-
-	return errOptionName
-}
-
 // Search runs a search on the given position until the given depth.
 // Cancelling the context stops the search.
-//
-// Implements the uci.Engine interface.
-func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int) <-chan uci.Output {
+func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int) <-chan Output {
 	_ = e.Init()
-	output := make(chan uci.Output)
+	output := make(chan Output)
 
 	go func() {
 		defer close(output)
@@ -138,7 +98,7 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxN
 		if e.ownBook {
 			moves := e.book.Lookup(pos)
 			if move := weightedRandomMove(moves); move != chess.NoMove {
-				output <- uci.Output{
+				output <- Output{
 					PV:    []chess.Move{move},
 					Depth: 1,
 					Nodes: 1,
@@ -153,6 +113,15 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxN
 	}()
 
 	return output
+}
+
+// Output holds a search output.
+type Output struct {
+	PV    []chess.Move // Principal variation, best line found.
+	Depth int          // Search depth in plies.
+	Nodes int          // Number of nodes searched.
+	Score int          // Score from the engine's point of view in centipawns.
+	Mate  int          // Number of moves before mate. Positive for the current player to mate, negative for the current player to be mated.
 }
 
 // searchInfo contains info on the running search.
@@ -173,7 +142,7 @@ func newSearchInfo(table transpositionTable, pawnTable transpositionPawnTable) *
 }
 
 // iterativeSearch performs an iterative search.
-func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- uci.Output) {
+func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- Output) {
 	si := newSearchInfo(e.table, e.pawnTable)
 
 	if maxDepth <= 0 || maxDepth > maxSearchDepth {
@@ -199,7 +168,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 
 		nodes := int(si.nodes)
 
-		output <- uci.Output{
+		output <- Output{
 			Depth: maxDepth,
 			Score: int(score),
 			Nodes: nodes,

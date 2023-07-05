@@ -6,26 +6,27 @@ import (
 	"time"
 
 	"github.com/leonhfr/orca/chess"
+	"github.com/leonhfr/orca/search"
 )
 
 // command is the interface implemented by objects that represent
-// UCI commands from the GUI to the Engine.
+// UCI commands from the GUI to the *search.Engine.
 type command interface {
-	run(ctx context.Context, e Engine, c *Controller)
+	run(ctx context.Context, e *search.Engine, c *Controller)
 }
 
 // commandUCI represents a "uci" command.
 type commandUCI struct{}
 
 // run implements the command interface.
-func (commandUCI) run(_ context.Context, e Engine, c *Controller) {
+func (commandUCI) run(_ context.Context, _ *search.Engine, c *Controller) {
 	c.respond(responseID{
 		name:   c.name,
 		author: c.author,
 	})
 
-	for _, option := range e.Options() {
-		c.respond(option)
+	for _, option := range availableOptions {
+		c.respond(option.uci())
 	}
 
 	c.respond(responseUCIOK{})
@@ -37,7 +38,7 @@ type commandDebug struct {
 }
 
 // run implements the command interface.
-func (cmd commandDebug) run(_ context.Context, _ Engine, s *Controller) {
+func (cmd commandDebug) run(_ context.Context, _ *search.Engine, s *Controller) {
 	s.debug = cmd.on
 	s.logDebug("debug set to ", cmd.on)
 }
@@ -46,7 +47,7 @@ func (cmd commandDebug) run(_ context.Context, _ Engine, s *Controller) {
 type commandIsReady struct{}
 
 // run implements the command interface.
-func (commandIsReady) run(_ context.Context, e Engine, c *Controller) {
+func (commandIsReady) run(_ context.Context, e *search.Engine, c *Controller) {
 	go func() {
 		err := e.Init()
 		if err != nil {
@@ -63,17 +64,27 @@ type commandSetOption struct {
 }
 
 // run implements the command interface.
-func (cmd commandSetOption) run(_ context.Context, e Engine, c *Controller) {
-	if err := e.SetOption(cmd.name, cmd.value); err != nil {
-		c.logError(err)
+func (cmd commandSetOption) run(_ context.Context, e *search.Engine, c *Controller) {
+	for _, option := range availableOptions {
+		if option.String() == cmd.name {
+			fn, err := option.optionFunc(cmd.value)
+			if err != nil {
+				c.logError(err)
+				return
+			}
+			fn(e)
+			return
+		}
 	}
+
+	c.logError(errOptionName)
 }
 
 // commandUCINewGame represents a "ucinewgame" command.
 type commandUCINewGame struct{}
 
 // run implements the command interface.
-func (commandUCINewGame) run(_ context.Context, e Engine, c *Controller) {
+func (commandUCINewGame) run(_ context.Context, e *search.Engine, c *Controller) {
 	go func() {
 		c.position = chess.StartingPosition()
 		err := e.Init()
@@ -91,7 +102,7 @@ type commandPosition struct {
 }
 
 // run implements the command interface.
-func (cmd commandPosition) run(_ context.Context, _ Engine, c *Controller) {
+func (cmd commandPosition) run(_ context.Context, _ *search.Engine, c *Controller) {
 	if cmd.startPos {
 		c.position = chess.StartingPosition()
 	} else if len(cmd.fen) > 0 {
@@ -136,7 +147,7 @@ type commandGo struct {
 }
 
 // run implements the command interface.
-func (cmd commandGo) run(ctx context.Context, e Engine, c *Controller) {
+func (cmd commandGo) run(ctx context.Context, e *search.Engine, c *Controller) {
 	c.mu.Lock()
 	start := time.Now()
 	ctx, cancel := searchContext(ctx, c.stop, cmd.moveTime)
@@ -147,7 +158,7 @@ func (cmd commandGo) run(ctx context.Context, e Engine, c *Controller) {
 		defer c.mu.Unlock()
 		defer cancel()
 
-		var output Output
+		var output search.Output
 		for output = range outputs {
 			c.respond(responseOutput{
 				Output: output,
@@ -184,7 +195,7 @@ func searchContext(ctx context.Context, stop <-chan struct{}, limit time.Duratio
 type commandStop struct{}
 
 // run implements the command interface.
-func (commandStop) run(_ context.Context, _ Engine, c *Controller) {
+func (commandStop) run(_ context.Context, _ *search.Engine, c *Controller) {
 	select {
 	case c.stop <- struct{}{}:
 	default:
@@ -195,7 +206,7 @@ func (commandStop) run(_ context.Context, _ Engine, c *Controller) {
 type commandQuit struct{}
 
 // run implements the command interface.
-func (commandQuit) run(ctx context.Context, e Engine, c *Controller) {
+func (commandQuit) run(ctx context.Context, e *search.Engine, c *Controller) {
 	commandStop{}.run(ctx, e, c)
 
 	e.Close()

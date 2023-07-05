@@ -2,18 +2,18 @@ package uci
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/leonhfr/orca/chess"
+	"github.com/leonhfr/orca/search"
 )
 
 // compile time check that commandUCI implements command.
@@ -21,22 +21,19 @@ var _ command = commandUCI{}
 
 func TestCommandUCI(t *testing.T) {
 	name, author := "NAME", "AUTHOR"
-	e := new(mockEngine)
-	e.On("Options").Return([]Option{
-		testOptions[OptionInteger],
-	})
+	e := search.NewEngine()
 	w := &strings.Builder{}
 	c := NewController(name, author, w)
 
 	expected := concatenateResponses(c, []response{
 		responseID{name, author},
-		testOptions[OptionInteger],
+		availableOptions[0].uci(),
+		availableOptions[1].uci(),
 		responseUCIOK{},
 	})
 
 	commandUCI{}.run(context.Background(), e, c)
 
-	e.AssertExpectations(t)
 	assert.Equal(t, expected, w.String())
 }
 
@@ -48,10 +45,9 @@ func TestCommandDebug(t *testing.T) {
 
 	for _, tt := range []bool{true, false} {
 		t.Run(fmt.Sprint(tt), func(t *testing.T) {
-			e := new(mockEngine)
+			e := search.NewEngine()
 			commandDebug{on: tt}.run(context.Background(), e, c)
 
-			e.AssertExpectations(t)
 			assert.Equal(t, tt, c.debug)
 		})
 	}
@@ -62,31 +58,23 @@ var _ command = commandIsReady{}
 
 func TestCommandIsReady(t *testing.T) {
 	tests := []struct {
-		err  error
-		logs []string
-		rr   []response
+		rr []response
 	}{
-		{nil, nil, []response{responseReadyOK{}}},
-		{fmt.Errorf("ERROR"), []string{"info string ERROR"}, []response{responseReadyOK{}}},
+		{[]response{responseReadyOK{}}},
 	}
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			e := new(mockEngine)
-			e.On("Init").Return(tt.err)
+			e := search.NewEngine()
 
 			c := NewController("", "", io.Discard)
 			want := concatenateResponses(c, tt.rr)
-			if len(tt.logs) > 0 {
-				want = strings.Join(tt.logs, "\n") + "\n" + want
-			}
-			w := newMockWaitWriter(len(want))
+			w := newMockWaitWriter(len(tt.rr))
 			c.writer = w
 
 			commandIsReady{}.run(context.Background(), e, c)
 			w.Wait()
 
-			e.AssertExpectations(t)
 			assert.Equal(t, want, w.String())
 		})
 	}
@@ -96,38 +84,31 @@ func TestCommandIsReady(t *testing.T) {
 var _ command = commandSetOption{}
 
 func TestCommandSetOption(t *testing.T) {
-	type args struct {
-		cmd commandSetOption
-		err error
-	}
-
 	tests := []struct {
 		name string
-		args args
+		args commandSetOption
 		want []string
 	}{
 		{
 			"valid option",
-			args{commandSetOption{"NAME", "VALUE"}, nil},
+			commandSetOption{"Hash", "64"},
 			[]string{},
 		},
 		{
 			"invalid option",
-			args{commandSetOption{"NAME", "VALUE"}, errors.New("ERROR")},
-			[]string{"info string ERROR"},
+			commandSetOption{"NAME", "VALUE"},
+			[]string{"info string option name not found"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := new(mockEngine)
-			e.On("SetOption", tt.args.cmd.name, tt.args.cmd.value).Return(tt.args.err)
+			e := search.NewEngine()
 			w := &strings.Builder{}
 			c := NewController("", "", w)
 
-			commandSetOption{tt.args.cmd.name, tt.args.cmd.value}.run(context.Background(), e, c)
+			commandSetOption{tt.args.name, tt.args.value}.run(context.Background(), e, c)
 
-			e.AssertExpectations(t)
 			assert.Equal(t, concatenateStrings(tt.want), w.String())
 		})
 	}
@@ -135,41 +116,6 @@ func TestCommandSetOption(t *testing.T) {
 
 // compile time check that commandUCINewGame implements command.
 var _ command = commandUCINewGame{}
-
-func TestCommandUCINewGame(t *testing.T) {
-	startFEN := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
-	tests := []struct {
-		err  error
-		fen  string
-		logs []string
-	}{
-		{
-			err:  fmt.Errorf("ERROR"),
-			fen:  "8/8/8/5K1k/8/8/8/7R b - - 0 1",
-			logs: []string{"info string ERROR"},
-		},
-	}
-
-	for i, tt := range tests {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			e := new(mockEngine)
-			e.On("Init").Return(tt.err)
-
-			want := strings.Join(tt.logs, "\n") + "\n"
-			w := newMockWaitWriter(len(want))
-			c := NewController("", "", w)
-			c.position, _ = chess.NewPosition(tt.fen)
-
-			commandUCINewGame{}.run(context.Background(), e, c)
-			w.Wait()
-
-			e.AssertExpectations(t)
-			assert.Equal(t, want, w.String())
-			assert.Equal(t, startFEN, c.position.String())
-		})
-	}
-}
 
 // compile time check that commandPosition implements command.
 var _ command = commandPosition{}
@@ -215,13 +161,12 @@ func TestCommandPosition(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {
-			e := new(mockEngine)
+			e := search.NewEngine()
 			w := &strings.Builder{}
 			c := NewController("", "", w)
 
 			tt.c.run(context.Background(), e, c)
 
-			e.AssertExpectations(t)
 			assert.Equal(t, tt.want, c.position.String())
 			assert.Equal(t, concatenateStrings(tt.r), w.String())
 		})
@@ -232,48 +177,45 @@ func TestCommandPosition(t *testing.T) {
 var _ command = commandGo{}
 
 func TestCommandGo(t *testing.T) {
-	m1 := chess.Move(chess.B1) ^ chess.Move(chess.A3)<<6 ^ chess.Move(chess.NoPiece)<<20
-	m2 := chess.Move(chess.E6) ^ chess.Move(chess.E7)<<6 ^ chess.Move(chess.NoPiece)<<20
+	m1 := chess.Move(chess.A2) ^ chess.Move(chess.A3)<<6 ^ chess.Move(chess.NoPiece)<<20
+	m2 := chess.Move(chess.E2) ^ chess.Move(chess.E4)<<6 ^ chess.Move(chess.NoPiece)<<20
+	m3 := chess.Move(chess.A7) ^ chess.Move(chess.A6)<<6 ^ chess.Move(chess.NoPiece)<<20
 
-	output1 := Output{Score: 1000, PV: []chess.Move{m1}}
-	output2 := Output{Score: 2000, PV: []chess.Move{m1, m2}}
+	output1 := search.Output{Depth: 1, Nodes: 71, Score: 51, PV: []chess.Move{m1}}
+	output2 := search.Output{Depth: 2, Nodes: 391, Score: 6, PV: []chess.Move{m2, m3}}
 
 	tests := []struct {
 		c  commandGo
-		oo []Output
+		oo []search.Output
 		rr []response
 	}{
 		{
-			commandGo{depth: 32, nodes: 2048},
-			[]Output{output1, output2},
+			commandGo{depth: 2, nodes: 2048},
+			[]search.Output{output1, output2},
 			[]response{
 				responseOutput{Output: output1, time: 1 * time.Nanosecond},
 				responseOutput{Output: output2, time: 1 * time.Nanosecond},
-				responseBestMove{m1},
+				responseBestMove{m2},
 			},
 		},
 	}
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			e := new(mockEngine)
-			oc := make(chan Output, len(tt.oo))
-			for _, o := range tt.oo {
-				oc <- o
-			}
-			close(oc)
-			e.On("Search", mock.Anything, mock.Anything, tt.c.depth, tt.c.nodes).Return(oc)
+			e := search.NewEngine()
 
 			c := NewController("", "", io.Discard)
 			expected := concatenateResponses(c, tt.rr)
-			w := newMockWaitWriter(len(expected))
+			w := newMockWaitWriter(len(tt.rr))
 			c.writer = w
 
 			tt.c.run(context.Background(), e, c)
 
 			w.Wait()
-			e.AssertExpectations(t)
-			assert.Equal(t, expected, w.String())
+
+			timeRegex := regexp.MustCompile(`time \d+`)
+			got := timeRegex.ReplaceAllString(w.String(), "time 0")
+			assert.Equal(t, expected, got)
 		})
 	}
 }
@@ -282,7 +224,7 @@ func TestCommandGo(t *testing.T) {
 var _ command = commandStop{}
 
 func TestCommandStop(t *testing.T) {
-	e := new(mockEngine)
+	e := search.NewEngine()
 	c := NewController("", "", io.Discard)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -315,8 +257,7 @@ func TestCommandStop(t *testing.T) {
 var _ command = commandQuit{}
 
 func TestCommandQuit(t *testing.T) {
-	e := new(mockEngine)
-	e.On("Close")
+	e := search.NewEngine()
 	c := NewController("", "", io.Discard)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -342,7 +283,6 @@ func TestCommandQuit(t *testing.T) {
 	commandQuit{}.run(context.Background(), e, c)
 	wg.Wait()
 
-	e.AssertExpectations(t)
 	assert.True(t, stopCalled)
 }
 
@@ -366,26 +306,24 @@ func concatenateResponses(c *Controller, responses []response) string {
 
 // mockWaitWriter associates a string builder and a wait group.
 type mockWaitWriter struct {
-	b   *strings.Builder
-	wg  *sync.WaitGroup
-	lim int
+	b  *strings.Builder
+	wg *sync.WaitGroup
 }
 
 // newMockWaitWriter creates a new mockWaitWriter.
 func newMockWaitWriter(lim int) *mockWaitWriter {
 	ms := &mockWaitWriter{
-		b:   &strings.Builder{},
-		wg:  &sync.WaitGroup{},
-		lim: lim,
+		b:  &strings.Builder{},
+		wg: &sync.WaitGroup{},
 	}
-	ms.wg.Add(1)
+	ms.wg.Add(lim)
 	return ms
 }
 
 // Write implements the io.Writer interface.
 func (ms *mockWaitWriter) Write(p []byte) (n int, err error) {
 	n, err = ms.b.Write(p)
-	if ms.b.Len() >= ms.lim {
+	if strings.Contains(string(p), "\n") {
 		ms.wg.Done()
 	}
 	return n, err

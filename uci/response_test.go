@@ -8,9 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/leonhfr/orca/chess"
+	"github.com/leonhfr/orca/search"
 )
 
-func TestResponseString(t *testing.T) {
+func TestResponseFormat(t *testing.T) {
 	controller := NewController("", "", io.Discard)
 
 	m1 := chess.Move(chess.B1) ^ chess.Move(chess.A3)<<6 ^ chess.Move(chess.NoPiece)<<20
@@ -28,7 +29,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info score positive",
 			args: responseOutput{
-				Output{
+				search.Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: 3000,
@@ -41,7 +42,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info score negative",
 			args: responseOutput{
-				Output{
+				search.Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: -3000,
@@ -54,7 +55,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info mate positive",
 			args: responseOutput{
-				Output{
+				search.Output{
 					Depth: 8,
 					Score: 3000,
 					Nodes: 1024,
@@ -68,7 +69,7 @@ func TestResponseString(t *testing.T) {
 		{
 			name: "info mate negative",
 			args: responseOutput{
-				Output{
+				search.Output{
 					Depth: 8,
 					Nodes: 1024,
 					Score: -3000,
@@ -81,12 +82,12 @@ func TestResponseString(t *testing.T) {
 		},
 		{
 			name: "integer option",
-			args: testOptions[OptionInteger],
+			args: testOptions[integerOptionType],
 			want: "option name INTEGER OPTION type spin default 32 min 2 max 1024",
 		},
 		{
 			name: "boolean option",
-			args: testOptions[OptionBoolean],
+			args: testOptions[booleanOptionType],
 			want: "option name BOOLEAN OPTION type check default false",
 		},
 	}
@@ -96,4 +97,20 @@ func TestResponseString(t *testing.T) {
 			assert.Equal(t, tt.want, tt.args.format(controller))
 		})
 	}
+}
+
+// testOptions contains test options.
+var testOptions = []responseOption{
+	{
+		Type:    integerOptionType,
+		Name:    "INTEGER OPTION",
+		Default: "32",
+		Min:     "2",
+		Max:     "1024",
+	},
+	{
+		Type:    booleanOptionType,
+		Name:    "BOOLEAN OPTION",
+		Default: "false",
+	},
 }

@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/leonhfr/orca/chess"
+	"github.com/leonhfr/orca/search"
 )
 
 // Controller handles communications between UCI commands and a chess engine.
@@ -50,7 +51,7 @@ func NewController(name, author string, writer io.Writer) *Controller {
 //
 // Run parses command from the reader, executes them with the provided
 // search engine and writes the responses on the writer.
-func (c *Controller) Run(ctx context.Context, e Engine, r io.Reader) {
+func (c *Controller) Run(ctx context.Context, e *search.Engine, r io.Reader) {
 	// graceful shutdown when context canceled
 	// sending EOF to the UCI scanner by closing the pipe
 	pipeR, pipeW := io.Pipe()
