@@ -47,6 +47,24 @@ func NewController(name, author string, writer io.Writer) *Controller {
 	}
 }
 
+// Option represents an option.
+type Option func(*Controller)
+
+// WithChess960 sets the chess mode to classic chess or Chess960.
+func WithChess960(on bool) Option {
+	if on {
+		return func(c *Controller) {
+			c.notation = chess.ShredderFEN{}
+			c.moveNotation = chess.UCIChess960{}
+		}
+	}
+
+	return func(c *Controller) {
+		c.notation = chess.FEN{}
+		c.moveNotation = chess.UCI{}
+	}
+}
+
 // Run runs the controller.
 //
 // Run parses command from the reader, executes them with the provided

@@ -39,3 +39,4 @@ option name OwnBook type check default false
 Available options are:
 - `Hash`: size in MB used for the transposition table
 - `OwnBook`: allow the engine to use its own opening book
+- `UCI_Chess960`: sets the engine to Chess960 mode.

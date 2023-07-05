@@ -38,7 +38,7 @@ type Engine struct {
 }
 
 // NewEngine creates a new search engine.
-func NewEngine(options ...func(*Engine)) *Engine {
+func NewEngine(options ...Option) *Engine {
 	e := &Engine{
 		book:      chess.NewBook(),
 		killers:   newKillerList(),
@@ -52,15 +52,18 @@ func NewEngine(options ...func(*Engine)) *Engine {
 	return e
 }
 
+// Option represents an option.
+type Option func(*Engine)
+
 // WithTableSize sets the size of the transposition table in MB.
-func WithTableSize(size int) func(*Engine) {
+func WithTableSize(size int) Option {
 	return func(e *Engine) {
 		e.tableSize = size
 	}
 }
 
 // WithOwnBook determines the use of the search engine's own opening book.
-func WithOwnBook(on bool) func(*Engine) {
+func WithOwnBook(on bool) Option {
 	return func(e *Engine) {
 		e.ownBook = on
 	}

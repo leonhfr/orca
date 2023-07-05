@@ -17,11 +17,21 @@ const (
 )
 
 var (
-	// availableOptions holds all the search engine available options.
-	availableOptions = []option{tableSizeOption, ownBookOption}
+	// availableUCIOptions holds all the uci available options.
+	availableUCIOptions = []uciOption{chess960Option}
+
+	// availableSearchOptions holds all the search available options.
+	availableSearchOptions = []searchOption{tableSizeOption, ownBookOption}
+
+	// chess960Option represents the chess mode, classic or Chess960.
+	chess960Option = booleanUCIOption{
+		name: "UCI_Chess960",
+		def:  false,
+		fn:   WithChess960,
+	}
 
 	// tableSizeOption represents the size of the transposition hash table.
-	tableSizeOption = optionInteger{
+	tableSizeOption = integerSearchOption{
 		name: "Hash",
 		def:  64,
 		min:  1,
@@ -30,7 +40,7 @@ var (
 	}
 
 	// ownBook represents whether the search engine should use its own opening book.
-	ownBookOption = optionBoolean{
+	ownBookOption = booleanSearchOption{
 		name: "OwnBook",
 		def:  false,
 		fn:   search.WithOwnBook,
@@ -40,30 +50,80 @@ var (
 	errOutsideBound = errors.New("option value outside bounds")
 )
 
-// option is the interface implemented by each option type.
+// option is the interface implemented by all options.
 type option interface {
 	fmt.Stringer
-	uci() responseOption
+	response() responseOption
+}
+
+// uciOption is the interface implemented by each option that modifies the Controller.
+type uciOption interface {
+	option
+	defaultFunc() func(*Controller)
+	optionFunc(value string) (func(*Controller), error)
+}
+
+// booleanUCIOption represents a boolean option.
+//
+//nolint:govet
+type booleanUCIOption struct {
+	name string
+	def  bool
+	fn   func(bool) Option
+}
+
+// String implements the uciOption interface.
+func (o booleanUCIOption) String() string {
+	return o.name
+}
+
+// response implements the uciOption interface.
+func (o booleanUCIOption) response() responseOption {
+	return responseOption{
+		Type:    booleanOptionType,
+		Name:    o.name,
+		Default: fmt.Sprint(o.def),
+	}
+}
+
+// defaultFunc implements the uciOption interface.
+func (o booleanUCIOption) defaultFunc() func(*Controller) {
+	return o.fn(o.def)
+}
+
+// optionFunc implements the uciOption interface.
+func (o booleanUCIOption) optionFunc(value string) (func(*Controller), error) {
+	v, err := strconv.ParseBool(value)
+	if err != nil {
+		return func(e *Controller) {}, err
+	}
+
+	return o.fn(v), nil
+}
+
+// searchOption is the interface implemented by each option that modifies search.Engine.
+type searchOption interface {
+	option
 	defaultFunc() func(*search.Engine)
 	optionFunc(value string) (func(*search.Engine), error)
 }
 
-// optionInteger represents an integer option.
+// integerSearchOption represents an integer option.
 //
 //nolint:govet
-type optionInteger struct {
+type integerSearchOption struct {
 	name          string
 	def, min, max int
-	fn            func(int) func(*search.Engine)
+	fn            func(int) search.Option
 }
 
-// String implements the option interface.
-func (o optionInteger) String() string {
+// String implements the searchOption interface.
+func (o integerSearchOption) String() string {
 	return o.name
 }
 
-// uci implements the option interface.
-func (o optionInteger) uci() responseOption {
+// response implements the searchOption interface.
+func (o integerSearchOption) response() responseOption {
 	return responseOption{
 		Type:    integerOptionType,
 		Name:    o.name,
@@ -73,13 +133,13 @@ func (o optionInteger) uci() responseOption {
 	}
 }
 
-// defaultFunc implements the option interface.
-func (o optionInteger) defaultFunc() func(*search.Engine) {
+// defaultFunc implements the searchOption interface.
+func (o integerSearchOption) defaultFunc() func(*search.Engine) {
 	return o.fn(o.def)
 }
 
-// optionFunc implements the option interface.
-func (o optionInteger) optionFunc(value string) (func(*search.Engine), error) {
+// optionFunc implements the searchOption interface.
+func (o integerSearchOption) optionFunc(value string) (func(*search.Engine), error) {
 	v, err := strconv.ParseInt(value, 10, 0)
 	if err != nil {
 		return func(e *search.Engine) {}, err
@@ -92,22 +152,22 @@ func (o optionInteger) optionFunc(value string) (func(*search.Engine), error) {
 	return o.fn(int(v)), nil
 }
 
-// optionBoolean represents a boolean option.
+// booleanSearchOption represents a boolean option.
 //
 //nolint:govet
-type optionBoolean struct {
+type booleanSearchOption struct {
 	name string
 	def  bool
-	fn   func(bool) func(*search.Engine)
+	fn   func(bool) search.Option
 }
 
-// String implements the option interface.
-func (o optionBoolean) String() string {
+// String implements the searchOption interface.
+func (o booleanSearchOption) String() string {
 	return o.name
 }
 
-// uci implements the option interface.
-func (o optionBoolean) uci() responseOption {
+// response implements the searchOption interface.
+func (o booleanSearchOption) response() responseOption {
 	return responseOption{
 		Type:    booleanOptionType,
 		Name:    o.name,
@@ -115,13 +175,13 @@ func (o optionBoolean) uci() responseOption {
 	}
 }
 
-// defaultFunc implements the option interface.
-func (o optionBoolean) defaultFunc() func(*search.Engine) {
+// defaultFunc implements the searchOption interface.
+func (o booleanSearchOption) defaultFunc() func(*search.Engine) {
 	return o.fn(o.def)
 }
 
-// optionFunc implements the option interface.
-func (o optionBoolean) optionFunc(value string) (func(*search.Engine), error) {
+// optionFunc implements the searchOption interface.
+func (o booleanSearchOption) optionFunc(value string) (func(*search.Engine), error) {
 	v, err := strconv.ParseBool(value)
 	if err != nil {
 		return func(e *search.Engine) {}, err

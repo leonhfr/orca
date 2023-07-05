@@ -25,8 +25,11 @@ func (commandUCI) run(_ context.Context, _ *search.Engine, c *Controller) {
 		author: c.author,
 	})
 
-	for _, option := range availableOptions {
-		c.respond(option.uci())
+	for _, option := range availableSearchOptions {
+		c.respond(option.response())
+	}
+	for _, option := range availableUCIOptions {
+		c.respond(option.response())
 	}
 
 	c.respond(responseUCIOK{})
@@ -65,7 +68,7 @@ type commandSetOption struct {
 
 // run implements the command interface.
 func (cmd commandSetOption) run(_ context.Context, e *search.Engine, c *Controller) {
-	for _, option := range availableOptions {
+	for _, option := range availableSearchOptions {
 		if option.String() == cmd.name {
 			fn, err := option.optionFunc(cmd.value)
 			if err != nil {
@@ -73,6 +76,18 @@ func (cmd commandSetOption) run(_ context.Context, e *search.Engine, c *Controll
 				return
 			}
 			fn(e)
+			return
+		}
+	}
+
+	for _, option := range availableUCIOptions {
+		if option.String() == cmd.name {
+			fn, err := option.optionFunc(cmd.value)
+			if err != nil {
+				c.logError(err)
+				return
+			}
+			fn(c)
 			return
 		}
 	}

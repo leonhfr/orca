@@ -27,8 +27,9 @@ func TestCommandUCI(t *testing.T) {
 
 	expected := concatenateResponses(c, []response{
 		responseID{name, author},
-		availableOptions[0].uci(),
-		availableOptions[1].uci(),
+		availableSearchOptions[0].response(),
+		availableSearchOptions[1].response(),
+		availableUCIOptions[0].response(),
 		responseUCIOK{},
 	})
 
