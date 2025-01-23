@@ -22,6 +22,7 @@ func TestControllerRun(t *testing.T) {
 		responseID{name, author},
 		availableSearchOptions[0].response(),
 		availableSearchOptions[1].response(),
+		availableSearchOptions[2].response(),
 		availableUCIOptions[0].response(),
 		responseUCIOK{},
 	})

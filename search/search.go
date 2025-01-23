@@ -33,6 +33,7 @@ type Engine struct {
 	once      sync.Once
 	ownBook   bool
 	tableSize int
+	threads   int
 	table     transpositionTable
 	pawnTable transpositionPawnTable
 }
@@ -45,6 +46,7 @@ func NewEngine(options ...Option) *Engine {
 		table:     noTable{},
 		pawnTable: noPawnTable{},
 		tableSize: 64,
+		threads:   1,
 	}
 	for _, fn := range options {
 		fn(e)
@@ -59,6 +61,13 @@ type Option func(*Engine)
 func WithTableSize(size int) Option {
 	return func(e *Engine) {
 		e.tableSize = size
+	}
+}
+
+// WithThreads sets the number of threads to search with.
+func WithThreads(n int) Option {
+	return func(e *Engine) {
+		e.threads = n
 	}
 }
 
@@ -112,7 +121,7 @@ func (e *Engine) Search(ctx context.Context, pos *chess.Position, maxDepth, maxN
 		}
 
 		e.table.inc()
-		e.iterativeSearch(ctx, pos, maxDepth, maxNodes, output)
+		e.sequentialSearch(ctx, pos, maxDepth, maxNodes, output)
 	}()
 
 	return output
@@ -144,8 +153,8 @@ func newSearchInfo(table transpositionTable, pawnTable transpositionPawnTable) *
 	}
 }
 
-// iterativeSearch performs an iterative search.
-func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- Output) {
+// sequentialSearch performs an iterative search.
+func (e *Engine) sequentialSearch(ctx context.Context, pos *chess.Position, maxDepth, maxNodes int, output chan<- Output) {
 	si := newSearchInfo(e.table, e.pawnTable)
 
 	if maxDepth <= 0 || maxDepth > maxSearchDepth {

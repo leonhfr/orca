@@ -21,7 +21,7 @@ var (
 	availableUCIOptions = []uciOption{chess960Option}
 
 	// availableSearchOptions holds all the search available options.
-	availableSearchOptions = []searchOption{tableSizeOption, ownBookOption}
+	availableSearchOptions = []searchOption{tableSizeOption, threadsOption, ownBookOption}
 
 	// chess960Option represents the chess mode, classic or Chess960.
 	chess960Option = booleanUCIOption{
@@ -37,6 +37,15 @@ var (
 		min:  1,
 		max:  16 * 1024,
 		fn:   search.WithTableSize,
+	}
+
+	// threadsOption represents the number of threads to use for searching.
+	threadsOption = integerSearchOption{
+		name: "Threads",
+		def:  1,
+		min:  1,
+		max:  16,
+		fn:   search.WithThreads,
 	}
 
 	// ownBook represents whether the search engine should use its own opening book.
