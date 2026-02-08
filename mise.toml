@@ -1,0 +1,70 @@
+[tools]
+go = "1.22.0"
+"go:golang.org/x/tools/cmd/godoc" = "0.29.0"
+"cargo:perftree-cli" = "0.2.0"
+golangci-lint = "2.5.0"
+goreleaser = "2.13.3"
+
+[tasks.build]
+description = "Build the project"
+run = "go build ."
+
+[tasks.run]
+description = "Run the project"
+run = "go run ."
+
+[tasks."check:cargo"]
+description = "Check that cargo is installed"
+hide = true
+run = "command -v cargo >/dev/null || (echo 'cargo is required to build perftree-cli. Install Rust: https://rustup.rs' && exit 1)"
+
+[tasks."check:stockfish"]
+description = "Check that stockfish is installed"
+hide = true
+run = "command -v stockfish >/dev/null || (echo 'stockfish is required by perftree. Install it: https://stockfishchess.org/download/' && exit 1)"
+
+[tasks.perft]
+description = "Run perft tests"
+depends = ["check:cargo", "check:stockfish"]
+run = "perftree ./test/perft/perft.sh"
+
+[tasks.gen]
+description = "Run go generate"
+run = "go generate ./..."
+
+[tasks.test]
+description = "Run tests"
+run = "go test ./..."
+
+[tasks.test-race]
+description = "Run tests with race detector"
+run = "go test -race ./..."
+
+[tasks.bench]
+description = "Run benchmarks"
+run = "go test -bench . ./... -benchmem -run=^# | tee ./docs/benchmarks.txt"
+
+[tasks.lint]
+description = "Run linter"
+run = "golangci-lint run"
+
+[tasks.fmt]
+description = "Format code"
+run = "golangci-lint fmt"
+
+[tasks.coverage-html]
+description = "Generate HTML coverage report"
+depends = ["coverage"]
+run = "go tool cover -html=coverage.out"
+
+[tasks.coverage]
+description = "Generate coverage profile"
+run = "go test -coverprofile=coverage.out -coverpkg=github.com/leonhfr/orca/... ./..."
+
+[tasks.doc]
+description = "Serve documentation"
+run = "godoc -http=:6060"
+
+[tasks.release]
+description = "Create a snapshot release"
+run = "goreleaser release --snapshot --clean"

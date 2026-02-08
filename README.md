@@ -15,12 +15,12 @@ Several installation methods are available:
 go install github.com/leonhfr/orca@latest
 ```
 
-- compile from source (requires `go@1.19` and `make`):
+- compile from source (requires `mise`):
 
 ```sh
 git clone git@github.com:leonhfr/orca.git
 cd orca
-make build
+mise run build
 ```
 
 ## Quick start
