@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -38,7 +37,7 @@ func TestInit(t *testing.T) {
 
 	err := engine.Init()
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.IsType(t, &arrayTable{}, engine.table)
 }
 
@@ -167,7 +166,7 @@ func TestCachedSearch(t *testing.T) {
 				outputs = append(outputs, o)
 			}
 
-			require.Equal(t, len(tt.want), len(outputs))
+			require.Len(t, outputs, len(tt.want))
 			for i, o := range outputs {
 				wantMoves := make([]string, 0, len(tt.want[i].PV))
 				gotMoves := make([]string, 0, len(o.PV))
@@ -177,7 +176,7 @@ func TestCachedSearch(t *testing.T) {
 				for _, m := range o.PV {
 					gotMoves = append(gotMoves, m.String())
 				}
-				assert.Equal(t, tt.want[i], o, fmt.Sprintf("want moves %s, got %s", strings.Join(wantMoves, ", "), strings.Join(gotMoves, ", ")))
+				assert.Equal(t, tt.want[i], o, "want moves %s, got %s", strings.Join(wantMoves, ", "), strings.Join(gotMoves, ", "))
 			}
 		})
 	}

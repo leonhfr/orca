@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,9 +18,9 @@ func TestZeroWindow(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
 			score, err := si.zeroWindow(context.Background(), pos, mate, tt.depth)
 
-			assert.Equal(t, res.nodes, si.nodes, fmt.Sprintf("want %d, got %d", res.nodes, si.nodes))
-			assert.Equal(t, res.score, score, fmt.Sprintf("want %d, got %d", res.score, score))
-			assert.Nil(t, err)
+			assert.Equal(t, res.nodes, si.nodes, "want %d, got %d", res.nodes, si.nodes)
+			assert.Equal(t, res.score, score, "want %d, got %d", res.score, score)
+			assert.NoError(t, err)
 		})
 	}
 }

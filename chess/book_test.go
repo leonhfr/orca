@@ -21,7 +21,7 @@ func TestInit(t *testing.T) {
 	reader := bytes.NewReader(data.LaskerTrap)
 	err := book.Init(reader)
 
-	if ok := assert.Nil(t, err); ok {
+	if ok := assert.NoError(t, err); ok {
 		assert.Len(t, book.m, 7)
 	}
 }
@@ -32,7 +32,7 @@ func TestLookup(t *testing.T) {
 	reader := bytes.NewReader(data.LaskerTrap)
 	err := book.Init(reader)
 
-	if ok := assert.Nil(t, err); ok {
+	if ok := assert.NoError(t, err); ok {
 		pos := unsafeFEN("rnbqk1nr/ppp2ppp/8/4P3/1bPp4/4P3/PP1B1PPP/RN1QKBNR b KQkq - 0 1")
 		moves := book.Lookup(pos)
 		if ok := assert.Len(t, moves, 1); ok {

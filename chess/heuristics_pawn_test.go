@@ -1,7 +1,6 @@
 package chess
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,8 +64,8 @@ func TestPawnMap(t *testing.T) {
 			var pieces int
 			pos.PawnMap(func(p Piece, sq Square, properties PawnProperty) {
 				pieces++
-				assert.Equal(t, tt.pieces[sq].p, p, fmt.Sprintf("%v:%v", sq.String(), p.String()))
-				assert.Equal(t, tt.pieces[sq].pp, properties, fmt.Sprintf("%v:%v", sq.String(), properties))
+				assert.Equal(t, tt.pieces[sq].p, p, "%v:%v", sq.String(), p.String())
+				assert.Equal(t, tt.pieces[sq].pp, properties, "%v:%v", sq.String(), properties)
 			})
 			assert.Equal(t, len(tt.pieces), pieces)
 		})

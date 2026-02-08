@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,10 +52,10 @@ func TestQuiescence(t *testing.T) {
 			score, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth, 0)
 			pv := si.table.principalVariation(pos)
 
-			assert.Equal(t, tt.result.nodes, si.nodes, fmt.Sprintf("want %d, got %d", tt.result.nodes, si.nodes))
-			assert.Equal(t, tt.result.score, score, fmt.Sprintf("want %d, got %d", tt.result.score, score))
+			assert.Equal(t, tt.result.nodes, si.nodes, "want %d, got %d", tt.result.nodes, si.nodes)
+			assert.Equal(t, tt.result.score, score, "want %d, got %d", tt.result.score, score)
 			assert.Equal(t, tt.moves, movesString(pv))
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 		})
 	}
 }

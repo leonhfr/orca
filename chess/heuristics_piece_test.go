@@ -1,7 +1,6 @@
 package chess
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,8 +65,8 @@ func TestPieceMap(t *testing.T) {
 			var pieces int
 			pos.PieceMap(func(p Piece, sq Square, mobility int, _ PieceProperty) {
 				pieces++
-				assert.Equal(t, tt.pm[sq].piece, p, fmt.Sprintf("%v:%v", sq.String(), p.String()))
-				assert.Equal(t, tt.pm[sq].mobility, mobility, fmt.Sprintf("%v:%d", sq.String(), mobility))
+				assert.Equal(t, tt.pm[sq].piece, p, "%v:%v", sq.String(), p.String())
+				assert.Equal(t, tt.pm[sq].mobility, mobility, "%v:%d", sq.String(), mobility)
 			})
 			assert.Equal(t, len(tt.pm), pieces)
 		})

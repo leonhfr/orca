@@ -14,7 +14,7 @@ func TestBitboard_String(t *testing.T) {
 		bb ^= sq.bitboard()
 	}
 	expected := "10000001" + strings.Repeat("0", 48) + "10000001"
-	assert.Equal(t, bb.String(), expected)
+	assert.Equal(t, expected, bb.String())
 }
 
 // mapping returns the list of squares set to 1.

@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -155,10 +154,10 @@ func TestAlphaBeta(t *testing.T) {
 			score, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth, 0)
 			pv := si.table.principalVariation(pos)
 
-			assert.Equal(t, res.nodes, si.nodes, fmt.Sprintf("want %d, got %d", res.nodes, si.nodes))
-			assert.Equal(t, res.score, score, fmt.Sprintf("want %d, got %d", res.score, score))
+			assert.Equal(t, res.nodes, si.nodes, "want %d, got %d", res.nodes, si.nodes)
+			assert.Equal(t, res.score, score, "want %d, got %d", res.score, score)
 			assert.Equal(t, res.moves, movesString(pv))
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 		})
 	}
 }

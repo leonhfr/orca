@@ -2,10 +2,10 @@ package search
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/leonhfr/orca/chess"
 )
@@ -234,10 +234,10 @@ func TestNegamax(t *testing.T) {
 			score, err := si.negamax(context.Background(), unsafeFEN(tt.fen), tt.depth)
 
 			want := tt.negamax
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, score)
-			assert.Equal(t, want.nodes, si.nodes, fmt.Sprintf("nodes: want %d, got %d", want.nodes, si.nodes))
-			assert.Equal(t, want.score, score, fmt.Sprintf("score: want %d, got %d", want.score, score))
+			assert.Equal(t, want.nodes, si.nodes, "nodes: want %d, got %d", want.nodes, si.nodes)
+			assert.Equal(t, want.score, score, "score: want %d, got %d", want.score, score)
 		})
 	}
 }
