@@ -9,6 +9,7 @@ import (
 )
 
 func TestKillerListGet(t *testing.T) {
+	t.Parallel()
 	A, B := chess.Move(chess.A2), chess.Move(chess.B2)
 	C, D := chess.Move(chess.C2), chess.Move(chess.D2)
 	E, F := chess.Move(chess.E2), chess.Move(chess.F2)
@@ -63,6 +64,7 @@ func TestKillerListGet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := tt.list.get(tt.depth)
 			assert.Equal(t, tt.want, got)
 		})
@@ -70,6 +72,7 @@ func TestKillerListGet(t *testing.T) {
 }
 
 func TestKillerListSet(t *testing.T) {
+	t.Parallel()
 	A, B := chess.Move(chess.A2), chess.Move(chess.B2)
 	C, D := chess.Move(chess.C2), chess.Move(chess.D2)
 
@@ -94,6 +97,7 @@ func TestKillerListSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			kl := newKillerList()
 			for _, args := range tt.args {
 				kl.set(args.move, args.depth)

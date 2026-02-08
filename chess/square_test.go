@@ -7,6 +7,7 @@ import (
 )
 
 func TestSquare_File(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args []Square
@@ -24,6 +25,7 @@ func TestSquare_File(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			for _, sq := range tt.args {
 				assert.Equal(t, tt.want, sq.File())
 			}
@@ -32,6 +34,7 @@ func TestSquare_File(t *testing.T) {
 }
 
 func TestSquare_Rank(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args []Square
@@ -49,6 +52,7 @@ func TestSquare_Rank(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			for _, sq := range tt.args {
 				assert.Equal(t, tt.want, sq.Rank())
 			}

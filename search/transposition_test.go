@@ -19,6 +19,7 @@ var _ transpositionTable = (*arrayTable)(nil)
 var _ transpositionTable = (*hashMapTable)(nil)
 
 func TestNewTable(t *testing.T) {
+	t.Parallel()
 	table := newArrayTable(1)
 	defer table.close()
 
@@ -26,6 +27,7 @@ func TestNewTable(t *testing.T) {
 }
 
 func TestTableGet(t *testing.T) {
+	t.Parallel()
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
 	table := newArrayTable(1)
@@ -36,6 +38,7 @@ func TestTableGet(t *testing.T) {
 }
 
 func TestTableSet(t *testing.T) {
+	t.Parallel()
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
 	//nolint:gosec

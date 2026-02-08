@@ -16,6 +16,7 @@ var _ transpositionPawnTable = noPawnTable{}
 var _ transpositionPawnTable = (*arrayPawnTable)(nil)
 
 func TestNewPawnTable(t *testing.T) {
+	t.Parallel()
 	table := newArrayPawnTable(1)
 	defer table.close()
 
@@ -23,6 +24,7 @@ func TestNewPawnTable(t *testing.T) {
 }
 
 func TestPawnTableGet(t *testing.T) {
+	t.Parallel()
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
 	table := newArrayTable(1)
@@ -33,6 +35,7 @@ func TestPawnTableGet(t *testing.T) {
 }
 
 func TestPawnTableSet(t *testing.T) {
+	t.Parallel()
 	//nolint:gosec
 	hash := chess.Hash(rand.Uint64())
 	//nolint:gosec

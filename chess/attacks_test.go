@@ -8,6 +8,7 @@ import (
 )
 
 func TestPieceBitboard(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		fen string
 		sq  Square
@@ -46,6 +47,7 @@ func TestPieceBitboard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args.pt.String()+" "+tt.args.sq.String(), func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.args.fen)
 			occupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
 			got := pieceBitboard(tt.args.sq, tt.args.pt, occupancy)
@@ -55,6 +57,7 @@ func TestPieceBitboard(t *testing.T) {
 }
 
 func TestPawnMoveBitboard(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		fen   string
 		upOne []Square
@@ -66,6 +69,7 @@ func TestPawnMoveBitboard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			pawn := pos.board.bbPieces[Pawn] & pos.board.bbColors[pos.turn]
 			occupancy := pos.board.bbColors[White] ^ pos.board.bbColors[Black]
@@ -77,6 +81,7 @@ func TestPawnMoveBitboard(t *testing.T) {
 }
 
 func TestPawnCaptureBitboard(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		fen      string
 		captureR []Square
@@ -88,6 +93,7 @@ func TestPawnCaptureBitboard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			pawn := pos.board.bbPieces[Pawn] & pos.board.bbColors[pos.turn]
 			captureR, captureL := pawnCaptureBitboard(pawn, pos.turn)
@@ -98,11 +104,13 @@ func TestPawnCaptureBitboard(t *testing.T) {
 }
 
 func TestRookBishopMoves(t *testing.T) {
+	t.Parallel()
 	magics := [][64]Magic{rookMagics, bishopMagics}
 	moves := [][]bitboard{bbMagicRookMoves, bbMagicBishopMoves}
 
 	for pieceIndex, pt := range []PieceType{Rook, Bishop} {
 		t.Run(pt.String(), func(t *testing.T) {
+			t.Parallel()
 			for range 20 {
 				bb, sq := randomPosition()
 				index := magics[pieceIndex][sq].index(bb)

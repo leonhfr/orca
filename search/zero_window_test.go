@@ -9,8 +9,10 @@ import (
 )
 
 func TestZeroWindow(t *testing.T) {
+	t.Parallel()
 	for _, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			si := newSearchInfo(noTable{}, noPawnTable{})
 
 			res := tt.zeroWindow

@@ -25,8 +25,10 @@ var testPositions = []struct {
 }
 
 func TestEvaluate(t *testing.T) {
+	t.Parallel()
 	for _, tt := range testPositions {
 		t.Run(tt.fen, func(t *testing.T) {
+			t.Parallel()
 			si := newSearchInfo(noTable{}, noPawnTable{})
 			pos := unsafeFEN(tt.fen)
 			assert.Equal(t, tt.score, si.evaluate(pos))
@@ -35,8 +37,10 @@ func TestEvaluate(t *testing.T) {
 }
 
 func TestEvaluatePawns(t *testing.T) {
+	t.Parallel()
 	for _, tt := range testPositions {
 		t.Run(tt.fen, func(t *testing.T) {
+			t.Parallel()
 			si := newSearchInfo(noTable{}, noPawnTable{})
 			pos := unsafeFEN(tt.fen)
 			mg, eg := si.evaluatePawns(pos)

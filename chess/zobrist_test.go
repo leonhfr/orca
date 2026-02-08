@@ -140,8 +140,10 @@ var zobristTests = []struct {
 }
 
 func TestZobristHash(t *testing.T) {
+	t.Parallel()
 	for _, tt := range zobristTests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.args)
 			key := newZobristHash(pos)
 			assert.Equal(t, tt.hash, key)
@@ -150,8 +152,10 @@ func TestZobristHash(t *testing.T) {
 }
 
 func TestPawnZobristHash(t *testing.T) {
+	t.Parallel()
 	for _, tt := range zobristTests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.args)
 			key := newPawnZobristHash(pos)
 			assert.Equal(t, tt.pawnHash, key)
@@ -160,9 +164,11 @@ func TestPawnZobristHash(t *testing.T) {
 }
 
 func TestIncrementalZobristHash(t *testing.T) {
+	t.Parallel()
 	for i, tt := range zobristTests {
 		if tt.move != NoMove {
 			t.Run(fmt.Sprintf("%s (%s)", tt.name, tt.move.String()), func(t *testing.T) {
+				t.Parallel()
 				pos := unsafeFEN(tt.args)
 				pos.MakeMove(tt.move)
 

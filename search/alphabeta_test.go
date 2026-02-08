@@ -144,8 +144,10 @@ func getNodeType(alpha, beta, score int32) nodeType {
 }
 
 func TestAlphaBeta(t *testing.T) {
+	t.Parallel()
 	for _, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			si := newSearchInfo(newHashMapTable(), noPawnTable{})
 
 			res := tt.alphaBeta

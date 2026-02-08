@@ -42,8 +42,10 @@ var kingPieceMapTests = []struct {
 }
 
 func TestKingMap(t *testing.T) {
+	t.Parallel()
 	for _, tt := range kingPieceMapTests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			pos.KingMap(func(p Piece, sq Square, shieldDefects, openFiles, halfOpenFiles int) {
 				assert.Equal(t, tt.kings[p.Color()].sq, sq, fmt.Sprint(sq))
@@ -55,7 +57,7 @@ func TestKingMap(t *testing.T) {
 	}
 }
 
-func BenchmarKingMap(b *testing.B) {
+func BenchmarkKingMap(b *testing.B) {
 	for _, bb := range kingPieceMapTests {
 		b.Run(bb.name, func(b *testing.B) {
 			pos := unsafeFEN(bb.fen)

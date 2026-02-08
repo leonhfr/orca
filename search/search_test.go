@@ -14,21 +14,25 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	t.Parallel()
 	e := NewEngine()
 	assert.Equal(t, 64, e.tableSize)
 }
 
 func TestWithTableSize(t *testing.T) {
+	t.Parallel()
 	e := NewEngine(WithTableSize(128))
 	assert.Equal(t, 128, e.tableSize)
 }
 
 func TestWithOwnBook(t *testing.T) {
+	t.Parallel()
 	e := NewEngine(WithOwnBook(true))
 	assert.True(t, e.ownBook)
 }
 
 func TestInit(t *testing.T) {
+	t.Parallel()
 	engine := NewEngine()
 	assert.Equal(t, noTable{}, engine.table)
 
@@ -39,6 +43,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestSearch(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		fen     string
@@ -87,6 +92,7 @@ func TestSearch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			engine := NewEngine()
 			_ = engine.Init()
 			if tt.book {
@@ -106,6 +112,7 @@ func TestSearch(t *testing.T) {
 }
 
 func TestCachedSearch(t *testing.T) {
+	t.Parallel()
 	fen := "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"
 	depth := 8
 
@@ -146,6 +153,7 @@ func TestCachedSearch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			engine := NewEngine()
 			_ = engine.Init()
 			if !tt.cached {

@@ -11,6 +11,7 @@ import (
 )
 
 func TestControllerRun(t *testing.T) {
+	t.Parallel()
 	name, author := "NAME", "AUTHOR"
 	e := search.NewEngine()
 	w := &strings.Builder{}

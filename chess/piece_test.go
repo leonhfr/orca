@@ -7,6 +7,7 @@ import (
 )
 
 func TestColor_String(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args Color
@@ -18,12 +19,14 @@ func TestColor_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tt.want, tt.args.String())
 		})
 	}
 }
 
 func TestPieceType_String(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args PieceType
@@ -40,12 +43,14 @@ func TestPieceType_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tt.want, tt.args.String())
 		})
 	}
 }
 
 func TestPiece_String(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args Piece
@@ -68,12 +73,14 @@ func TestPiece_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tt.want, tt.args.String())
 		})
 	}
 }
 
 func TestPiece_Color(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args Piece
@@ -95,12 +102,14 @@ func TestPiece_Color(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tt.want, tt.args.Color())
 		})
 	}
 }
 
 func TestPiece_Type(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args Piece
@@ -122,6 +131,7 @@ func TestPiece_Type(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tt.want, tt.args.Type())
 		})
 	}

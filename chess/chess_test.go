@@ -7,6 +7,7 @@ import (
 )
 
 func TestHasInsufficientMaterial(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		fen  string
@@ -46,6 +47,7 @@ func TestHasInsufficientMaterial(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			got := pos.HasInsufficientMaterial()
 			assert.Equal(t, tt.want, got)
@@ -62,6 +64,7 @@ func BenchmarkHasInsufficientMaterial(b *testing.B) {
 }
 
 func TestPseudoMoves(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		fen  string
 		want []string
@@ -125,6 +128,7 @@ func TestPseudoMoves(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			checkData, _ := pos.InCheck()
 			moves := pos.PseudoMoves(checkData)
@@ -150,6 +154,7 @@ func BenchmarkPseudoMoves(b *testing.B) {
 }
 
 func TestLoudMoves(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		fen  string
 		want []string
@@ -180,6 +185,7 @@ func TestLoudMoves(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			loudMoves := pos.LoudMoves()
 			got := make([]string, 0, len(loudMoves))
@@ -203,6 +209,7 @@ func BenchmarkLoudMoves(b *testing.B) {
 }
 
 func TestAttackedByBitboard(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		fen  string
@@ -228,6 +235,7 @@ func TestAttackedByBitboard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			got := pos.attackedByBitboard(tt.sq, tt.c)
 			assert.Equal(t, tt.want, got)
@@ -236,6 +244,7 @@ func TestAttackedByBitboard(t *testing.T) {
 }
 
 func TestAttackBitboards(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		fen  string
@@ -259,6 +268,7 @@ func TestAttackBitboards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			got := pos.attackBitboards(tt.sq, tt.c)
 			assert.Equal(t, tt.want, got)

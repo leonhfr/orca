@@ -16,10 +16,12 @@ linters:
     - makezero
     - modernize
     - nilerr
+    - paralleltest
     - perfsprint
     - prealloc
     - revive
     - staticcheck
+    - thelper
     - unconvert
     - unparam
     - unused

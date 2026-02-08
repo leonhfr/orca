@@ -20,6 +20,7 @@ import (
 var _ command = commandUCI{}
 
 func TestCommandUCI(t *testing.T) {
+	t.Parallel()
 	name, author := "NAME", "AUTHOR"
 	e := search.NewEngine()
 	w := &strings.Builder{}
@@ -42,10 +43,12 @@ func TestCommandUCI(t *testing.T) {
 var _ command = commandDebug{}
 
 func TestCommandDebug(t *testing.T) {
+	t.Parallel()
 	c := NewController("", "", io.Discard)
 
 	for _, tt := range []bool{true, false} {
 		t.Run(strconv.FormatBool(tt), func(t *testing.T) {
+			t.Parallel()
 			e := search.NewEngine()
 			commandDebug{on: tt}.run(context.Background(), e, c)
 
@@ -58,6 +61,7 @@ func TestCommandDebug(t *testing.T) {
 var _ command = commandIsReady{}
 
 func TestCommandIsReady(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		rr []response
 	}{
@@ -66,6 +70,7 @@ func TestCommandIsReady(t *testing.T) {
 
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Parallel()
 			e := search.NewEngine()
 
 			c := NewController("", "", io.Discard)
@@ -85,6 +90,7 @@ func TestCommandIsReady(t *testing.T) {
 var _ command = commandSetOption{}
 
 func TestCommandSetOption(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		args commandSetOption
@@ -104,6 +110,7 @@ func TestCommandSetOption(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			e := search.NewEngine()
 			w := &strings.Builder{}
 			c := NewController("", "", w)
@@ -122,6 +129,7 @@ var _ command = commandUCINewGame{}
 var _ command = commandPosition{}
 
 func TestCommandPosition(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		c    commandPosition
 		r    []string
@@ -162,6 +170,7 @@ func TestCommandPosition(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {
+			t.Parallel()
 			e := search.NewEngine()
 			w := &strings.Builder{}
 			c := NewController("", "", w)
@@ -178,6 +187,7 @@ func TestCommandPosition(t *testing.T) {
 var _ command = commandGo{}
 
 func TestCommandGo(t *testing.T) {
+	t.Parallel()
 	m1 := chess.Move(chess.A2) ^ chess.Move(chess.A3)<<6 ^ chess.Move(chess.NoPiece)<<20
 	m2 := chess.Move(chess.E2) ^ chess.Move(chess.E4)<<6 ^ chess.Move(chess.NoPiece)<<20
 	m3 := chess.Move(chess.A7) ^ chess.Move(chess.A6)<<6 ^ chess.Move(chess.NoPiece)<<20
@@ -203,6 +213,7 @@ func TestCommandGo(t *testing.T) {
 
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Parallel()
 			e := search.NewEngine()
 
 			c := NewController("", "", io.Discard)
@@ -225,6 +236,7 @@ func TestCommandGo(t *testing.T) {
 var _ command = commandStop{}
 
 func TestCommandStop(t *testing.T) {
+	t.Parallel()
 	e := search.NewEngine()
 	c := NewController("", "", io.Discard)
 
@@ -258,6 +270,7 @@ func TestCommandStop(t *testing.T) {
 var _ command = commandQuit{}
 
 func TestCommandQuit(t *testing.T) {
+	t.Parallel()
 	e := search.NewEngine()
 	c := NewController("", "", io.Discard)
 

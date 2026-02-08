@@ -8,6 +8,7 @@ import (
 )
 
 func TestCastling_String(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		args castling
 		want string
@@ -19,12 +20,14 @@ func TestCastling_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprint(tt.args), func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tt.want, tt.args.String())
 		})
 	}
 }
 
 func TestNewCastleCheck(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		c     Color
 		s     side
@@ -113,6 +116,7 @@ func TestNewCastleCheck(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := newCastleCheck(tt.c, tt.s, tt.kings, tt.cf, tt.cr)
 			assert.Equal(t, tt.want, got)
 		})

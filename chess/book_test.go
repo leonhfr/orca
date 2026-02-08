@@ -10,11 +10,13 @@ import (
 )
 
 func TestNewBook(t *testing.T) {
+	t.Parallel()
 	book := NewBook()
 	assert.Equal(t, map[Hash][]openingMove{}, book.m)
 }
 
 func TestInit(t *testing.T) {
+	t.Parallel()
 	book := NewBook()
 	reader := bytes.NewReader(data.LaskerTrap)
 	err := book.Init(reader)
@@ -25,6 +27,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestLookup(t *testing.T) {
+	t.Parallel()
 	book := NewBook()
 	reader := bytes.NewReader(data.LaskerTrap)
 	err := book.Init(reader)

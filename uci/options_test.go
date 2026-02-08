@@ -20,10 +20,12 @@ var _ searchOption = integerSearchOption{}
 var _ searchOption = booleanSearchOption{}
 
 func TestOptionBooleanString(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, chess960Option.name, chess960Option.String())
 }
 
 func TestOptionBooleanUCI(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, responseOption{
 		Type:    booleanOptionType,
 		Name:    chess960Option.name,
@@ -34,6 +36,7 @@ func TestOptionBooleanUCI(t *testing.T) {
 // optionBoolean.defaultFunc tested in New
 
 func TestOptionBooleanOptionFunc(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		notation     chess.Notation
 		moveNotation chess.MoveNotation
@@ -64,6 +67,7 @@ func TestOptionBooleanOptionFunc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			fn, err := chess960Option.optionFunc(tt.args)
 			if err != nil {
 				assert.Equal(t, tt.want.err, err.Error())

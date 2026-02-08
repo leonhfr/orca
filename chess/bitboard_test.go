@@ -8,6 +8,7 @@ import (
 )
 
 func TestBitboard_String(t *testing.T) {
+	t.Parallel()
 	var bb bitboard
 	for _, sq := range []Square{A1, H1, A8, H8} {
 		bb ^= sq.bitboard()

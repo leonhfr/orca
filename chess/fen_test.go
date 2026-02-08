@@ -11,6 +11,7 @@ import (
 var _ Notation = FEN{}
 
 func TestFEN(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		args string
 		want error
@@ -21,6 +22,7 @@ func TestFEN(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			pos, err := FEN{}.Decode(tt.args)
 			if tt.want == nil {
 				assert.Equal(t, tt.args, FEN{}.Encode(pos))
@@ -31,6 +33,7 @@ func TestFEN(t *testing.T) {
 }
 
 func TestFENBoard(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		b   board
 		err error
@@ -46,6 +49,7 @@ func TestFENBoard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			b, err := fenBoard(tt.args)
 			assert.Equal(t, tt.want.err, err)
 			assert.Equal(t, tt.want.b, b)
@@ -54,6 +58,7 @@ func TestFENBoard(t *testing.T) {
 }
 
 func TestFENFileField(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		fm  map[File]Piece
 		err error
@@ -92,6 +97,7 @@ func TestFENFileField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			fm, err := fenFileField(tt.args)
 			assert.Equal(t, tt.want.fm, fm)
 			assert.Equal(t, tt.want.err, err)
@@ -100,6 +106,7 @@ func TestFENFileField(t *testing.T) {
 }
 
 func TestFENTurn(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		turn Color
 		err  error
@@ -116,6 +123,7 @@ func TestFENTurn(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			turn, err := fenTurn(tt.args)
 			assert.Equal(t, tt.want.turn, turn)
 			assert.Equal(t, tt.want.err, err)
@@ -124,6 +132,7 @@ func TestFENTurn(t *testing.T) {
 }
 
 func TestFENCastlingRights(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		cr  castlingRights
 		err error
@@ -141,6 +150,7 @@ func TestFENCastlingRights(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			cr, err := fenCastlingRights(tt.args)
 			assert.Equal(t, tt.want.cr, cr)
 			assert.Equal(t, tt.want.err, err)
@@ -149,6 +159,7 @@ func TestFENCastlingRights(t *testing.T) {
 }
 
 func TestFENEnPassantSquare(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		sq  Square
 		err error
@@ -167,6 +178,7 @@ func TestFENEnPassantSquare(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			sq, err := fenEnPassantSquare(tt.args)
 			assert.Equal(t, tt.want.sq, sq)
 			assert.Equal(t, tt.want.err, err)
@@ -175,6 +187,7 @@ func TestFENEnPassantSquare(t *testing.T) {
 }
 
 func TestFENHalfMoveClock(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		hmc uint8
 		err error
@@ -191,6 +204,7 @@ func TestFENHalfMoveClock(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			hmc, err := fenHalfMoveClock(tt.args)
 			assert.Equal(t, tt.want.hmc, hmc)
 			assert.Equal(t, tt.want.err, err)
@@ -199,6 +213,7 @@ func TestFENHalfMoveClock(t *testing.T) {
 }
 
 func TestFENFullMoves(t *testing.T) {
+	t.Parallel()
 	type want struct {
 		fm  uint8
 		err error
@@ -215,6 +230,7 @@ func TestFENFullMoves(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			fm, err := fenFullMoves(tt.args)
 			assert.Equal(t, tt.want.fm, fm)
 			assert.Equal(t, tt.want.err, err)

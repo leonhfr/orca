@@ -9,6 +9,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
+	t.Parallel()
 	fen := "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
 
 	tests := []struct {
@@ -68,6 +69,7 @@ func TestParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := parse(strings.Fields(tt.args))
 			assert.Equal(t, tt.want, got)
 		})

@@ -13,6 +13,7 @@ type pieceCallbackArgs struct {
 }
 
 func TestCountPieces(t *testing.T) {
+	t.Parallel()
 	pos := unsafeFEN(startFEN)
 	knights, bishops, rooks, queens := pos.CountPieces()
 	assert.Equal(t, 4, knights)
@@ -57,8 +58,10 @@ var pieceMapTests = []struct {
 }
 
 func TestPieceMap(t *testing.T) {
+	t.Parallel()
 	for _, tt := range pieceMapTests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			var pieces int
 			pos.PieceMap(func(p Piece, sq Square, mobility int, _ PieceProperty) {

@@ -11,6 +11,7 @@ import (
 var _ Notation = ShredderFEN{}
 
 func TestShredderFEN(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		args string
 		want error
@@ -25,6 +26,7 @@ func TestShredderFEN(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
 			pos, err := ShredderFEN{}.Decode(tt.args)
 			if tt.want == nil {
 				assert.Equal(t, tt.args, ShredderFEN{}.Encode(pos))
@@ -35,6 +37,7 @@ func TestShredderFEN(t *testing.T) {
 }
 
 func TestShredderFENCastling(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		args castling
 		want string
@@ -49,6 +52,7 @@ func TestShredderFENCastling(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {
+			t.Parallel()
 			got := shredderFenCastling(tt.args)
 			assert.Equal(t, tt.want, got)
 		})

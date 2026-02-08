@@ -57,8 +57,10 @@ var pawnPieceMapTests = []struct {
 }
 
 func TestPawnMap(t *testing.T) {
+	t.Parallel()
 	for _, tt := range pawnPieceMapTests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			var pieces int
 			pos.PawnMap(func(p Piece, sq Square, properties PawnProperty) {

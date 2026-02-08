@@ -9,8 +9,10 @@ import (
 )
 
 func TestPrincipalVariation(t *testing.T) {
+	t.Parallel()
 	for _, tt := range searchTestPositions {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			si := newSearchInfo(newHashMapTable(), noPawnTable{})
 
 			res := tt.principalVariation

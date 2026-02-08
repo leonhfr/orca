@@ -9,6 +9,7 @@ import (
 )
 
 func TestScoreMoves(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		fen     string
@@ -32,6 +33,7 @@ func TestScoreMoves(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			checkData, _ := pos.InCheck()
 			original := pos.PseudoMoves(checkData)
@@ -47,6 +49,7 @@ func TestScoreMoves(t *testing.T) {
 }
 
 func TestOrderMoves(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		fen     string
@@ -97,6 +100,7 @@ func TestOrderMoves(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			checkData, _ := pos.InCheck()
 			moves := pos.PseudoMoves(checkData)

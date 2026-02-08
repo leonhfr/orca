@@ -9,6 +9,7 @@ import (
 )
 
 func TestLateMoveReduction(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		validMoves int
 		inCheck    bool
@@ -30,6 +31,7 @@ func TestLateMoveReduction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := lateMoveReduction(tt.args.validMoves, tt.args.inCheck, tt.args.depth, tt.args.move)
 			assert.Equal(t, tt.want, got)
 		})
@@ -37,6 +39,7 @@ func TestLateMoveReduction(t *testing.T) {
 }
 
 func TestShouldNullMovePrune(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		fen     string
 		inCheck bool
@@ -56,6 +59,7 @@ func TestShouldNullMovePrune(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.args.fen)
 			got := shouldNullMovePrune(pos, tt.args.inCheck, tt.args.depth)
 			assert.Equal(t, tt.want, got)

@@ -8,9 +8,11 @@ import (
 )
 
 func TestPerft(t *testing.T) {
+	t.Parallel()
 	for _, tt := range perftResults {
 		for depth := 0; depth < len(tt.nodes); depth++ {
 			t.Run(fmt.Sprintf("%s depth %d", tt.fen, depth+1), func(t *testing.T) {
+				t.Parallel()
 				pos := unsafeFEN(tt.fen)
 				got := pos.Perft(depth + 1)
 				assert.Equal(t, tt.nodes[depth], got.nodes)
@@ -20,11 +22,13 @@ func TestPerft(t *testing.T) {
 }
 
 func TestPerftChess960(t *testing.T) {
+	t.Parallel()
 	// TODO: Chess960, broken at depth 3
 
 	for i, tt := range chess960perftResults {
 		for depth := 0; depth < len(tt.nodes) && depth < 2; depth++ {
 			t.Run(fmt.Sprintf("%d depth %d", i+1, depth+1), func(t *testing.T) {
+				t.Parallel()
 				pos := unsafeShredderFEN(tt.fen)
 				got := pos.Perft(depth + 1)
 				assert.Equal(t, tt.nodes[depth], got.nodes)

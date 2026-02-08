@@ -14,6 +14,7 @@ type quiescenceSearchTestResult struct {
 }
 
 func TestQuiescence(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		fen    string
@@ -46,6 +47,7 @@ func TestQuiescence(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			si := newSearchInfo(newHashMapTable(), noPawnTable{})
 			pos := unsafeFEN(tt.fen)
 			score, err := si.alphaBeta(context.Background(), pos, -mate, mate, tt.depth, 0)

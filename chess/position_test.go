@@ -8,6 +8,7 @@ import (
 )
 
 func TestNewPosition(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		s string
 		n Notation
@@ -22,6 +23,7 @@ func TestNewPosition(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args.s, func(t *testing.T) {
+			t.Parallel()
 			pos, err := NewPosition(tt.args.s)
 			if tt.want == nil {
 				assert.Equal(t, pos.String(), tt.args.s)
@@ -32,12 +34,15 @@ func TestNewPosition(t *testing.T) {
 }
 
 func TestStartingPosition(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, startFEN, StartingPosition().String())
 }
 
 func TestPosition_MakeMove(t *testing.T) {
+	t.Parallel()
 	for _, tt := range testPositions {
 		t.Run(tt.moveUCI, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.preFEN)
 			exp := unsafeFEN(tt.postFEN)
 			pos.MakeMove(tt.move)
@@ -63,8 +68,10 @@ func BenchmarkPosition_MakeMove(b *testing.B) {
 }
 
 func TestPosition_UnmakeMove(t *testing.T) {
+	t.Parallel()
 	for _, tt := range testPositions {
 		t.Run(tt.moveUCI, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.preFEN)
 			pre := unsafeFEN(tt.preFEN)
 			meta := pos.Metadata()

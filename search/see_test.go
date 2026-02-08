@@ -9,6 +9,7 @@ import (
 )
 
 func TestSEE(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		fen  string
@@ -43,6 +44,7 @@ func TestSEE(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			got := see(pos, tt.move)
 			assert.Equal(t, tt.want, got)

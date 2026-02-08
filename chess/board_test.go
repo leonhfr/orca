@@ -109,12 +109,15 @@ var (
 )
 
 func TestNewBoard(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, startingBoard, newBoard(startingSquareMap))
 }
 
 func TestBoard_MakeMoveBoard(t *testing.T) {
+	t.Parallel()
 	for _, tt := range testPositions {
 		t.Run(tt.move.String(), func(t *testing.T) {
+			t.Parallel()
 			pos, post := unsafeFEN(tt.preFEN), unsafeFEN(tt.postFEN)
 			pos.board.makeMove(tt.move, pos.castling.files)
 			want := strings.Fields(tt.postFEN)[0]
@@ -125,6 +128,7 @@ func TestBoard_MakeMoveBoard(t *testing.T) {
 }
 
 func TestBoard_String(t *testing.T) {
+	t.Parallel()
 	expected := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 	assert.Equal(t, expected, startingBoard.String())
 }

@@ -7,8 +7,10 @@ import (
 )
 
 func TestNewMove_Valid(t *testing.T) {
+	t.Parallel()
 	for _, tt := range testPositions {
 		t.Run(tt.moveUCI, func(t *testing.T) {
+			t.Parallel()
 			move, _ := NewMove(unsafeFEN(tt.preFEN), tt.moveUCI)
 			assert.Equal(t, tt.move, move)
 			for _, tag := range tt.tags {
@@ -19,6 +21,7 @@ func TestNewMove_Valid(t *testing.T) {
 }
 
 func TestNewMove_Invalid(t *testing.T) {
+	t.Parallel()
 	type (
 		args struct {
 			fen string
@@ -42,6 +45,7 @@ func TestNewMove_Invalid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args.uci, func(t *testing.T) {
+			t.Parallel()
 			move, err := NewMove(unsafeFEN(tt.args.fen), tt.args.uci)
 			assert.Equal(t, tt.want.move, move)
 			assert.Equal(t, tt.want.err, err)

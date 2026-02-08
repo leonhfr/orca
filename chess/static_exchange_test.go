@@ -7,6 +7,7 @@ import (
 )
 
 func TestStaticExchange(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		fen  string
@@ -41,6 +42,7 @@ func TestStaticExchange(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			pos := unsafeFEN(tt.fen)
 			var got []PieceType
 			pos.StaticExchange(tt.move, func(pt PieceType) bool {
