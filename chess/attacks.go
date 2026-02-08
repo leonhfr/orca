@@ -96,23 +96,23 @@ func pieceBitboard(sq Square, pt PieceType, occupancy bitboard) bitboard {
 }
 
 // pawnMoveBitboard returns the pawn move bitboard.
-func pawnMoveBitboard(pawn, occupancy bitboard, color Color) (upOne bitboard, upTwo bitboard) {
+func pawnMoveBitboard(pawn, occupancy bitboard, color Color) (upOne, upTwo bitboard) {
 	if color == Black {
 		upOne = ^occupancy & pawn.southOne()
 		upTwo = ^occupancy & (upOne & bbRank6).southOne()
-		return
+		return upOne, upTwo
 	}
 
 	upOne = ^occupancy & pawn.northOne()
 	upTwo = ^occupancy & (upOne & bbRank3).northOne()
-	return
+	return upOne, upTwo
 }
 
 // pawnCaptureBitboard returns the pawn capture bitboard.
 //
 // The returned bitboard has to be AND with the bitboard of the opponent of the player
 // whose turn it is, which should have already been OR with the en passant square bitboard.
-func pawnCaptureBitboard(pawn bitboard, color Color) (captureR bitboard, captureL bitboard) {
+func pawnCaptureBitboard(pawn bitboard, color Color) (captureR, captureL bitboard) {
 	return pawn.eastAttack(color), pawn.westAttack(color)
 }
 

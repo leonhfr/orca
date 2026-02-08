@@ -33,7 +33,7 @@ func newZobristHash(pos *Position) (hash Hash) {
 	hash ^= castleHash(pos.castling.rights)
 	hash ^= enPassantHash(pos.enPassant, pos.turn, bbWhitePawn, bbBlackPawn)
 	hash ^= turnHash(pos.turn)
-	return
+	return hash
 }
 
 // newPawnZobristHash returns a pawn zobrist hash (uint64).
@@ -47,7 +47,7 @@ func newPawnZobristHash(pos *Position) (hash Hash) {
 			hash ^= polyRandom[offset]
 		}
 	}
-	return
+	return hash
 }
 
 // xorHashPartialMove updates a position hash incrementally.
@@ -86,7 +86,7 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights, cf [2]File) (h, ph Hash
 	}
 
 	if m.HasTag(Quiet) {
-		return
+		return h, ph
 	}
 
 	// non quiet moves
@@ -119,7 +119,7 @@ func xorHashPartialMove(m Move, cr1, cr2 castlingRights, cf [2]File) (h, ph Hash
 		h ^= polyRandom[64*int(WhiteRook)+int(F1)]
 	}
 
-	return
+	return h, ph
 }
 
 // pieceHash returns a hash (uint64)
@@ -136,7 +136,7 @@ func pieceHash(pos *Position) (hash Hash) {
 			hash ^= polyRandom[offset]
 		}
 	}
-	return
+	return hash
 }
 
 // castleHash returns a a hash (uint64).
@@ -162,7 +162,7 @@ func castleHash(cr castlingRights) (hash Hash) {
 	if cr&castleBlackA > 0 {
 		hash ^= polyCastleBlackQueen
 	}
-	return
+	return hash
 }
 
 // enPassantHash returns a hash (uint64).

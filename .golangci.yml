@@ -45,11 +45,14 @@ linters:
 formatters:
   enable:
     - gci
+    - gofumpt
   settings:
     gci:
       sections:
         - standard
         - default
         - prefix(github.com/leonhfr/orca)
+    gofumpt:
+      extra-rules: true
   exclusions:
     generated: lax

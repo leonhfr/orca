@@ -136,7 +136,7 @@ func newCastleMove(p1 Piece, s1, s2 Square, s side, check bool) Move {
 }
 
 // newPawnMove creates a new pawn move.
-func newPawnMove(p1, p2 Piece, s1, s2 Square, enPassant Square, promo Piece, check bool) Move {
+func newPawnMove(p1, p2 Piece, s1, s2, enPassant Square, promo Piece, check bool) Move {
 	var tags MoveTag
 
 	if s2 == enPassant {

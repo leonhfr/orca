@@ -33,6 +33,10 @@ bench:
 lint:
 	golangci-lint run
 
+.PHONY: fmt
+fmt:
+	golangci-lint fmt
+
 .PHONY: coverage-html
 coverage-html: coverage
 	go tool cover -html=coverage.out
