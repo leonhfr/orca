@@ -151,7 +151,7 @@ func initBBDiagonals() {
 	for sq := A1; sq <= H8; sq++ {
 		var bb bitboard
 		// up right
-		for file, rank := int(sq.File()), int(int(sq.Rank())); file <= int(FileH) && rank <= int(Rank8); file, rank = file+1, rank+1 {
+		for file, rank := int(sq.File()), int(sq.Rank()); file <= int(FileH) && rank <= int(Rank8); file, rank = file+1, rank+1 {
 			bb |= newSquare(File(file), Rank(rank)).bitboard()
 		}
 		// down left

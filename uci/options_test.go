@@ -1,8 +1,8 @@
 package uci
 
 import (
-	"fmt"
 	"io"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,7 +27,7 @@ func TestOptionBooleanUCI(t *testing.T) {
 	assert.Equal(t, responseOption{
 		Type:    booleanOptionType,
 		Name:    chess960Option.name,
-		Default: fmt.Sprint(chess960Option.def),
+		Default: strconv.FormatBool(chess960Option.def),
 	}, chess960Option.response())
 }
 

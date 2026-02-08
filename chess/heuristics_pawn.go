@@ -34,7 +34,7 @@ const (
 
 // HasProperty checks the presence of the given property.
 func (pp PawnProperty) HasProperty(p PawnProperty) bool {
-	return pp&PawnProperty(p) > 0
+	return pp&p > 0
 }
 
 // PawnMap executes the callback for each pawn on the board.

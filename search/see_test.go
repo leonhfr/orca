@@ -18,25 +18,25 @@ func TestSEE(t *testing.T) {
 		{
 			"obvious case w",
 			"1k1r4/1pp4p/p7/4p3/8/P5P1/1PP4P/2K1R3 w - - 0 1",
-			newMove(chess.E1, chess.E5, chess.WhiteRook, chess.BlackPawn, chess.NoPiece, chess.Quiet),
+			newMove(chess.E1, chess.E5, chess.WhiteRook, chess.BlackPawn),
 			10,
 		},
 		{
 			"obvious case b",
 			"1k2r3/1pp4p/p7/4P3/8/P5P1/1PP4P/2K2R2 b - - 0 1",
-			newMove(chess.E8, chess.E5, chess.BlackRook, chess.WhitePawn, chess.NoPiece, chess.Quiet),
+			newMove(chess.E8, chess.E5, chess.BlackRook, chess.WhitePawn),
 			10,
 		},
 		{
 			"xrays w",
 			"1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - - 0 1",
-			newMove(chess.D3, chess.E5, chess.WhiteKnight, chess.BlackPawn, chess.NoPiece, chess.Quiet),
+			newMove(chess.D3, chess.E5, chess.WhiteKnight, chess.BlackPawn),
 			-20,
 		},
 		{
 			"xrays b",
 			"1k2r2q/1ppn3p/p4b2/4P3/8/P2N2P1/1PP1R1BP/2K1Q3 b - - 0 1",
-			newMove(chess.D7, chess.E5, chess.BlackKnight, chess.WhitePawn, chess.NoPiece, chess.Quiet),
+			newMove(chess.D7, chess.E5, chess.BlackKnight, chess.WhitePawn),
 			10,
 		},
 	}

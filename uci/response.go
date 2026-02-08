@@ -2,6 +2,7 @@ package uci
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -45,7 +46,7 @@ type responseBestMove struct {
 }
 
 func (r responseBestMove) format(c *Controller) string {
-	return fmt.Sprintf("bestmove %s", c.moveNotation.Encode(c.position, r.move))
+	return "bestmove " + c.moveNotation.Encode(c.position, r.move)
 }
 
 // responseInfo represents an "info" command.
@@ -58,15 +59,15 @@ func (o responseOutput) format(c *Controller) string {
 	var res []string
 
 	if o.Depth > 0 {
-		res = append(res, "depth", fmt.Sprint(o.Depth))
+		res = append(res, "depth", strconv.Itoa(o.Depth))
 	}
 	if o.Nodes > 0 {
-		res = append(res, "nodes", fmt.Sprint(o.Nodes))
+		res = append(res, "nodes", strconv.Itoa(o.Nodes))
 	}
 	if o.Mate != 0 {
-		res = append(res, "score mate", fmt.Sprint(o.Mate))
+		res = append(res, "score mate", strconv.Itoa(o.Mate))
 	} else {
-		res = append(res, "score cp", fmt.Sprint(o.Score))
+		res = append(res, "score cp", strconv.Itoa(o.Score))
 	}
 	if len(o.PV) > 0 {
 		res = append(res, "pv")
@@ -75,10 +76,10 @@ func (o responseOutput) format(c *Controller) string {
 		}
 	}
 	if o.time > 0 {
-		res = append(res, "time", fmt.Sprint(o.time.Milliseconds()))
+		res = append(res, "time", strconv.FormatInt(o.time.Milliseconds(), 10))
 	}
 
-	return fmt.Sprintf("info %s", strings.Join(res, " "))
+	return "info " + strings.Join(res, " ")
 }
 
 // responseOption represents an "option" command.
@@ -97,10 +98,10 @@ func (o responseOption) format(_ *Controller) string {
 	case integerOptionType:
 		var min, max string
 		if len(o.Min) > 0 {
-			min = fmt.Sprintf(" min %s", o.Min)
+			min = " min " + o.Min
 		}
 		if len(o.Max) > 0 {
-			max = fmt.Sprintf(" max %s", o.Max)
+			max = " max " + o.Max
 		}
 		return fmt.Sprintf(
 			"option name %s type spin default %s%s%s",

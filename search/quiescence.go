@@ -40,7 +40,7 @@ func (si *searchInfo) quiesce(ctx context.Context, pos *chess.Position, alpha, b
 		pos.UnmakeMove(move, meta, hash, pawnHash)
 
 		if err != nil {
-			return 0, nil
+			return 0, err
 		}
 
 		if score >= beta {

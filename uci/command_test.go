@@ -2,9 +2,9 @@ package uci
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -45,7 +45,7 @@ func TestCommandDebug(t *testing.T) {
 	c := NewController("", "", io.Discard)
 
 	for _, tt := range []bool{true, false} {
-		t.Run(fmt.Sprint(tt), func(t *testing.T) {
+		t.Run(strconv.FormatBool(tt), func(t *testing.T) {
 			e := search.NewEngine()
 			commandDebug{on: tt}.run(context.Background(), e, c)
 
@@ -65,7 +65,7 @@ func TestCommandIsReady(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			e := search.NewEngine()
 
 			c := NewController("", "", io.Discard)
@@ -202,7 +202,7 @@ func TestCommandGo(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			e := search.NewEngine()
 
 			c := NewController("", "", io.Discard)

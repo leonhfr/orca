@@ -3,15 +3,25 @@ version: "2"
 linters:
   default: none
   enable:
+    - contextcheck
     - errcheck
+    - errname
+    - errorlint
+    - exptostd
     - godot
     - gosec
     - govet
+    - iface
     - ineffassign
     - makezero
+    - modernize
+    - nilerr
+    - perfsprint
     - prealloc
     - revive
     - staticcheck
+    - unconvert
+    - unparam
     - unused
   settings:
     gosec:

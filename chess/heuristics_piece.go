@@ -64,7 +64,7 @@ const (
 
 // HasProperty checks the presence of the given property.
 func (pp PieceProperty) HasProperty(p PieceProperty) bool {
-	return pp&PieceProperty(p) > 0
+	return pp&p > 0
 }
 
 // PieceMap executes the callback for each piece on the board, passing the piece

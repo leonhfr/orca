@@ -39,7 +39,7 @@ func (pe pawnEntry) mg() int32 {
 
 // eg returns the endgame score.
 func (pe pawnEntry) eg() int32 {
-	return int32(uint32(uint64(pe.data+1<<31) >> 32))
+	return int32(uint32((pe.data + 1<<31) >> 32))
 }
 
 // noPawnTable does not store anything at all.

@@ -82,7 +82,7 @@ func (o booleanUCIOption) response() responseOption {
 	return responseOption{
 		Type:    booleanOptionType,
 		Name:    o.name,
-		Default: fmt.Sprint(o.def),
+		Default: strconv.FormatBool(o.def),
 	}
 }
 
@@ -127,9 +127,9 @@ func (o integerSearchOption) response() responseOption {
 	return responseOption{
 		Type:    integerOptionType,
 		Name:    o.name,
-		Default: fmt.Sprint(o.def),
-		Min:     fmt.Sprint(o.min),
-		Max:     fmt.Sprint(o.max),
+		Default: strconv.Itoa(o.def),
+		Min:     strconv.Itoa(o.min),
+		Max:     strconv.Itoa(o.max),
 	}
 }
 
@@ -171,7 +171,7 @@ func (o booleanSearchOption) response() responseOption {
 	return responseOption{
 		Type:    booleanOptionType,
 		Name:    o.name,
-		Default: fmt.Sprint(o.def),
+		Default: strconv.FormatBool(o.def),
 	}
 }
 

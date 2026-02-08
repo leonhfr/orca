@@ -21,7 +21,7 @@ func (c Color) String() string {
 
 // Other returns the Other color.
 func (c Color) Other() Color {
-	return Color((c + 1) & 1)
+	return (c + 1) & 1
 }
 
 // PieceType is the type of a piece.
