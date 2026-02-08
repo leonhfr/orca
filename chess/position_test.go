@@ -13,7 +13,7 @@ func TestNewPosition(t *testing.T) {
 		n Notation
 	}
 	tests := []struct {
-		args
+		args args
 		want error
 	}{
 		{args{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", FEN{}}, nil},

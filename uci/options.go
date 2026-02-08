@@ -95,7 +95,7 @@ func (o booleanUCIOption) defaultFunc() func(*Controller) {
 func (o booleanUCIOption) optionFunc(value string) (func(*Controller), error) {
 	v, err := strconv.ParseBool(value)
 	if err != nil {
-		return func(e *Controller) {}, err
+		return func(_ *Controller) {}, err
 	}
 
 	return o.fn(v), nil
@@ -142,11 +142,11 @@ func (o integerSearchOption) defaultFunc() func(*search.Engine) {
 func (o integerSearchOption) optionFunc(value string) (func(*search.Engine), error) {
 	v, err := strconv.ParseInt(value, 10, 0)
 	if err != nil {
-		return func(e *search.Engine) {}, err
+		return func(_ *search.Engine) {}, err
 	}
 
 	if int(v) < o.min || int(v) > o.max {
-		return func(e *search.Engine) {}, errOutsideBound
+		return func(_ *search.Engine) {}, errOutsideBound
 	}
 
 	return o.fn(int(v)), nil
@@ -184,7 +184,7 @@ func (o booleanSearchOption) defaultFunc() func(*search.Engine) {
 func (o booleanSearchOption) optionFunc(value string) (func(*search.Engine), error) {
 	v, err := strconv.ParseBool(value)
 	if err != nil {
-		return func(e *search.Engine) {}, err
+		return func(_ *search.Engine) {}, err
 	}
 
 	return o.fn(v), nil

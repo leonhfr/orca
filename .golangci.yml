@@ -1,35 +1,41 @@
+version: "2"
+
 linters:
+  default: none
   enable:
     - errcheck
-    - gci
     - godot
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - makezero
     - prealloc
     - revive
     - staticcheck
-    - typecheck
     - unused
+  settings:
+    gosec:
+      excludes:
+        - G104
+        - G115
+        - G602
+    govet:
+      enable-all: true
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - govet
+        path: (.+)_test.go
 
-linters-settings:
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/leonhfr/orca)
-  govet:
-    enable-all: true
-
-issues:
-  include:
-    - EXC0005
-    - EXC0012
-    - EXC0014
-    - EXC0015
-  exclude-rules:
-    - path: (.+)_test.go
-      linters:
-        - govet
+formatters:
+  enable:
+    - gci
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/leonhfr/orca)
+  exclusions:
+    generated: lax

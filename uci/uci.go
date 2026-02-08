@@ -74,7 +74,7 @@ func (c *Controller) Run(ctx context.Context, e *search.Engine, r io.Reader) {
 	// sending EOF to the UCI scanner by closing the pipe
 	pipeR, pipeW := io.Pipe()
 	go func() { _, _ = io.Copy(pipeW, r) }()
-	go func() { <-ctx.Done(); pipeW.Close() }()
+	go func() { <-ctx.Done(); _ = pipeW.Close() }()
 
 	for scanner := bufio.NewScanner(pipeR); scanner.Scan(); {
 		cmd := parse(strings.Fields(scanner.Text()))
@@ -90,17 +90,17 @@ func (c *Controller) Run(ctx context.Context, e *search.Engine, r io.Reader) {
 
 // logError logs an error to the output.
 func (c *Controller) logError(err error) {
-	fmt.Fprintln(c.writer, "info string", err.Error())
+	_, _ = fmt.Fprintln(c.writer, "info string", err.Error())
 }
 
 // logDebug logs debug info to the output.
 func (c *Controller) logDebug(v ...any) {
 	if c.debug {
-		fmt.Fprintln(c.writer, "info string", fmt.Sprint(v...))
+		_, _ = fmt.Fprintln(c.writer, "info string", fmt.Sprint(v...))
 	}
 }
 
 // respond processes responses.
 func (c *Controller) respond(r response) {
-	fmt.Fprintln(c.writer, r.format(c))
+	_, _ = fmt.Fprintln(c.writer, r.format(c))
 }

@@ -176,7 +176,7 @@ func fenEnPassantSquare(field string) (Square, error) {
 	if err != nil {
 		return NoSquare, err
 	}
-	if sq == NoSquare || !(sq.Rank() == Rank3 || sq.Rank() == Rank6) {
+	if sq == NoSquare || sq.Rank() != Rank3 && sq.Rank() != Rank6 {
 		return NoSquare, fmt.Errorf("invalid fen en passant square (%s)", field)
 	}
 	return sq, nil

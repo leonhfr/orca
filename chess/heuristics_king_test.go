@@ -60,7 +60,7 @@ func BenchmarKingMap(b *testing.B) {
 		b.Run(bb.name, func(b *testing.B) {
 			pos := unsafeFEN(bb.fen)
 			for n := 0; n < b.N; n++ {
-				pos.KingMap(func(p Piece, sq Square, shieldDefects, openFiles, halfOpenFiles int) {
+				pos.KingMap(func(_ Piece, _ Square, _, _, _ int) {
 					_ = 1
 				})
 			}

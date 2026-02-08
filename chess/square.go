@@ -70,6 +70,7 @@ const (
 // A File is the file of a square.
 type File uint8
 
+//nolint:revive
 const (
 	FileA File = iota // FileA is the file A.
 	FileB             // FileB is the file B.
@@ -91,6 +92,7 @@ func (f File) String() string {
 // Rank is the rank of a square.
 type Rank uint8
 
+//nolint:revive
 const (
 	Rank1 Rank = iota // Rank1 is the rank 1.
 	Rank2             // Rank2 is the rank 2.

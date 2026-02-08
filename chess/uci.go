@@ -95,7 +95,7 @@ func uciMove(s string, turn Color) (Square, Square, Piece, error) {
 	promo := NoPiece
 	if len(s) == 5 {
 		r := []byte(s)[4]
-		if !('A' <= r && r <= 'z') {
+		if r < 'A' || r > 'z' {
 			return NoSquare, NoSquare, NoPiece, errInvalidMove
 		}
 		promoType := promoPieceTypeTable[r-'A']

@@ -38,7 +38,7 @@ func TestFENBoard(t *testing.T) {
 
 	tests := []struct {
 		args string
-		want
+		want want
 	}{
 		{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP", want{board{}, errors.New("invalid fen board (rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP)")}},
 		{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", want{startingBoard, nil}},
@@ -61,7 +61,7 @@ func TestFENFileField(t *testing.T) {
 
 	tests := []struct {
 		args string
-		want
+		want want
 	}{
 		{"", want{nil, errors.New("invalid fen rank field ()")}},
 		{"-", want{nil, errors.New("invalid fen rank field (-)")}},
@@ -107,7 +107,7 @@ func TestFENTurn(t *testing.T) {
 
 	tests := []struct {
 		args string
-		want
+		want want
 	}{
 		{"-", want{White, errors.New("invalid fen turn (-)")}},
 		{"w", want{White, nil}},
@@ -131,7 +131,7 @@ func TestFENCastlingRights(t *testing.T) {
 
 	tests := []struct {
 		args string
-		want
+		want want
 	}{
 		{"-", want{noCastle, nil}},
 		{"KQkq", want{castleBlackA | castleBlackH | castleWhiteA | castleWhiteH, nil}},
@@ -156,7 +156,7 @@ func TestFENEnPassantSquare(t *testing.T) {
 
 	tests := []struct {
 		args string
-		want
+		want want
 	}{
 		{"", want{NoSquare, errors.New("invalid fen en passant square ()")}},
 		{"-", want{NoSquare, nil}},
@@ -182,7 +182,7 @@ func TestFENHalfMoveClock(t *testing.T) {
 
 	tests := []struct {
 		args string
-		want
+		want want
 	}{
 		{"-1", want{0, errors.New("invalid fen full moves count (-1)")}},
 		{"0", want{0, nil}},
@@ -206,7 +206,7 @@ func TestFENFullMoves(t *testing.T) {
 
 	tests := []struct {
 		args string
-		want
+		want want
 	}{
 		{"0", want{0, errors.New("invalid fen full moves count (0)")}},
 		{"1", want{1, nil}},

@@ -126,9 +126,9 @@ func TestPseudoMoves(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
-			var got []string
 			checkData, _ := pos.InCheck()
 			moves := pos.PseudoMoves(checkData)
+			got := make([]string, 0, len(moves))
 			for _, move := range moves {
 				got = append(got, move.String())
 			}
@@ -181,8 +181,9 @@ func TestLoudMoves(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.fen, func(t *testing.T) {
 			pos := unsafeFEN(tt.fen)
-			var got []string
-			for _, move := range pos.LoudMoves() {
+			loudMoves := pos.LoudMoves()
+			got := make([]string, 0, len(loudMoves))
+			for _, move := range loudMoves {
 				got = append(got, move.String())
 			}
 			assert.ElementsMatch(t, tt.want, got)

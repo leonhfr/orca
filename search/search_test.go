@@ -95,7 +95,7 @@ func TestSearch(t *testing.T) {
 			engine.table = newHashMapTable()
 			engine.pawnTable = noPawnTable{}
 			output := engine.Search(context.Background(), unsafeFEN(tt.fen), tt.depth, tt.nodes)
-			var outputs []Output
+			outputs := make([]Output, 0, tt.depth)
 			for o := range output {
 				outputs = append(outputs, o)
 			}
@@ -153,15 +153,16 @@ func TestCachedSearch(t *testing.T) {
 				engine.pawnTable = noPawnTable{}
 			}
 			pos := unsafeFEN(fen)
-			var outputs []Output
 			output := engine.Search(context.Background(), pos, depth, math.MaxInt)
+			outputs := make([]Output, 0, depth)
 			for o := range output {
 				outputs = append(outputs, o)
 			}
 
 			require.Equal(t, len(tt.want), len(outputs))
 			for i, o := range outputs {
-				var wantMoves, gotMoves []string
+				wantMoves := make([]string, 0, len(tt.want[i].PV))
+				gotMoves := make([]string, 0, len(o.PV))
 				for _, m := range tt.want[i].PV {
 					wantMoves = append(wantMoves, m.String())
 				}
