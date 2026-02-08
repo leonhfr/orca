@@ -21,9 +21,7 @@ func (pos *Position) KingMap(cb func(p Piece, sq Square, shieldDefects, openFile
 				bbPawns := psm[1] & pos.board.bbColors[c] & pos.board.bbPieces[Pawn]
 				pawnCount := bbPawns.ones()
 
-				if pawnCount > pawnShieldCount {
-					pawnCount = pawnShieldCount
-				}
+				pawnCount = min(pawnCount, pawnShieldCount)
 				shieldDefects = pawnShieldCount - pawnCount
 				break
 			}

@@ -12,7 +12,7 @@ func initPassedPawn() {
 	passedPawnMGHumanPieceTable, passedPawnEGHumanPieceTable := passedPawnHumanPieceTables()
 
 	for c := chess.Black; c <= chess.White; c++ {
-		for i := 0; i < 64; i++ {
+		for i := range 64 {
 			rank, file := 7-i/8, i%8
 			if c == chess.Black {
 				rank = i / 8
@@ -76,7 +76,7 @@ func initPesto() {
 		mgHuman := pestoMGHumanPieceTables[p.Type()]
 		egHuman := pestoEGHumanPieceTables[p.Type()]
 
-		for i := 0; i < 64; i++ {
+		for i := range 64 {
 			rank, file := 7-i/8, i%8
 			if p.Color() == chess.Black {
 				rank = i / 8

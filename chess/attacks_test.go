@@ -103,7 +103,7 @@ func TestRookBishopMoves(t *testing.T) {
 
 	for pieceIndex, pt := range []PieceType{Rook, Bishop} {
 		t.Run(pt.String(), func(t *testing.T) {
-			for i := 0; i < 20; i++ {
+			for range 20 {
 				bb, sq := randomPosition()
 				index := magics[pieceIndex][sq].index(bb)
 				actual := moves[pieceIndex][index]

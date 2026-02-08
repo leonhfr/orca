@@ -96,16 +96,16 @@ type responseOption struct {
 func (o responseOption) format(_ *Controller) string {
 	switch o.Type {
 	case integerOptionType:
-		var min, max string
+		var minStr, maxStr string
 		if len(o.Min) > 0 {
-			min = " min " + o.Min
+			minStr = " min " + o.Min
 		}
 		if len(o.Max) > 0 {
-			max = " max " + o.Max
+			maxStr = " max " + o.Max
 		}
 		return fmt.Sprintf(
 			"option name %s type spin default %s%s%s",
-			o.Name, o.Default, min, max,
+			o.Name, o.Default, minStr, maxStr,
 		)
 	case booleanOptionType:
 		return fmt.Sprintf(

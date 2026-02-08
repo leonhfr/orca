@@ -164,10 +164,7 @@ func (e *Engine) iterativeSearch(ctx context.Context, pos *chess.Position, maxDe
 
 		pv := e.table.principalVariation(pos)
 
-		maxDepth := depth
-		if len(pv) > maxDepth {
-			maxDepth = len(pv)
-		}
+		maxDepth := max(depth, len(pv))
 
 		nodes := int(si.nodes)
 

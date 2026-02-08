@@ -33,7 +33,7 @@ func (si *searchInfo) zeroWindow(ctx context.Context, pos *chess.Position, beta 
 	moves := pos.PseudoMoves(checkData)
 	quickScoreMoves(pos, moves)
 
-	for i := 0; i < len(moves); i++ {
+	for i := range len(moves) {
 		nextOracle(moves, i)
 		move := moves[i]
 

@@ -123,7 +123,7 @@ func (hm *hashMapTable) principalVariation(pos *chess.Position) []chess.Move {
 	}
 
 	length := len(unmakeMoveStack)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		um := unmakeMoveStack[length-i-1]
 		pos.UnmakeMove(um.move, um.meta, um.hash, um.pawnHash)
 	}

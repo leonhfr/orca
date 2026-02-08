@@ -102,8 +102,8 @@ func TestOrderMoves(t *testing.T) {
 			moves := pos.PseudoMoves(checkData)
 			scoreMoves(pos, moves, tt.best, tt.killers)
 
-			var sorted []chess.Move
-			for i := 0; i < len(moves); i++ {
+			sorted := make([]chess.Move, 0, len(moves))
+			for i := range len(moves) {
 				nextOracle(moves, i)
 				sorted = append(sorted, moves[i])
 			}

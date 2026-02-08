@@ -2,7 +2,7 @@ package chess
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 	"unicode"
 )
@@ -120,7 +120,7 @@ func shredderFenCastlingField(field string, kings [2]Square) (castling, error) {
 	rights := noCastle
 
 	runes := []rune(field)
-	sort.Slice(runes, func(i, j int) bool { return runes[i] < runes[j] })
+	slices.Sort(runes)
 
 	for _, r := range runes {
 		lr := unicode.ToLower(r)
